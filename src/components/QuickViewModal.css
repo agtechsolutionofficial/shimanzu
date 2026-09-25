@@ -57,11 +57,12 @@
 }
 
 .modal-image-col {
-  background: var(--bg-darker);
+  background: radial-gradient(ellipse at center, #0f2a18 0%, #071510 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 300px;
+  padding: 2rem;
 }
 
 .modal-image-placeholder {

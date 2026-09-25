@@ -1,264 +1,42 @@
-import prod1 from '../assets/images/1713008833.webp';
-import prod2 from '../assets/images/1713008853.webp';
-import prod3 from '../assets/images/1713009018.webp';
-import prod4 from '../assets/images/1713009051.webp';
-import prod5 from '../assets/images/1713009112.webp';
-import prod6 from '../assets/images/1713009164.webp';
+import t1 from '../assets/images/transparent (1).png';
+import t2 from '../assets/images/transparent (2).png';
+import t3 from '../assets/images/transparent (3).png';
+import t4 from '../assets/images/transparent (4).png';
+import t5 from '../assets/images/transparent (5).png';
+import t6 from '../assets/images/transparent (6).png';
+import t8 from '../assets/images/transparent (8).png';
+import t9 from '../assets/images/transparent (9).png';
+import t10 from '../assets/images/transparent (10).png';
+import t11 from '../assets/images/transparent (11).png';
+import t12 from '../assets/images/transparent (12).png';
+import t13 from '../assets/images/transparent (13).png';
+import t14 from '../assets/images/transparent (14).png';
+import t15 from '../assets/images/transparent (15).png';
+import t16 from '../assets/images/transparent (16).png';
+import t17 from '../assets/images/transparent (17).png';
+import t18 from '../assets/images/transparent (18).png';
+import t19 from '../assets/images/transparent (19).png';
+import t20 from '../assets/images/transparent (20).png';
+import t21 from '../assets/images/transparent (21).png';
+import t22 from '../assets/images/transparent (22).png';
+import t23 from '../assets/images/transparent (23).png';
+import t24 from '../assets/images/transparent (24).png';
+import t25 from '../assets/images/transparent (25).png';
+import t27 from '../assets/images/transparent (27).png';
+import t28 from '../assets/images/transparent (28).png';
+import t29 from '../assets/images/transparent (29).png';
+import t30 from '../assets/images/transparent (30).png';
+import t31 from '../assets/images/transparent (31).png';
+import t32 from '../assets/images/transparent (32).png';
 
 import fungicidesImg from '../assets/images/categories/fungicides.jpg';
 import herbicidesImg from '../assets/images/categories/herbicides.jpg';
 import insecticidesImg from '../assets/images/categories/insecticides.jpg';
 import harvestAidsImg from '../assets/images/categories/harvest-aids.jpg';
+import atPlantImg from '../assets/images/categories/at-plant.jpg';
+import precisionImg from '../assets/images/categories/precision-platforms.jpg';
 
 export const PRODUCTS = [
-  // HARVEST AIDS (Matching 2nd image)
-  {
-    id: 'ha-aim-ec',
-    name: 'AIM® EC HERBICIDE',
-    brand: 'Aim EC Herbicide',
-    chemical: 'Carfentrazone-ethyl 21.3% EC',
-    category: 'harvest-aids',
-    categoryLabel: 'HERBICIDES',
-    group: 'GROUP 14',
-    formulation: 'EC',
-    inStock: true,
-    packSizes: ['500ml', '1L', '5L'],
-    crops: ['Cotton', 'Potatoes', 'Soybeans', 'Corn - Field Corn', 'Small Grains'],
-    targets: 'Harvest aid desiccation, morning glory, velvetleaf, nightshade',
-    dosage: '1.0 - 2.0 fl oz/acre',
-    description: 'Post-emergence contact herbicide and premier harvest aid desiccant delivering rapid foliage knockdown in 24 hours.',
-    imgSrc: herbicidesImg,
-    heroType: 'field'
-  },
-  {
-    id: 'ha-display',
-    name: 'DISPLAY® COTTON HARVEST AID',
-    brand: 'Display Cotton Harvest Aid',
-    chemical: 'Carfentrazone-ethyl + Flumioxazin EC',
-    category: 'harvest-aids',
-    categoryLabel: 'HARVEST AIDS',
-    group: 'GROUP 14',
-    formulation: 'EC',
-    inStock: true,
-    packSizes: ['1L', '5L'],
-    crops: ['Cotton'],
-    targets: 'Defoliation, accelerated boll opening, terminal weed desiccation',
-    dosage: '0.6 - 1.0 fl oz/acre',
-    description: 'Exceptional defoliation performance, juvenile leaf drop, and regrowth suppression for clean, high-grade cotton harvest.',
-    imgSrc: harvestAidsImg,
-    heroType: 'cotton'
-  },
-  {
-    id: 'ha-shark-ew',
-    name: 'SHARK® EW HERBICIDE',
-    brand: 'Shark EW Herbicide',
-    chemical: 'Carfentrazone-ethyl 240 g/L EW',
-    category: 'harvest-aids',
-    categoryLabel: 'HERBICIDES',
-    group: 'GROUP 14',
-    formulation: 'EW',
-    inStock: true,
-    packSizes: ['250ml', '1L'],
-    crops: ['Tree Fruit', 'Grapes', 'Citrus', 'Tree Nuts', 'Alfalfa'],
-    targets: 'Broadleaf weed burndown, vine sucker control, harvest aid',
-    dosage: '100 - 150 ml/ha',
-    description: 'Water-based emulsion delivering pinpoint broadleaf control, tree/vine sucker control, and non-residual harvest conditioning.',
-    imgSrc: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=600&q=80',
-    heroType: 'foliage'
-  },
-  {
-    id: 'ha-boll-drop',
-    name: 'BOLL-DROP® 39 SL DEFOLIANT',
-    brand: 'Boll-Drop Defoliant',
-    chemical: 'Ethephon 39% SL',
-    category: 'harvest-aids',
-    categoryLabel: 'HARVEST AIDS',
-    group: 'GROUP 1',
-    formulation: 'SL',
-    inStock: true,
-    packSizes: ['500ml', '1L', '5L'],
-    crops: ['Cotton', 'Tree Fruit', 'Tobacco'],
-    targets: 'Synchronous boll opening, uniform ripening, defoliation',
-    dosage: '600 - 800 ml/acre',
-    description: 'Ethylene generator designed to accelerate natural crop maturation and harvest schedule predictability.',
-    imgSrc: prod5
-  },
-
-  // FUNGICIDES (Matching Grapes & Crops)
-  {
-    id: 'f-m45',
-    name: 'M-45® MANCOZEB 75% WP',
-    brand: 'M-45 Mancozeb',
-    chemical: 'Mancozeb 75% WP',
-    category: 'fungicides',
-    categoryLabel: 'FUNGICIDES',
-    group: 'GROUP M03',
-    formulation: 'WP',
-    inStock: true,
-    packSizes: ['500g', '1kg', '5kg'],
-    crops: ['Grapes', 'Potatoes', 'Vegetables', 'Citrus', 'Apple', 'Tree Fruit'],
-    targets: 'Downy mildew, Late blight, Early blight, Black rot, Anthracnose',
-    dosage: '600 - 800 g / acre in 200 L water',
-    description: 'World-renowned multisite contact fungicide preventing resistant fungal spore germination on fruits and leaves.',
-    imgSrc: prod4
-  },
-  {
-    id: 'f-volvo',
-    name: 'VOLVO® SYSTEMIC HEXACONAZOLE',
-    brand: 'Volvo Systemic',
-    chemical: 'Hexaconazole 5% SC',
-    category: 'fungicides',
-    categoryLabel: 'FUNGICIDES',
-    group: 'GROUP 3',
-    formulation: 'SC',
-    inStock: true,
-    packSizes: ['250ml', '500ml', '1L'],
-    crops: ['Grapes', 'Rice', 'Peanuts', 'Tree Fruit', 'Vegetables'],
-    targets: 'Powdery mildew, Sheath blight, Rust, Anthracnose, Leaf spot',
-    dosage: '200 - 300 ml / acre',
-    description: 'Systemic triazole fungicide with preventative and curative activity protecting emerging tender shoots.',
-    imgSrc: prod6
-  },
-  {
-    id: 'f-azoxy-top',
-    name: 'AZOXY-TOP® DUO FUNGICIDE',
-    brand: 'Azoxy-Top Duo',
-    chemical: 'Azoxystrobin 18.2% + Difenoconazole 11.4% SC',
-    category: 'fungicides',
-    categoryLabel: 'FUNGICIDES',
-    group: 'GROUP 11 + 3',
-    formulation: 'SC',
-    inStock: true,
-    packSizes: ['100ml', '250ml', '500ml', '1L'],
-    crops: ['Grapes', 'Vegetables', 'Rice', 'Corn - Field Corn', 'Small Fruits'],
-    targets: 'Powdery mildew, Anthracnose, Blast, Fruit rot, Gummy stem blight',
-    dosage: '200 ml / acre',
-    description: 'Dual systemic active blend delivering translaminar movement for pristine bunch quality in grape vineyards.',
-    imgSrc: fungicidesImg
-  },
-  {
-    id: 'f-copper',
-    name: 'COPPER-GOLD® 50 WP',
-    brand: 'Copper-Gold',
-    chemical: 'Copper Oxychloride 50% WP',
-    category: 'fungicides',
-    categoryLabel: 'FUNGICIDES',
-    group: 'GROUP M01',
-    formulation: 'WP',
-    inStock: true,
-    packSizes: ['500g', '1kg'],
-    crops: ['Citrus', 'Grapes', 'Potatoes', 'Tree Fruit', 'Vegetables'],
-    targets: 'Citrus canker, Black rot, Blister blight, Downy mildew',
-    dosage: '1.0 - 1.25 kg / acre',
-    description: 'Micro-fine particle formulation ensuring persistent protective leaf coverage against bacterial and fungal blights.',
-    imgSrc: prod4
-  },
-
-  // INSECTICIDES & MITICIDES (Matching Image 5)
-  {
-    id: 'ins-altacor',
-    name: 'ALTACOR® INSECT CONTROL',
-    brand: 'Altacor Insect Control',
-    chemical: 'Chlorantraniliprole 35% WG',
-    category: 'insecticides',
-    categoryLabel: 'INSECTICIDES & MITICIDES',
-    group: 'GROUP 28',
-    formulation: 'WG',
-    inStock: true,
-    packSizes: ['30g', '60g', '150g'],
-    crops: ['Grapes', 'Tree Fruit', 'Vegetables', 'Cotton', 'Rice'],
-    targets: 'Grape berry moth, Leafroller, Bollworm complex, Stem borer',
-    dosage: '1.5 - 2.0 oz/acre',
-    description: 'Ryanodine receptor modulator providing long-residual worm control while preserving beneficial mites and pollinators.',
-    imgSrc: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'ins-avaunt-evo',
-    name: 'AVAUNT® EVO INSECT CONTROL',
-    brand: 'Avaunt Evo Insect Control',
-    chemical: 'Indoxacarb 30% WG',
-    category: 'insecticides',
-    categoryLabel: 'INSECTICIDES & MITICIDES',
-    group: 'GROUP 22',
-    formulation: 'WG',
-    inStock: true,
-    packSizes: ['100g', '250g', '500g'],
-    crops: ['Grapes', 'Vegetables', 'Tree Fruit', 'Peanuts', 'Alfalfa'],
-    targets: 'Omnivorous leafroller, Grape leaffolder, Beet armyworm, Weevils',
-    dosage: '3.5 - 6.0 oz/acre',
-    description: 'Oxadiazine insect control inhibiting voltage-gated sodium channels, stopping pest feeding within hours.',
-    imgSrc: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'ins-beleaf',
-    name: 'BELEAF® 50 SG INSECTICIDE',
-    brand: 'Beleaf 50SG Insecticide',
-    chemical: 'Flonicamid 50% SG',
-    category: 'insecticides',
-    categoryLabel: 'INSECTICIDES & MITICIDES',
-    group: 'GROUP 29',
-    formulation: 'SG',
-    inStock: true,
-    packSizes: ['60g', '150g', '500g'],
-    crops: ['Cotton', 'Vegetables', 'Citrus', 'Potatoes', 'Tree Fruit'],
-    targets: 'Aphids, Whiteflies, Plant bugs, Lygus bugs, Thrips',
-    dosage: '2.0 - 2.8 oz/acre',
-    description: 'Targeted chordotonal organ modulator stopping sap-feeding insects rapidly, eliminating honeydew and viral transmission.',
-    imgSrc: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'ins-brigade',
-    name: 'BRIGADE® 2EC INSECTICIDE/MITICIDE',
-    brand: 'Brigade 2EC Insecticide/Miticide',
-    chemical: 'Bifenthrin 25.1% EC',
-    category: 'insecticides',
-    categoryLabel: 'INSECTICIDES & MITICIDES',
-    group: 'GROUP 3A',
-    formulation: 'EC',
-    inStock: true,
-    packSizes: ['500ml', '1L', '5L'],
-    crops: ['Corn - Field Corn', 'Soybeans', 'Cotton', 'Peanuts', 'Grapes', 'Vegetables'],
-    targets: 'Two-spotted spider mites, Stink bugs, Corn rootworm, Cutworms',
-    dosage: '2.6 - 6.4 fl oz/acre',
-    description: 'Broad-spectrum synthetic pyrethroid with knock-down and repellent action against severe insect and mite complexes.',
-    imgSrc: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'ins-khufia',
-    name: 'KHUFIA® FOPRONIL 40 WG',
-    brand: 'Khufia Fopronil',
-    chemical: 'Fipronil 40% + Imidacloprid 40% WG',
-    category: 'insecticides',
-    categoryLabel: 'INSECTICIDES & MITICIDES',
-    group: 'GROUP 2B + 4A',
-    formulation: 'WG',
-    inStock: true,
-    packSizes: ['40g', '100g', '250g', '500g'],
-    crops: ['Cotton', 'Rice', 'Sugarcane', 'Chilli', 'Vegetables'],
-    targets: 'White grub, Stem borer, Brown planthopper, Thrips, Aphids',
-    dosage: '40 - 50 g / acre in 200 L water',
-    description: 'Unique dual-chemistry granules providing dual action on central nervous system of chewing and sucking insect pests.',
-    imgSrc: prod2
-  },
-  {
-    id: 'ins-forodon',
-    name: 'FORODON® 3G SOIL GRANULES',
-    brand: 'Forodon 3G',
-    chemical: 'Carbofuran 3% CG',
-    category: 'insecticides',
-    categoryLabel: 'INSECTICIDES & MITICIDES',
-    group: 'GROUP 1A',
-    formulation: 'CG',
-    inStock: true,
-    packSizes: ['1kg', '5kg', '10kg', '25kg'],
-    crops: ['Rice', 'Sugarcane', 'Corn - Field Corn', 'Peanuts'],
-    targets: 'Stem borer, Gall midge, Root borer, Nematodes',
-    dosage: '7 - 10 kg / acre broadcast',
-    description: 'Systemic carbamate soil insecticide and nematicide providing subterranean root zone protection.',
-    imgSrc: prod3
-  },
-
-  // HERBICIDES
   {
     id: 'h-black-label',
     name: 'BLACK LABEL® PRETILACHLOR',
@@ -274,7 +52,7 @@ export const PRODUCTS = [
     targets: 'Echinochloa crus-galli, Cyperus difformis, broadleaf weeds',
     dosage: '400 - 600 ml / acre',
     description: 'Selective pre-emergence rice herbicide halting weed seed division while maintaining safety to transplanted seedlings.',
-    imgSrc: prod1
+    imgSrc: t1
   },
   {
     id: 'h-bispyri',
@@ -291,7 +69,7 @@ export const PRODUCTS = [
     targets: 'Barnyard grass, water grass, jungle rice, sedges',
     dosage: '80 - 100 ml / acre',
     description: 'Early post-emergence weed control with wide application flexibility in wet and direct-seeded rice.',
-    imgSrc: prod1
+    imgSrc: t2
   },
   {
     id: 'h-atrazin',
@@ -302,16 +80,354 @@ export const PRODUCTS = [
     categoryLabel: 'HERBICIDES',
     group: 'GROUP 5',
     formulation: 'WP',
-    inStock: false,
+    inStock: true,
     packSizes: ['500g', '1kg'],
     crops: ['Corn - Field Corn', 'Sweet Corn', 'Sorghum', 'Sugarcane'],
     targets: 'Annual broadleaves and grasses, Trianthema portulacastrum',
     dosage: '400 - 800 g / acre',
     description: 'Proven selective foundation herbicide delivering dependable residual weed suppression in corn fields.',
-    imgSrc: prod1
+    imgSrc: t3
   },
-
-  // AT-PLANT
+  {
+    id: 'h-glypho',
+    name: 'GLYPHO-STAR® 41 SL',
+    brand: 'Glypho-Star',
+    chemical: 'Glyphosate 41% SL',
+    category: 'herbicides',
+    categoryLabel: 'HERBICIDES',
+    group: 'GROUP 9',
+    formulation: 'SL',
+    inStock: true,
+    packSizes: ['500ml', '1L', '5L'],
+    crops: ['All Crops', 'Orchards', 'Non-crop areas'],
+    targets: 'All annual and perennial grasses and broadleaf weeds',
+    dosage: '1.0 - 1.6 L / acre',
+    description: 'Broad-spectrum non-selective systemic herbicide for total weed control in orchards, plantations and field margins.',
+    imgSrc: t4
+  },
+  {
+    id: 'h-pendimeth',
+    name: 'PENDI-FORCE® 30 EC',
+    brand: 'Pendi-Force',
+    chemical: 'Pendimethalin 30% EC',
+    category: 'herbicides',
+    categoryLabel: 'HERBICIDES',
+    group: 'GROUP 3',
+    formulation: 'EC',
+    inStock: true,
+    packSizes: ['500ml', '1L', '5L'],
+    crops: ['Cotton', 'Soybean', 'Groundnut', 'Onion', 'Maize'],
+    targets: 'Annual grasses, Digitaria sanguinalis, Echinochloa spp., broadleaf weeds',
+    dosage: '700 - 1000 ml / acre',
+    description: 'Pre-emergence dinitroaniline herbicide forming a chemical barrier in the soil to prevent weed germination.',
+    imgSrc: t5
+  },
+  {
+    id: 'h-2-4-d',
+    name: '2,4-D AMINE® 58 SL',
+    brand: '2,4-D Amine',
+    chemical: '2,4-D Dimethylamine Salt 58% SL',
+    category: 'herbicides',
+    categoryLabel: 'HERBICIDES',
+    group: 'GROUP 4',
+    formulation: 'SL',
+    inStock: true,
+    packSizes: ['500ml', '1L', '5L'],
+    crops: ['Wheat', 'Rice', 'Maize', 'Sugarcane', 'Sorghum'],
+    targets: 'Broadleaf weeds, Parthenium hysterophorus, Convolvulus arvensis',
+    dosage: '400 - 600 ml / acre',
+    description: 'Selective systemic post-emergence herbicide for broadleaf weed control in cereal and grass crops.',
+    imgSrc: t6
+  },
+  {
+    id: 'f-m45',
+    name: 'M-45® MANCOZEB 75% WP',
+    brand: 'M-45 Mancozeb',
+    chemical: 'Mancozeb 75% WP',
+    category: 'fungicides',
+    categoryLabel: 'FUNGICIDES',
+    group: 'GROUP M03',
+    formulation: 'WP',
+    inStock: true,
+    packSizes: ['500g', '1kg', '5kg'],
+    crops: ['Grapes', 'Potatoes', 'Vegetables', 'Citrus', 'Apple', 'Tree Fruit'],
+    targets: 'Downy mildew, Late blight, Early blight, Black rot, Anthracnose',
+    dosage: '600 - 800 g / acre in 200 L water',
+    description: 'World-renowned multisite contact fungicide preventing resistant fungal spore germination on fruits and leaves.',
+    imgSrc: t8
+  },
+  {
+    id: 'f-volvo',
+    name: 'VOLVO® SYSTEMIC HEXACONAZOLE',
+    brand: 'Volvo Systemic',
+    chemical: 'Hexaconazole 5% SC',
+    category: 'fungicides',
+    categoryLabel: 'FUNGICIDES',
+    group: 'GROUP 3',
+    formulation: 'SC',
+    inStock: true,
+    packSizes: ['250ml', '500ml', '1L'],
+    crops: ['Grapes', 'Rice', 'Peanuts', 'Tree Fruit', 'Vegetables'],
+    targets: 'Powdery mildew, Sheath blight, Rust, Anthracnose, Leaf spot',
+    dosage: '200 - 300 ml / acre',
+    description: 'Systemic triazole fungicide with preventative and curative activity protecting emerging tender shoots.',
+    imgSrc: t9
+  },
+  {
+    id: 'f-azoxy-top',
+    name: 'AZOXY-TOP® DUO FUNGICIDE',
+    brand: 'Azoxy-Top Duo',
+    chemical: 'Azoxystrobin 18.2% + Difenoconazole 11.4% SC',
+    category: 'fungicides',
+    categoryLabel: 'FUNGICIDES',
+    group: 'GROUP 11 + 3',
+    formulation: 'SC',
+    inStock: true,
+    packSizes: ['100ml', '250ml', '500ml', '1L'],
+    crops: ['Grapes', 'Vegetables', 'Rice', 'Corn - Field Corn', 'Small Fruits'],
+    targets: 'Powdery mildew, Anthracnose, Blast, Fruit rot, Gummy stem blight',
+    dosage: '200 ml / acre',
+    description: 'Dual systemic active blend delivering translaminar movement for pristine bunch quality in grape vineyards.',
+    imgSrc: t10
+  },
+  {
+    id: 'f-copper',
+    name: 'COPPER-GOLD® 50 WP',
+    brand: 'Copper-Gold',
+    chemical: 'Copper Oxychloride 50% WP',
+    category: 'fungicides',
+    categoryLabel: 'FUNGICIDES',
+    group: 'GROUP M01',
+    formulation: 'WP',
+    inStock: true,
+    packSizes: ['500g', '1kg'],
+    crops: ['Citrus', 'Grapes', 'Potatoes', 'Tree Fruit', 'Vegetables'],
+    targets: 'Citrus canker, Black rot, Blister blight, Downy mildew',
+    dosage: '1.0 - 1.25 kg / acre',
+    description: 'Micro-fine particle formulation ensuring persistent protective leaf coverage against bacterial and fungal blights.',
+    imgSrc: t11
+  },
+  {
+    id: 'f-propio',
+    name: 'PROPIO-STAR® 25 EC',
+    brand: 'Propio-Star',
+    chemical: 'Propiconazole 25% EC',
+    category: 'fungicides',
+    categoryLabel: 'FUNGICIDES',
+    group: 'GROUP 3',
+    formulation: 'EC',
+    inStock: true,
+    packSizes: ['250ml', '500ml', '1L'],
+    crops: ['Wheat', 'Rice', 'Groundnut', 'Banana', 'Turf'],
+    targets: 'Sheath blight, Brown rust, Yellow rust, Leaf spot, Sigatoka',
+    dosage: '200 - 250 ml / acre',
+    description: 'Systemic triazole fungicide with strong curative and eradicant action against a wide range of fungal diseases.',
+    imgSrc: t12
+  },
+  {
+    id: 'f-carbendo',
+    name: 'CARBO-SHIELD® 50 WP',
+    brand: 'Carbo-Shield',
+    chemical: 'Carbendazim 50% WP',
+    category: 'fungicides',
+    categoryLabel: 'FUNGICIDES',
+    group: 'GROUP 1',
+    formulation: 'WP',
+    inStock: true,
+    packSizes: ['250g', '500g', '1kg'],
+    crops: ['Rice', 'Wheat', 'Cotton', 'Vegetables', 'Fruits'],
+    targets: 'Blast, Sheath blight, Powdery mildew, Anthracnose, Wilt',
+    dosage: '200 - 400 g / acre',
+    description: 'Broad-spectrum benzimidazole fungicide with systemic action for control of major fungal diseases across crops.',
+    imgSrc: t13
+  },
+  {
+    id: 'ins-altacor',
+    name: 'ALTACOR® INSECT CONTROL',
+    brand: 'Altacor Insect Control',
+    chemical: 'Chlorantraniliprole 35% WG',
+    category: 'insecticides',
+    categoryLabel: 'INSECTICIDES & MITICIDES',
+    group: 'GROUP 28',
+    formulation: 'WG',
+    inStock: true,
+    packSizes: ['30g', '60g', '150g'],
+    crops: ['Grapes', 'Tree Fruit', 'Vegetables', 'Cotton', 'Rice'],
+    targets: 'Grape berry moth, Leafroller, Bollworm complex, Stem borer',
+    dosage: '1.5 - 2.0 oz/acre',
+    description: 'Ryanodine receptor modulator providing long-residual worm control while preserving beneficial mites and pollinators.',
+    imgSrc: t14
+  },
+  {
+    id: 'ins-khufia',
+    name: 'KHUFIA® FOPRONIL 40 WG',
+    brand: 'Khufia Fopronil',
+    chemical: 'Fipronil 40% + Imidacloprid 40% WG',
+    category: 'insecticides',
+    categoryLabel: 'INSECTICIDES & MITICIDES',
+    group: 'GROUP 2B + 4A',
+    formulation: 'WG',
+    inStock: true,
+    packSizes: ['40g', '100g', '250g', '500g'],
+    crops: ['Cotton', 'Rice', 'Sugarcane', 'Chilli', 'Vegetables'],
+    targets: 'White grub, Stem borer, Brown planthopper, Thrips, Aphids',
+    dosage: '40 - 50 g / acre in 200 L water',
+    description: 'Unique dual-chemistry granules providing dual action on central nervous system of chewing and sucking insect pests.',
+    imgSrc: t15
+  },
+  {
+    id: 'ins-forodon',
+    name: 'FORODON® 3G SOIL GRANULES',
+    brand: 'Forodon 3G',
+    chemical: 'Carbofuran 3% CG',
+    category: 'insecticides',
+    categoryLabel: 'INSECTICIDES & MITICIDES',
+    group: 'GROUP 1A',
+    formulation: 'CG',
+    inStock: true,
+    packSizes: ['1kg', '5kg', '10kg', '25kg'],
+    crops: ['Rice', 'Sugarcane', 'Corn - Field Corn', 'Peanuts'],
+    targets: 'Stem borer, Gall midge, Root borer, Nematodes',
+    dosage: '7 - 10 kg / acre broadcast',
+    description: 'Systemic carbamate soil insecticide and nematicide providing subterranean root zone protection.',
+    imgSrc: t16
+  },
+  {
+    id: 'ins-imida',
+    name: 'IMIDA-GOLD® 17.8 SL',
+    brand: 'Imida-Gold',
+    chemical: 'Imidacloprid 17.8% SL',
+    category: 'insecticides',
+    categoryLabel: 'INSECTICIDES & MITICIDES',
+    group: 'GROUP 4A',
+    formulation: 'SL',
+    inStock: true,
+    packSizes: ['100ml', '250ml', '500ml', '1L'],
+    crops: ['Cotton', 'Rice', 'Vegetables', 'Fruits', 'Sugarcane'],
+    targets: 'Aphids, Whiteflies, Jassids, Brown planthopper, Thrips',
+    dosage: '60 - 80 ml / acre',
+    description: 'Neonicotinoid systemic insecticide with contact and stomach action for rapid knockdown of sucking pests.',
+    imgSrc: t17
+  },
+  {
+    id: 'ins-lambda',
+    name: 'LAMBDA-FORCE® 5 EC',
+    brand: 'Lambda-Force',
+    chemical: 'Lambda-cyhalothrin 5% EC',
+    category: 'insecticides',
+    categoryLabel: 'INSECTICIDES & MITICIDES',
+    group: 'GROUP 3A',
+    formulation: 'EC',
+    inStock: true,
+    packSizes: ['250ml', '500ml', '1L'],
+    crops: ['Cotton', 'Vegetables', 'Soybean', 'Maize', 'Pulses'],
+    targets: 'Bollworm, Armyworm, Aphids, Jassids, Pod borer',
+    dosage: '200 - 300 ml / acre',
+    description: 'Fast-acting synthetic pyrethroid with broad-spectrum contact and stomach action against major crop pests.',
+    imgSrc: t18
+  },
+  {
+    id: 'ins-chloro',
+    name: 'CHLORO-MAX® 20 EC',
+    brand: 'Chloro-Max',
+    chemical: 'Chlorpyrifos 20% EC',
+    category: 'insecticides',
+    categoryLabel: 'INSECTICIDES & MITICIDES',
+    group: 'GROUP 1B',
+    formulation: 'EC',
+    inStock: true,
+    packSizes: ['500ml', '1L', '5L'],
+    crops: ['Cotton', 'Rice', 'Maize', 'Groundnut', 'Vegetables'],
+    targets: 'Stem borer, Cut worm, White grub, Termites, Aphids',
+    dosage: '400 - 600 ml / acre',
+    description: 'Organophosphate insecticide with contact, stomach and vapour action for control of soil and foliar pests.',
+    imgSrc: t19
+  },
+  {
+    id: 'ins-spinosad',
+    name: 'SPINO-STAR® 45 SC',
+    brand: 'Spino-Star',
+    chemical: 'Spinosad 45% SC',
+    category: 'insecticides',
+    categoryLabel: 'INSECTICIDES & MITICIDES',
+    group: 'GROUP 5',
+    formulation: 'SC',
+    inStock: true,
+    packSizes: ['60ml', '150ml', '500ml'],
+    crops: ['Cotton', 'Vegetables', 'Fruits', 'Grapes', 'Chilli'],
+    targets: 'Thrips, Leafminer, Bollworm, Fruit borer, Caterpillars',
+    dosage: '60 - 80 ml / acre',
+    description: 'Bio-derived insecticide from Saccharopolyspora spinosa with unique mode of action safe for beneficial insects.',
+    imgSrc: t20
+  },
+  {
+    id: 'ha-aim-ec',
+    name: 'AIM® EC HERBICIDE',
+    brand: 'Aim EC Herbicide',
+    chemical: 'Carfentrazone-ethyl 21.3% EC',
+    category: 'harvest-aids',
+    categoryLabel: 'HARVEST AIDS',
+    group: 'GROUP 14',
+    formulation: 'EC',
+    inStock: true,
+    packSizes: ['500ml', '1L', '5L'],
+    crops: ['Cotton', 'Potatoes', 'Soybeans', 'Corn - Field Corn', 'Small Grains'],
+    targets: 'Harvest aid desiccation, morning glory, velvetleaf, nightshade',
+    dosage: '1.0 - 2.0 fl oz/acre',
+    description: 'Post-emergence contact herbicide and premier harvest aid desiccant delivering rapid foliage knockdown in 24 hours.',
+    imgSrc: t21
+  },
+  {
+    id: 'ha-display',
+    name: 'DISPLAY® COTTON HARVEST AID',
+    brand: 'Display Cotton Harvest Aid',
+    chemical: 'Carfentrazone-ethyl + Flumioxazin EC',
+    category: 'harvest-aids',
+    categoryLabel: 'HARVEST AIDS',
+    group: 'GROUP 14',
+    formulation: 'EC',
+    inStock: true,
+    packSizes: ['1L', '5L'],
+    crops: ['Cotton'],
+    targets: 'Defoliation, accelerated boll opening, terminal weed desiccation',
+    dosage: '0.6 - 1.0 fl oz/acre',
+    description: 'Exceptional defoliation performance, juvenile leaf drop, and regrowth suppression for clean, high-grade cotton harvest.',
+    imgSrc: t22
+  },
+  {
+    id: 'ha-boll-drop',
+    name: 'BOLL-DROP® 39 SL DEFOLIANT',
+    brand: 'Boll-Drop Defoliant',
+    chemical: 'Ethephon 39% SL',
+    category: 'harvest-aids',
+    categoryLabel: 'HARVEST AIDS',
+    group: 'GROUP 1',
+    formulation: 'SL',
+    inStock: true,
+    packSizes: ['500ml', '1L', '5L'],
+    crops: ['Cotton', 'Tree Fruit', 'Tobacco'],
+    targets: 'Synchronous boll opening, uniform ripening, defoliation',
+    dosage: '600 - 800 ml/acre',
+    description: 'Ethylene generator designed to accelerate natural crop maturation and harvest schedule predictability.',
+    imgSrc: t23
+  },
+  {
+    id: 'ha-diquat',
+    name: 'DIQUAT-STAR® 20 SL',
+    brand: 'Diquat-Star',
+    chemical: 'Diquat Dibromide 20% SL',
+    category: 'harvest-aids',
+    categoryLabel: 'HARVEST AIDS',
+    group: 'GROUP 22',
+    formulation: 'SL',
+    inStock: true,
+    packSizes: ['500ml', '1L', '5L'],
+    crops: ['Potatoes', 'Sunflower', 'Oilseed Rape', 'Peas', 'Lentils'],
+    targets: 'Pre-harvest desiccation, haulm destruction, weed burndown',
+    dosage: '400 - 600 ml / acre',
+    description: 'Fast-acting contact desiccant for uniform crop dry-down enabling earlier and cleaner mechanical harvesting.',
+    imgSrc: t24
+  },
   {
     id: 'ap-cruiser',
     name: 'CRUISER® SEED-DRESSING PRO',
@@ -327,7 +443,7 @@ export const PRODUCTS = [
     targets: 'Seed-borne insects, Wireworms, Aphids, Early season thrips',
     dosage: '3 - 5 ml / kg seed',
     description: 'Systemic seed treatment ensuring robust seedling emergence, root defense, and uniform stand establishment.',
-    imgSrc: prod2
+    imgSrc: t25
   },
   {
     id: 'ap-terra',
@@ -344,10 +460,25 @@ export const PRODUCTS = [
     targets: 'Root elongation, Phosphorus solubilization, Moisture stress defense',
     dosage: '4 kg / acre at planting',
     description: 'Symbiotic mycorrhizal fungal network multiplying effective root nutrient uptake up to seven-fold.',
-    imgSrc: prod5
+    imgSrc: t27
   },
-
-  // PRECISION PLATFORMS
+  {
+    id: 'ap-zinc',
+    name: 'ZINC-MAX® 33 SC',
+    brand: 'Zinc-Max',
+    chemical: 'Zinc Sulphate Monohydrate 33% SC',
+    category: 'at-plant',
+    categoryLabel: 'AT-PLANT',
+    group: 'MICRONUTRIENT',
+    formulation: 'SC',
+    inStock: true,
+    packSizes: ['500ml', '1L', '5L'],
+    crops: ['Rice', 'Wheat', 'Maize', 'Vegetables', 'Fruits'],
+    targets: 'Zinc deficiency, Khaira disease in rice, stunted growth',
+    dosage: '500 ml - 1 L / acre',
+    description: 'Highly soluble zinc micronutrient formulation correcting zinc deficiency for improved grain filling and crop quality.',
+    imgSrc: t28
+  },
   {
     id: 'pp-hanako',
     name: 'HANAKO® GROWTH BIO-PROMOTER',
@@ -363,7 +494,7 @@ export const PRODUCTS = [
     targets: 'Fruit set, Berry elongation, Abiotic heat/cold stress tolerance',
     dosage: '250 - 350 ml / acre',
     description: 'Premium bioactive marine extract rich in natural phytohormones and amino acids boosting photosynthetic yield.',
-    imgSrc: prod5
+    imgSrc: t29
   },
   {
     id: 'pp-gibber',
@@ -380,6 +511,40 @@ export const PRODUCTS = [
     targets: 'Berry enlargement, bunch looseness, stem elongation',
     dosage: '180 ml / acre in 200 L water',
     description: 'Specialty plant growth regulator for table grape cluster elongation and berry size optimization.',
-    imgSrc: prod6
+    imgSrc: t30
+  },
+  {
+    id: 'pp-humic',
+    name: 'HUMIC-GOLD® SOIL CONDITIONER',
+    brand: 'Humic-Gold',
+    chemical: 'Humic Acid 12% + Fulvic Acid 3% SL',
+    category: 'precision-platforms',
+    categoryLabel: 'PRECISION PLATFORMS',
+    group: 'SOIL HEALTH',
+    formulation: 'SL',
+    inStock: true,
+    packSizes: ['500ml', '1L', '5L'],
+    crops: ['All Crops', 'Vegetables', 'Fruits', 'Cereals', 'Pulses'],
+    targets: 'Soil structure improvement, nutrient retention, microbial activity',
+    dosage: '500 ml - 1 L / acre',
+    description: 'Concentrated humic and fulvic acid blend improving soil CEC, water retention and nutrient availability for all crops.',
+    imgSrc: t31
+  },
+  {
+    id: 'pp-amino',
+    name: 'AMINO-BOOST® FOLIAR FEED',
+    brand: 'Amino-Boost',
+    chemical: 'Hydrolysed Amino Acids 40% SL',
+    category: 'precision-platforms',
+    categoryLabel: 'PRECISION PLATFORMS',
+    group: 'BIO-NUTRITION',
+    formulation: 'SL',
+    inStock: true,
+    packSizes: ['250ml', '500ml', '1L'],
+    crops: ['Vegetables', 'Fruits', 'Grapes', 'Flowers', 'Cereals'],
+    targets: 'Protein synthesis, stress recovery, fruit quality enhancement',
+    dosage: '200 - 300 ml / acre',
+    description: 'Free amino acid foliar nutrition accelerating protein synthesis and crop recovery from biotic and abiotic stress.',
+    imgSrc: t32
   }
 ];

@@ -1,55 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Search, ShoppingCart, Leaf } from 'lucide-react';
+import { Menu, X, Phone } from 'lucide-react';
 import './Navbar.css';
+import logoImg from '../assets/images/1712639794.png';
+
+const navLinks = [
+  { name: 'Home',       path: '/' },
+  { name: 'About',      path: '/about' },
+  { name: 'Products',   path: '/products' },
+  { name: 'Crops',      path: '/crops' },
+  { name: 'Gallery',    path: '/gallery' },
+  { name: 'Blog',       path: '/blog' },
+  { name: 'Contact',    path: '/contact' },
+];
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen,   setIsOpen]   = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location]);
-
-  const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'About', path: '/about' },
-    { name: 'Products', path: '/products' },
-    { name: 'Crops', path: '/crops' },
-    { name: 'Gallery', path: '/gallery' },
-    { name: 'Blog', path: '/blog' },
-    { name: 'Contact', path: '/contact' }
-  ];
+  useEffect(() => { setIsOpen(false); }, [location]);
 
   return (
     <header className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-      <div className="container navbar-container">
+      <div className="container navbar-container" style={{ position: 'relative', zIndex: 2 }}>
         {/* Logo */}
         <Link to="/" className="navbar-logo">
-          <Leaf className="logo-icon" size={28} />
-          <span className="logo-text">Shimanzu</span>
+          <img src={logoImg} alt="Shimanzu Japan" className="navbar-logo-img" />
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Nav */}
         <nav className="navbar-links desktop-only">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.name} 
+          {navLinks.map(link => (
+            <Link
+              key={link.name}
               to={link.path}
               className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
             >
@@ -58,36 +48,27 @@ const Navbar = () => {
           ))}
         </nav>
 
-        {/* Actions (Desktop) */}
+        {/* CTA */}
         <div className="navbar-actions desktop-only">
-          <button className="action-btn" aria-label="Search">
-            <Search size={20} />
-          </button>
-          <button className="action-btn" aria-label="Cart">
-            <ShoppingCart size={20} />
-          </button>
-          <Link to="/contact" className="btn btn-outline-gold" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
-            Get Quote
+          <Link to="/contact" className="navbar-cta-btn">
+            <Phone size={15} />
+            Get in Touch
           </Link>
         </div>
 
-        {/* Mobile Menu Toggle */}
-        <button 
-          className="mobile-menu-btn"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
+        {/* Mobile toggle */}
+        <button className="mobile-menu-btn" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
+          {isOpen ? <X size={26} /> : <Menu size={26} />}
         </button>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Nav */}
       <div className={`mobile-nav ${isOpen ? 'open' : ''}`}>
         <div className="container">
           <nav className="mobile-links">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.name} 
+            {navLinks.map(link => (
+              <Link
+                key={link.name}
                 to={link.path}
                 className={`mobile-nav-link ${location.pathname === link.path ? 'active' : ''}`}
               >
@@ -95,10 +76,9 @@ const Navbar = () => {
               </Link>
             ))}
           </nav>
-          
           <div className="mobile-actions">
-            <Link to="/contact" className="btn btn-gold" style={{ width: '100%', marginTop: '1rem' }}>
-              Get a Quote
+            <Link to="/contact" className="navbar-cta-btn" style={{ width: '100%', justifyContent: 'center', marginTop: '12px' }}>
+              <Phone size={15} /> Get in Touch
             </Link>
           </div>
         </div>

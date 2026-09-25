@@ -1,52 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import './HeroSection.css';
 
 import gif1 from '../assets/images/gif1-min.gif';
 import gif2 from '../assets/images/gif2-min.gif';
-import gif3 from '../assets/images/gif3-min.gif';
+import seedlingVideo from '../assets/images/Seedling_growing_from_soil-clip-1_20260925110529.mp4';
 
-import s1  from '../assets/images/video_slides/slide_1.jpeg';
-import s2  from '../assets/images/video_slides/slide_2.jpeg';
-import s3  from '../assets/images/video_slides/slide_3.jpeg';
-import s4  from '../assets/images/video_slides/slide_4.jpeg';
-import s5  from '../assets/images/video_slides/slide_5.jpeg';
-import s6  from '../assets/images/video_slides/slide_6.jpeg';
-import s7  from '../assets/images/video_slides/slide_7.jpeg';
-import s8  from '../assets/images/video_slides/slide_8.jpeg';
-import s9  from '../assets/images/video_slides/slide_9.jpeg';
-import s10 from '../assets/images/video_slides/slide_10.jpeg';
-import s11 from '../assets/images/video_slides/slide_11.jpeg';
-import s12 from '../assets/images/video_slides/slide_12.jpeg';
-import s13 from '../assets/images/video_slides/slide_13.jpg';
-import s14 from '../assets/images/video_slides/slide_14.jpg';
-import s15 from '../assets/images/video_slides/slide_15.jpg';
-import s16 from '../assets/images/1712639794.png';
-
-// Timeline: 3 GIFs (6s each = 18s) + 6 images (2s each = 12s) = 30s total
 const timeline = [
-  { type: 'gif', src: gif1,  duration: 6000, label: 'Farmer Harvesting' },
-  { type: 'gif', src: gif2,  duration: 6000, label: 'Chemical Testing'  },
-  { type: 'gif', src: gif3,  duration: 6000, label: 'Factory Production' },
-  { type: 'img', src: s1,   duration: 2000 },
-  { type: 'img', src: s4,   duration: 2000 },
-  { type: 'img', src: s7,   duration: 2000 },
-  { type: 'img', src: s10,  duration: 2000 },
-  { type: 'img', src: s13,  duration: 2000 },
-  { type: 'img', src: s16,  duration: 2000 },
+  { type: 'gif',   src: gif1,          duration: 6000 },
+  { type: 'gif',   src: gif2,          duration: 6000 },
+  { type: 'video', src: seedlingVideo, duration: 12000 },
 ];
 
 const kbClass = ['kb-zoom-in', 'kb-pan-left', 'kb-pan-right', 'kb-zoom-out', 'kb-zoom-in-left', 'kb-zoom-in-right'];
-
-const FADE = 800; // crossfade ms
+const FADE = 800;
 
 const HeroSection = () => {
   const [cur, setCur]           = useState(0);
   const [nxt, setNxt]           = useState(null);
   const [entering, setEntering] = useState(false);
   const timerRef                = useRef(null);
-  const imgIdx                  = useRef(0); // tracks kb variant per img slide
 
   const advance = (from) => {
     const next = (from + 1) % timeline.length;
@@ -67,27 +41,39 @@ const HeroSection = () => {
   const renderLayer = (index, cls) => {
     const item = timeline[index];
     if (!item) return null;
-
     if (item.type === 'gif') {
       return (
         <div key={`${index}-${cls}`} className={`hero-layer ${cls}`}>
-          <img src={item.src} alt={item.label} className="hero-gif" />
+          <img src={item.src} alt="Shimanzu agriculture" className="hero-gif" />
           <div className="hero-overlay" />
         </div>
       );
     }
-
+    if (item.type === 'video') {
+      return (
+        <div key={`${index}-${cls}`} className={`hero-layer ${cls}`}>
+          <video
+            src={item.src}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="hero-gif"
+          />
+          <div className="hero-overlay" />
+        </div>
+      );
+    }
     const kb = kbClass[index % kbClass.length];
     return (
       <div key={`${index}-${cls}`} className={`hero-layer ${cls}`}>
-        <div
-          className={`hero-img-bg ${kb}`}
-          style={{ backgroundImage: `url(${item.src})` }}
-        />
+        <div className={`hero-img-bg ${kb}`} style={{ backgroundImage: `url(${item.src})` }} />
         <div className="hero-overlay" />
       </div>
     );
   };
+
+  const scrollDown = () => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
 
   return (
     <section className="hero">
@@ -95,24 +81,53 @@ const HeroSection = () => {
         {renderLayer(cur, entering ? 'layer-exit' : 'layer-active')}
         {nxt !== null && renderLayer(nxt, 'layer-enter')}
 
-        <div className="container hero-container">
+<div className="container hero-container">
           <div className="hero-content">
-            <span className="hero-subtitle">SHIMANZU CHEMICALS PRIVATE LIMITED</span>
             <h1 className="hero-title">
-              Empowering Farmers: <br />
-              Innovative <span className="text-gradient">Agrochemicals</span> for Sustainable Agriculture
+              Advanced Agricultural<br />
+              Solutions for a<br />
+              <span className="hero-title-accent">Better Tomorrow</span>
             </h1>
+            <p className="hero-desc">
+              Shimanzu Japan develops and provides premium agricultural chemical and crop-care solutions — combining Japanese scientific precision with deep understanding of farmer needs for sustainable, high-yield agriculture.
+            </p>
             <div className="hero-actions">
-              <Link to="/products" className="btn btn-primary">
-                View Products <ArrowRight size={18} style={{ marginLeft: '8px' }} />
+              <Link to="/products" className="hero-btn-primary">
+                Explore Products <ArrowRight size={18} />
               </Link>
+              <Link to="/about" className="hero-btn-secondary">
+                Discover Shimanzu
+              </Link>
+            </div>
+
+            {/* Stats strip */}
+            <div className="hero-stats">
+              <div className="hero-stat">
+                <span className="hs-num">20,000+</span>
+                <span className="hs-label">Farmers Served</span>
+              </div>
+              <div className="hero-stat-divider" />
+              <div className="hero-stat">
+                <span className="hs-num">157+</span>
+                <span className="hs-label">Export Countries</span>
+              </div>
+              <div className="hero-stat-divider" />
+              <div className="hero-stat">
+                <span className="hs-num">200+</span>
+                <span className="hs-label">Quality Products</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Progress bar — 30s full cycle */}
+        {/* Scroll down indicator */}
+        <button className="hero-scroll-btn" onClick={scrollDown} aria-label="Scroll down">
+          <ChevronDown size={22} />
+        </button>
+
+        {/* Progress bar */}
         <div className="hero-progress">
-          <div className="hero-progress-bar" style={{ animationDuration: '30s' }} />
+          <div className="hero-progress-bar" style={{ animationDuration: '33s' }} />
         </div>
       </div>
     </section>

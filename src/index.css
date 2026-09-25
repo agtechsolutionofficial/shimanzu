@@ -1,12 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap');
 
 :root {
-  /* Color Palette - Luxury Dark Agro */
+  /* Color Palette - Shimanzu Japan */
   --bg-dark: #0A1910;
   --bg-darker: #050d08;
   --bg-card: #0F2015;
   --bg-card-hover: #152c1d;
-  
+
+  /* New brand palette */
+  --green-deep: #1B5E20;
+  --green-fresh: #66BB6A;
+  --green-light: #E8F5E9;
+  --red-japan: #D32F2F;
+  --off-white: #F7F9F5;
+  --charcoal: #263238;
+
   --accent-gold: #D4AF37;
   --accent-gold-light: #e6c863;
   --accent-emerald: #10B981;

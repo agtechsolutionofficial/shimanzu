@@ -34,16 +34,8 @@ export const DataProvider = ({ children }) => {
     return INITIAL_CROPS;
   });
 
-  // 3. Products state with localStorage persistence
-  const [products, setProducts] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error('Failed to load products from localStorage', e);
-    }
-    return INITIAL_PRODUCTS;
-  });
+  // 3. Products state — always use INITIAL_PRODUCTS as base (images are imported modules)
+  const [products, setProducts] = useState(INITIAL_PRODUCTS);
 
   // Save to localStorage whenever state changes
   useEffect(() => {
@@ -61,14 +53,6 @@ export const DataProvider = ({ children }) => {
       console.error('Failed to save crops to localStorage', e);
     }
   }, [crops]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
-    } catch (e) {
-      console.error('Failed to save products to localStorage', e);
-    }
-  }, [products]);
 
   // CATEGORY CRUD
   const addCategory = (newCat) => {
@@ -173,7 +157,8 @@ export const DataProvider = ({ children }) => {
     setProducts(INITIAL_PRODUCTS);
     localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
     localStorage.removeItem(STORAGE_KEYS.CROPS);
-    localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
+    // Clear old products cache if exists
+    localStorage.removeItem('shimanzu_products_v1');
   };
 
   // Dynamically compute product counts per category

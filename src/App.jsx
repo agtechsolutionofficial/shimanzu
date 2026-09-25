@@ -50,6 +50,11 @@ function AnimatedRoutes() {
 }
 
 function App() {
+  // One-time clear of old products localStorage cache so new images load correctly
+  useEffect(() => {
+    localStorage.removeItem('shimanzu_products_v1');
+  }, []);
+
   return (
     <DataProvider>
       <Router>

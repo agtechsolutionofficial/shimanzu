@@ -3,20 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Building2, 
   Warehouse, 
-  ShieldCheck, 
-  Truck, 
   CheckCircle2, 
   Maximize2, 
-  X, 
-  Layers, 
-  Clock, 
-  Boxes,
+  X,
   FlaskConical,
   Award,
-  Globe
+  Globe,
+  Leaf,
+  ArrowRight
 } from 'lucide-react';
-import aboutImg from '../assets/images/about-img-1.jpg';
 import './About.css';
+
+const aboutMainImg = 'https://images.pexels.com/photos/2132250/pexels-photo-2132250.jpeg?auto=compress&cs=tinysrgb&w=900';
+const aboutFloatImg = 'https://images.pexels.com/photos/3735218/pexels-photo-3735218.jpeg?auto=compress&cs=tinysrgb&w=400';
 
 // Import Godown/Warehouse photos
 import godown1 from '../assets/images/godown/godown-1.jpeg';
@@ -93,20 +92,33 @@ const About = () => {
       </div>
 
       <div className="container" style={{ marginTop: '70px', marginBottom: '80px' }}>
-        {/* Legacy of Quality */}
-        <div className="grid grid-cols-2 gap-8 items-center" style={{ marginBottom: '80px' }}>
+        {/* Company Intro — two column */}
+        <div className="grid grid-cols-2 gap-8 items-center" style={{ marginBottom: '60px' }}>
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={vp}
             transition={{ duration: 0.6 }}
+            style={{ position: 'relative' }}
           >
             <img 
-              src={aboutImg} 
-              alt="Shimanzu Quality Lab" 
-              style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-highlight)', width: '100%', display: 'block', boxShadow: '0 15px 35px rgba(0,0,0,0.5)' }} 
+              src={aboutMainImg}
+              alt="Shimanzu agricultural fields" 
+              style={{ borderRadius: 'var(--radius-lg)', width: '100%', display: 'block', boxShadow: '0 15px 35px rgba(0,0,0,0.5)', height: '460px', objectFit: 'cover' }} 
             />
+            {/* Floating lab image */}
+            <div style={{ position: 'absolute', bottom: '-24px', right: '-24px', width: '200px', background: '#fff', borderRadius: '14px', overflow: 'hidden', boxShadow: '0 12px 35px rgba(0,0,0,0.2)', border: '2px solid #E8F5E9' }}>
+              <img src={aboutFloatImg} alt="Laboratory" style={{ width: '100%', height: '110px', objectFit: 'cover', display: 'block' }} />
+              <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '1.3rem' }}>🇯🇵</span>
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1B5E20' }}>Japanese Technology</div>
+                  <div style={{ fontSize: '0.7rem', color: '#66BB6A' }}>Agricultural Innovation</div>
+                </div>
+              </div>
+            </div>
           </motion.div>
+
           <motion.div 
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -118,9 +130,36 @@ const About = () => {
             <p className="text-secondary" style={{ marginBottom: '16px', lineHeight: '1.8' }}>
               Shimanzu Chemicals Private Limited is committed to bringing the pinnacle of Japanese agricultural technology to farmers across India and the globe. By establishing state-of-the-art manufacturing plants, we ensure that every formulation meets the highest standards of purity, efficacy, and environmental safety.
             </p>
-            <p className="text-secondary" style={{ lineHeight: '1.8' }}>
+            <p className="text-secondary" style={{ lineHeight: '1.8', marginBottom: '28px' }}>
               Our mission is to enhance crop productivity, maximize farm income, and champion sustainable agriculture through our robust nationwide network of dealers, distributors, and certified agronomists.
             </p>
+
+            {/* Mission & Vision cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '24px' }}>
+              <div style={{ background: 'rgba(27,94,32,0.15)', borderRadius: '12px', padding: '16px', borderLeft: '3px solid #66BB6A' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#66BB6A', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Our Mission</div>
+                <p style={{ fontSize: '0.82rem', color: '#90A4AE', lineHeight: '1.6' }}>To empower every farmer with scientifically advanced, safe, and effective agrochemical solutions that maximize yield and promote sustainable land stewardship.</p>
+              </div>
+              <div style={{ background: 'rgba(27,94,32,0.15)', borderRadius: '12px', padding: '16px', borderLeft: '3px solid #66BB6A' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#66BB6A', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Our Vision</div>
+                <p style={{ fontSize: '0.82rem', color: '#90A4AE', lineHeight: '1.6' }}>To be the most trusted agricultural chemical company in Asia, recognized for Japanese precision, product integrity, and farmer-first innovation.</p>
+              </div>
+            </div>
+
+            {/* Highlights */}
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {[
+                { icon: <FlaskConical size={15} />, text: 'Advanced GLC, HPLC & UV molecular testing' },
+                { icon: <Award size={15} />, text: 'ISO 9001:2015 & 14001:2015 certified manufacturing' },
+                { icon: <Globe size={15} />, text: 'Exporting to 157+ countries worldwide' },
+                { icon: <CheckCircle2 size={15} />, text: 'Complex formulations: EC, SC, WG standards' },
+              ].map((h, i) => (
+                <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#CBD5E1', fontWeight: 500 }}>
+                  <span style={{ color: '#66BB6A', flexShrink: 0 }}>{h.icon}</span>
+                  {h.text}
+                </li>
+              ))}
+            </ul>
           </motion.div>
         </div>
 

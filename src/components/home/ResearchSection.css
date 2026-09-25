@@ -1,0 +1,190 @@
+.research-section {
+  padding: 90px 0 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+.research-bg-img {
+  position: absolute;
+  inset: 0;
+  background: url('https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover no-repeat;
+}
+
+.research-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 28, 10, 0.82);
+}
+
+.research-inner { position: relative; z-index: 2; }
+
+/* Header */
+.research-header {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 52px;
+}
+
+.research-eyebrow-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.research-eyebrow-line {
+  display: block;
+  width: 44px;
+  height: 1.5px;
+  background: rgba(102,187,106,0.5);
+}
+
+.research-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #66BB6A;
+  text-transform: uppercase;
+}
+
+.research-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  color: #fff;
+  font-weight: 800;
+  margin-bottom: 18px;
+  line-height: 1.15;
+}
+
+.research-subtext {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.75;
+  margin-bottom: 24px;
+}
+
+.research-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.research-divider span {
+  display: block;
+  width: 70px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, #2E7D32);
+}
+
+.research-divider span:last-child {
+  background: linear-gradient(90deg, #2E7D32, transparent);
+}
+
+.research-divider-leaf { color: #66BB6A; }
+
+/* Cards */
+.research-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.research-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.research-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+}
+
+/* Image */
+.research-card-img-wrap {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.research-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 0.5s ease;
+  display: block;
+}
+
+.research-card:hover .research-card-img {
+  transform: scale(1.06);
+}
+
+/* Green circle icon — bottom-left overlapping image/body */
+.research-card-icon {
+  position: absolute;
+  bottom: -20px;
+  left: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #2E7D32;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(46,125,50,0.5);
+  z-index: 10;
+  border: 3px solid #fff;
+}
+
+/* Card body */
+.research-card-body {
+  padding: 32px 16px 20px;
+}
+
+.research-card-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 8px;
+}
+
+.research-card-desc {
+  font-size: 0.8rem;
+  color: #4a5a4a;
+  line-height: 1.65;
+  margin-bottom: 16px;
+}
+
+.research-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #2E7D32;
+  text-decoration: none;
+  transition: gap 0.2s ease;
+}
+
+.research-card-link:hover { gap: 9px; }
+
+@media (max-width: 1200px) {
+  .research-cards-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .research-section { padding: 70px 0; }
+  .research-cards-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .research-cards-grid { grid-template-columns: 1fr; }
+}
