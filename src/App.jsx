@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import CustomCursor from './components/CustomCursor';
@@ -13,7 +13,8 @@ import Gallery from './pages/Gallery';
 import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
-import { DataProvider } from './context/DataContext';
+import Login from './pages/Login';
+import { DataProvider, useDataContext } from './context/DataContext';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -29,6 +30,18 @@ const pageVariants = {
   exit: { opacity: 0, y: -16, transition: { duration: 0.3 } },
 };
 
+// Route guard: Only allows access to Admin if authenticated, otherwise redirects to /login
+function ProtectedAdminRoute() {
+  const { isAdmin } = useDataContext();
+  const location = useLocation();
+
+  if (!isAdmin) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <Admin />;
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
   return (
@@ -42,7 +55,8 @@ function AnimatedRoutes() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<ProtectedAdminRoute />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

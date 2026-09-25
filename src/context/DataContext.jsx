@@ -2,13 +2,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CATEGORIES as INITIAL_CATEGORIES } from '../data/categoriesData';
 import { CROPS as INITIAL_CROPS } from '../data/cropsData';
 import { PRODUCTS as INITIAL_PRODUCTS } from '../data/productsData';
+import { FALLBACK_PRODUCT_IMAGE } from '../utils/imageCompressor';
 
 const DataContext = createContext(null);
 
 const STORAGE_KEYS = {
   CATEGORIES: 'shimanzu_categories_v1',
   CROPS: 'shimanzu_crops_v1',
-  PRODUCTS: 'shimanzu_products_v1'
+  PRODUCTS: 'shimanzu_products_v1',
+  AUTH: 'shimanzu_admin_auth_v1'
 };
 
 export const DataProvider = ({ children }) => {
@@ -36,6 +38,48 @@ export const DataProvider = ({ children }) => {
 
   // 3. Products state — always use INITIAL_PRODUCTS as base (images are imported modules)
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
+
+  // 4. Admin Auth state with localStorage persistence
+  const [isAdmin, setIsAdmin] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEYS.AUTH) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const login = (username, password) => {
+    const u = (username || '').trim().toLowerCase();
+    const p = (password || '').trim();
+
+    // Only allowed credentials
+    if (
+      (u === 'admin@shimanzu.com') &&
+      (p === 'shimanzu@123')
+    ) {
+      setIsAdmin(true);
+      try {
+        localStorage.setItem(STORAGE_KEYS.AUTH, 'true');
+      } catch (e) {
+        console.error('Failed to save auth to localStorage', e);
+      }
+      return { success: true };
+    }
+
+    return { 
+      success: false, 
+      message: 'Invalid username or password.' 
+    };
+  };
+
+  const logout = () => {
+    setIsAdmin(false);
+    try {
+      localStorage.removeItem(STORAGE_KEYS.AUTH);
+    } catch (e) {
+      console.error('Failed to remove auth from localStorage', e);
+    }
+  };
 
   // Save to localStorage whenever state changes
   useEffect(() => {
@@ -181,7 +225,10 @@ export const DataProvider = ({ children }) => {
     addProduct,
     updateProduct,
     deleteProduct,
-    resetToDefaultData
+    resetToDefaultData,
+    isAdmin,
+    login,
+    logout
   };
 
   return (

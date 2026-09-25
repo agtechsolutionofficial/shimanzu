@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, CheckCircle2, MessageCircle, AlertCircle, Sparkles } from 'lucide-react';
+import { FALLBACK_PRODUCT_IMAGE } from '../utils/imageCompressor';
 import './QuickViewModal.css';
 
 const QuickViewModal = ({ product, onClose }) => {
@@ -14,17 +15,15 @@ const QuickViewModal = ({ product, onClose }) => {
         
         <div className="modal-grid">
           <div className="modal-image-col">
-            {product.imgSrc ? (
-              <img 
-                src={product.imgSrc} 
-                alt={product.name} 
-                style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', filter: 'drop-shadow(0 12px 24px rgba(0,0,0,0.5))' }} 
-              />
-            ) : (
-              <div className="modal-image-placeholder">
-                <span className="modal-formulation">{product.formulation}</span>
-              </div>
-            )}
+            <img 
+              src={product.imgSrc || FALLBACK_PRODUCT_IMAGE} 
+              alt={product.name} 
+              style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', filter: 'drop-shadow(0 12px 24px rgba(0,0,0,0.5))' }} 
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = FALLBACK_PRODUCT_IMAGE;
+              }}
+            />
           </div>
           
           <div className="modal-info-col">

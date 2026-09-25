@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import ProductCategoriesGrid from '../components/ProductCategoriesGrid';
 import ProductCard from '../components/ProductCard';
 import FilterSidebar from '../components/FilterSidebar';
@@ -18,6 +18,19 @@ const Products = () => {
   const [selectedFormulations, setSelectedFormulations] = useState([]);
   const [selectedCrops, setSelectedCrops] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [searchAllQuery, setSearchAllQuery] = useState('');
+
+  // Products filtered by all-search query
+  const searchedAllProducts = useMemo(() => {
+    if (!searchAllQuery.trim()) return PRODUCTS;
+    const q = searchAllQuery.toLowerCase();
+    return PRODUCTS.filter(p => 
+      p.name.toLowerCase().includes(q) ||
+      (p.chemical && p.chemical.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q)) ||
+      (p.crops && p.crops.some(c => c.toLowerCase().includes(q)))
+    );
+  }, [PRODUCTS, searchAllQuery]);
 
   // Sync state with URL params
   useEffect(() => {
@@ -113,13 +126,17 @@ const Products = () => {
     <div className="fmc-products-page">
       {/* 
         Case 1: When user is viewing All Categories, 
-        show ONLY the exact PRODUCT CATEGORIES grid!
+        show Categories Grid + Full Product Portfolio Showcase!
       */}
       {selectedCategory === 'all' && (
-        <ProductCategoriesGrid 
-          selectedCategoryId={selectedCategory} 
-          onSelectCategory={handleSelectCategory} 
-        />
+        <>
+          <ProductCategoriesGrid 
+            selectedCategoryId={selectedCategory} 
+            onSelectCategory={handleSelectCategory} 
+          />
+
+
+        </>
       )}
 
       {/* 

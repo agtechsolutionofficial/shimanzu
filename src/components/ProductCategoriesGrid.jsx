@@ -54,6 +54,10 @@ const ProductCategoriesGrid = ({ categories: propCategories, selectedCategoryId,
                     alt={cat.name}
                     className="category-card-img"
                     loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?auto=format&fit=crop&w=800&q=80';
+                    }}
                   />
                 </div>
 

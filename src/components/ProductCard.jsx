@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { FALLBACK_PRODUCT_IMAGE } from '../utils/imageCompressor';
 import './ProductCard.css';
 
 const ProductCard = ({ product, onViewClick }) => {
@@ -33,19 +34,17 @@ const ProductCard = ({ product, onViewClick }) => {
       {/* Top Media */}
       <div className="fmc-card-media">
         <img 
-          src={product.imgSrc} 
+          src={product.imgSrc || FALLBACK_PRODUCT_IMAGE} 
           alt={product.name} 
           className="fmc-card-img"
           loading="lazy" 
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = FALLBACK_PRODUCT_IMAGE;
+          }}
         />
         
-        {/* Stylized Brand Overlay matching image 2 & 5 if needed */}
-        {product.brand && (
-          <div className="fmc-card-brand-overlay">
-            <span className="fmc-brand-text">{product.brand.split(' ')[0]}</span>
-            <span className="fmc-brand-sub">{product.formulation || 'FORMULATION'}</span>
-          </div>
-        )}
+
       </div>
 
       {/* Card Body */}

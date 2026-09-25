@@ -140,6 +140,10 @@ const Crops = () => {
                     alt={crop.name} 
                     className="crop-circle-thumb" 
                     loading="lazy" 
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=300&q=80';
+                    }}
                   />
                   <h3 className="crop-card-name">{crop.name}</h3>
                 </div>

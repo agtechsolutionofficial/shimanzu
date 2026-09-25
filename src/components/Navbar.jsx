@@ -37,9 +37,9 @@ const Navbar = () => {
 
         {/* Desktop Nav */}
         <nav className="navbar-links desktop-only">
-          {navLinks.map(link => (
-            <Link
-              key={link.name}
+          {navLinks.map((link) => (
+            <Link 
+              key={link.name} 
               to={link.path}
               className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
             >
@@ -66,9 +66,9 @@ const Navbar = () => {
       <div className={`mobile-nav ${isOpen ? 'open' : ''}`}>
         <div className="container">
           <nav className="mobile-links">
-            {navLinks.map(link => (
-              <Link
-                key={link.name}
+            {navLinks.map((link) => (
+              <Link 
+                key={link.name} 
                 to={link.path}
                 className={`mobile-nav-link ${location.pathname === link.path ? 'active' : ''}`}
               >
@@ -76,6 +76,7 @@ const Navbar = () => {
               </Link>
             ))}
           </nav>
+
           <div className="mobile-actions">
             <Link to="/contact" className="navbar-cta-btn" style={{ width: '100%', justifyContent: 'center', marginTop: '12px' }}>
               <Phone size={15} /> Get in Touch
