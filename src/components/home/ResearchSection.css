@@ -97,7 +97,7 @@
 .research-card {
   background: #fff;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -111,6 +111,7 @@
   position: relative;
   height: 200px;
   overflow: hidden;
+  border-radius: 16px 16px 0 0;
 }
 
 .research-card-img {

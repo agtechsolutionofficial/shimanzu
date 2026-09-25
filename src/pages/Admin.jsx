@@ -8,12 +8,12 @@ import { useDataContext } from '../context/DataContext';
 import { compressImage, FALLBACK_PRODUCT_IMAGE } from '../utils/imageCompressor';
 import './Admin.css';
 
-import prod1 from '../assets/images/1713008833.webp';
-import prod2 from '../assets/images/1713008853.webp';
-import prod3 from '../assets/images/1713009018.webp';
-import prod4 from '../assets/images/1713009051.webp';
-import prod5 from '../assets/images/1713009112.webp';
-import prod6 from '../assets/images/1713009164.webp';
+import prod1 from '../assets/images/1713003050.webp';
+import prod2 from '../assets/images/1713003056.webp';
+import prod3 from '../assets/images/1713003063.webp';
+import prod4 from '../assets/images/1713003050.webp';
+import prod5 from '../assets/images/1713003056.webp';
+import prod6 from '../assets/images/1713003063.webp';
 
 const PRESET_PRODUCT_IMAGES = [
   { label: 'Bottle 1 (Herbicide)', src: prod1 },
