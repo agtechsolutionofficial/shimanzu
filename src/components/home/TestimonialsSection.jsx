@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Star, MapPin, Leaf } from 'lucide-react';
 import './TestimonialsSection.css';
+import partnerMp from '../../assets/images/partner_mp.jpg';
+import partnerUp from '../../assets/images/partner_up.jpg';
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } } };
 const vp = { once: true, margin: '-50px' };
 
-// Placeholder testimonials — replace with real data when available
+// Trusted partners testimonials
 const TESTIMONIALS = [
   {
     id: 1,
@@ -44,13 +46,59 @@ const TESTIMONIALS = [
     text: 'Khufia Fopronil gave me excellent control over bollworm and stem borer in my cotton. The dual-action chemistry is truly effective. Shimanzu understands what farmers need.',
     rating: 5,
   },
+  {
+    id: 5,
+    name: 'Manoj Patidar',
+    role: 'Soybean & Wheat Grower',
+    location: 'Madhya Pradesh, India',
+    img: partnerMp,
+    text: 'Using Shimanzu crop protection solutions for my soybean and wheat fields across Madhya Pradesh has delivered exceptional results. Healthy root growth and bumper harvests every single season.',
+    rating: 5,
+  },
+  {
+    id: 6,
+    name: 'Dharmendra Yadav',
+    role: 'Sugarcane & Agri Distributor',
+    location: 'Uttar Pradesh, India',
+    img: partnerUp,
+    text: 'In Uttar Pradesh, pest infestations in sugarcane and wheat can devastate yields. Shimanzu formulations give long-lasting protection and peace of mind to our entire farmer network.',
+    rating: 5,
+  },
 ];
 
 const TestimonialsSection = () => {
   const [current, setCurrent] = useState(0);
+  const timerRef = useRef(null);
 
-  const prev = () => setCurrent(c => (c - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
-  const next = () => setCurrent(c => (c + 1) % TESTIMONIALS.length);
+  // Auto change testimonial every 4 seconds continuously
+  const startTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setCurrent(c => (c + 1) % TESTIMONIALS.length);
+    }, 4000);
+  };
+
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const prev = () => {
+    setCurrent(c => (c - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
+    startTimer();
+  };
+
+  const next = () => {
+    setCurrent(c => (c + 1) % TESTIMONIALS.length);
+    startTimer();
+  };
+
+  const handleSelect = (idx) => {
+    setCurrent(idx);
+    startTimer();
+  };
 
   const t = TESTIMONIALS[current];
 
@@ -74,9 +122,8 @@ const TestimonialsSection = () => {
           {/* Featured large testimonial */}
           <motion.div
             key={current}
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.4 }}
             className="testimonial-featured"
           >
@@ -104,7 +151,7 @@ const TestimonialsSection = () => {
           {/* Side cards */}
           <div className="testimonials-side">
             {TESTIMONIALS.filter((_, i) => i !== current).slice(0, 2).map((item) => (
-              <div key={item.id} className="testimonial-side-card" onClick={() => setCurrent(TESTIMONIALS.indexOf(item))}>
+              <div key={item.id} className="testimonial-side-card" onClick={() => handleSelect(TESTIMONIALS.indexOf(item))}>
                 <div className="tsc-top">
                   <div className="tsc-stars">
                     {Array.from({ length: item.rating }).map((_, i) => (
@@ -135,7 +182,7 @@ const TestimonialsSection = () => {
           <button className="tn-btn" onClick={prev} aria-label="Previous"><ChevronLeft size={20} /></button>
           <div className="tn-dots">
             {TESTIMONIALS.map((_, i) => (
-              <button key={i} className={`tn-dot ${i === current ? 'active' : ''}`} onClick={() => setCurrent(i)} aria-label={`Go to ${i + 1}`} />
+              <button key={i} className={`tn-dot ${i === current ? 'active' : ''}`} onClick={() => handleSelect(i)} aria-label={`Go to ${i + 1}`} />
             ))}
           </div>
           <button className="tn-btn" onClick={next} aria-label="Next"><ChevronRight size={20} /></button>

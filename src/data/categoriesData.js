@@ -4,8 +4,19 @@ import insecticidesImg from '../assets/images/categories/insecticides.jpg';
 import atplantImg from '../assets/images/categories/at-plant.jpg';
 import harvestAidsImg from '../assets/images/categories/harvest-aids.jpg';
 import precisionImg from '../assets/images/categories/precision-platforms.jpg';
+import chemicalsImg from '../assets/images/categories/chemicals.jpg';
 
 export const CATEGORIES = [
+  {
+    id: 'chemicals',
+    name: 'CHEMICALS',
+    shortName: 'Chemicals',
+    accentColor: '#1E40AF', // Deep Blue accent bar
+    image: chemicalsImg,
+    description: 'Explore our high-purity chemical technicals, titanium dioxide rutile pigments, and specialty industrial formulations.',
+    fullDescription: 'High-purity chemical technicals, titanium dioxide rutile grade pigments, specialty industrial additives, and advanced chemical intermediates manufactured with Japanese precision.',
+    productCount: 3,
+  },
   {
     id: 'fungicides',
     name: 'FUNGICIDES',

@@ -29,14 +29,70 @@ import t30 from '../assets/images/transparent (30).png';
 import t31 from '../assets/images/transparent (31).png';
 import t32 from '../assets/images/transparent (32).png';
 
+import r777Img from '../assets/images/Shimanzu Japan Bag 3D R-777 (2).png';
+import r555Img from '../assets/images/packaging/shiroikona-r-555-sq.jpeg';
+import r111Img from '../assets/images/Shimanzu Japan Bag 3D R-111 F.png';
+
 import fungicidesImg from '../assets/images/categories/fungicides.jpg';
 import herbicidesImg from '../assets/images/categories/herbicides.jpg';
 import insecticidesImg from '../assets/images/categories/insecticides.jpg';
 import harvestAidsImg from '../assets/images/categories/harvest-aids.jpg';
 import atPlantImg from '../assets/images/categories/at-plant.jpg';
 import precisionImg from '../assets/images/categories/precision-platforms.jpg';
+import chemicalsImg from '../assets/images/categories/chemicals.jpg';
 
 export const PRODUCTS = [
+  {
+    id: 'chem-r777',
+    name: 'SHIROIKONA® R-777 RUTILE PIGMENT',
+    brand: 'Shiroikona R-777',
+    chemical: 'Titanium Dioxide (TiO₂) Rutile 99%',
+    category: 'chemicals',
+    categoryLabel: 'CHEMICALS',
+    group: 'SPECIALTY CHEMICALS',
+    formulation: 'PW',
+    inStock: true,
+    packSizes: ['25kg Bag', '500kg Jumbo'],
+    crops: ['Industrial Coatings', 'Agricultural Plastics', 'Masterbatch', 'Paints'],
+    targets: 'High weather resistance, maximum opacity, chemical stability, UV shielding',
+    dosage: 'Custom compounding standard',
+    description: 'High-purity Japanese rutile titanium dioxide chemical compound offering superior weatherability, high tinting strength, and pure whiteness.',
+    imgSrc: r777Img
+  },
+  {
+    id: 'chem-r555',
+    name: 'SHIROIKONA® R-555 COATING GRADE',
+    brand: 'Shiroikona R-555',
+    chemical: 'Titanium Dioxide (TiO₂) 98.5%',
+    category: 'chemicals',
+    categoryLabel: 'CHEMICALS',
+    group: 'TECHNICAL CHEMICALS',
+    formulation: 'PW',
+    inStock: true,
+    packSizes: ['25kg Bag', '500kg Jumbo'],
+    crops: ['Emulsions', 'Industrial Coatings', 'Agri Mulch Films', 'Plastics'],
+    targets: 'High opacity, fast dispersion, gloss retention, chalking resistance',
+    dosage: 'Industrial formulation standard',
+    description: 'Specialty chemical grade rutile pigment engineered with inorganic surface treatment for excellent dispersibility and durability.',
+    imgSrc: r555Img
+  },
+  {
+    id: 'chem-r111',
+    name: 'SHIROIKONA® R-111 UNIVERSAL RUTILE',
+    brand: 'Shiroikona R-111',
+    chemical: 'Titanium Dioxide (TiO₂) 99.2% Technical',
+    category: 'chemicals',
+    categoryLabel: 'CHEMICALS',
+    group: 'GENERAL CHEMICALS',
+    formulation: 'PW',
+    inStock: true,
+    packSizes: ['25kg Bag', '500kg Jumbo'],
+    crops: ['All Industrial Applications', 'Agricultural Formulations', 'Inks'],
+    targets: 'Universal compatibility, thermal stability, brightness enhancement',
+    dosage: 'Universal industrial standard',
+    description: 'Universal multi-purpose chemical grade titanium dioxide providing exceptional brightness, hiding power, and chemical inertness.',
+    imgSrc: r111Img
+  },
   {
     id: 'h-black-label',
     name: 'BLACK LABEL® PRETILACHLOR',

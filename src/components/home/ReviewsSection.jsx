@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Star, MapPin, Leaf } from 'lucide-react';
 import './ReviewsSection.css';
@@ -56,6 +56,27 @@ const Stars = ({ rating, size = 16 }) => (
 
 const ReviewsSection = () => {
   const [active, setActive] = useState(0);
+  const timerRef = useRef(null);
+
+  const startTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setActive(prev => (prev + 1) % FEATURED.length);
+    }, 4000);
+  };
+
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const handleSelect = (idx) => {
+    setActive(idx);
+    startTimer();
+  };
+
   const f = FEATURED[active];
 
   return (
@@ -93,7 +114,7 @@ const ReviewsSection = () => {
             </div>
             <div className="rf-dots">
               {FEATURED.map((_, i) => (
-                <button key={i} className={`rf-dot${i === active ? ' active' : ''}`} onClick={() => setActive(i)} />
+                <button key={i} className={`rf-dot${i === active ? ' active' : ''}`} onClick={() => handleSelect(i)} />
               ))}
             </div>
             <div className="rf-leaf-deco" />

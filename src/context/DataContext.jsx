@@ -3,6 +3,7 @@ import { CATEGORIES as INITIAL_CATEGORIES } from '../data/categoriesData';
 import { CROPS as INITIAL_CROPS } from '../data/cropsData';
 import { PRODUCTS as INITIAL_PRODUCTS } from '../data/productsData';
 import { FALLBACK_PRODUCT_IMAGE } from '../utils/imageCompressor';
+import { supabaseApi } from '../utils/supabaseClient';
 
 const DataContext = createContext(null);
 
@@ -18,7 +19,12 @@ export const DataProvider = ({ children }) => {
   const [categories, setCategories] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.some(c => c.id === 'chemicals')) {
+          return parsed;
+        }
+      }
     } catch (e) {
       console.error('Failed to load categories from localStorage', e);
     }
@@ -36,8 +42,39 @@ export const DataProvider = ({ children }) => {
     return INITIAL_CROPS;
   });
 
-  // 3. Products state — always use INITIAL_PRODUCTS as base (images are imported modules)
+  // 3. Products state — loaded from Supabase database with INITIAL_PRODUCTS fallback
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
+  const [isSupabaseLoading, setIsSupabaseLoading] = useState(false);
+  const [supabaseError, setSupabaseError] = useState(null);
+
+  // Fetch products from Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadSupabaseProducts = async () => {
+      setIsSupabaseLoading(true);
+      const { data, error } = await supabaseApi.getProducts();
+
+      if (!isMounted) return;
+
+      if (error) {
+        setSupabaseError(error);
+        console.warn('Supabase products fetch failed; using initial catalog:', error);
+      } else if (Array.isArray(data) && data.length > 0) {
+        setProducts(data);
+        setSupabaseError(null);
+      } else {
+        console.info('Supabase products table is empty; displaying initial catalog');
+      }
+      setIsSupabaseLoading(false);
+    };
+
+    loadSupabaseProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // 4. Admin Auth state with localStorage persistence
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -147,7 +184,7 @@ export const DataProvider = ({ children }) => {
   };
 
   // PRODUCT CRUD
-  const addProduct = (newProd) => {
+  const addProduct = async (newProd) => {
     const id = newProd.id || 'prod-' + Date.now();
     const product = {
       ...newProd,
@@ -166,11 +203,28 @@ export const DataProvider = ({ children }) => {
       description: newProd.description || '',
       imgSrc: newProd.imgSrc || 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=600&q=80'
     };
+
+    // 1. Optimistic UI update
     setProducts(prev => [product, ...prev]);
+
+    // 2. Persist to Supabase
+    try {
+      const { data, error } = await supabaseApi.addProduct(product);
+      if (error) {
+        setSupabaseError(error);
+        console.warn('Supabase addProduct failed:', error);
+      } else if (data) {
+        setProducts(prev => prev.map(p => (p.id === id ? data : p)));
+      }
+    } catch (err) {
+      console.error('Failed to sync added product to Supabase:', err);
+    }
+
     return product;
   };
 
-  const updateProduct = (id, updatedFields) => {
+  const updateProduct = async (id, updatedFields) => {
+    let targetUpdated = null;
     setProducts(prev => prev.map(p => {
       if (p.id === id) {
         const updated = { ...p, ...updatedFields };
@@ -184,14 +238,66 @@ export const DataProvider = ({ children }) => {
         if (typeof updated.crops === 'string') {
           updated.crops = updated.crops.split(',').map(s => s.trim()).filter(Boolean);
         }
+        targetUpdated = updated;
         return updated;
       }
       return p;
     }));
+
+    // Persist to Supabase
+    try {
+      const { data, error } = await supabaseApi.updateProduct(id, targetUpdated || updatedFields);
+      if (error) {
+        setSupabaseError(error);
+        console.warn('Supabase updateProduct failed:', error);
+      } else if (data) {
+        setProducts(prev => prev.map(p => (p.id === id ? data : p)));
+      }
+    } catch (err) {
+      console.error('Failed to sync updated product to Supabase:', err);
+    }
   };
 
-  const deleteProduct = (id) => {
+  const deleteProduct = async (id) => {
+    // 1. Optimistic UI update
     setProducts(prev => prev.filter(p => p.id !== id));
+
+    // 2. Persist to Supabase
+    try {
+      const { error } = await supabaseApi.deleteProduct(id);
+      if (error) {
+        setSupabaseError(error);
+        console.warn('Supabase deleteProduct failed:', error);
+      }
+    } catch (err) {
+      console.error('Failed to delete product in Supabase:', err);
+    }
+  };
+
+  // Re-fetch products from Supabase
+  const refreshProducts = async () => {
+    setIsSupabaseLoading(true);
+    const { data, error } = await supabaseApi.getProducts();
+    if (error) {
+      setSupabaseError(error);
+    } else if (Array.isArray(data) && data.length > 0) {
+      setProducts(data);
+      setSupabaseError(null);
+    }
+    setIsSupabaseLoading(false);
+  };
+
+  // Helper to bulk seed initial products to Supabase if empty
+  const seedInitialProductsToSupabase = async () => {
+    setIsSupabaseLoading(true);
+    let successCount = 0;
+    for (const prod of INITIAL_PRODUCTS) {
+      const { error } = await supabaseApi.addProduct(prod);
+      if (!error) successCount++;
+    }
+    await refreshProducts();
+    setIsSupabaseLoading(false);
+    return successCount;
   };
 
   // Reset to initial demo catalog
@@ -201,7 +307,6 @@ export const DataProvider = ({ children }) => {
     setProducts(INITIAL_PRODUCTS);
     localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
     localStorage.removeItem(STORAGE_KEYS.CROPS);
-    // Clear old products cache if exists
     localStorage.removeItem('shimanzu_products_v1');
   };
 
@@ -216,6 +321,10 @@ export const DataProvider = ({ children }) => {
     rawCategories: categories,
     crops,
     products,
+    isSupabaseLoading,
+    supabaseError,
+    refreshProducts,
+    seedInitialProductsToSupabase,
     addCategory,
     updateCategory,
     deleteCategory,

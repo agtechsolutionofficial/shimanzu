@@ -6,6 +6,7 @@ import './ProductCard.css';
 const ProductCard = ({ product, onViewClick }) => {
   const getCategoryColor = (cat) => {
     switch (cat) {
+      case 'chemicals': return '#1E40AF';
       case 'fungicides': return '#0D9488';
       case 'herbicides': return '#15803D';
       case 'insecticides': return '#7C3AED';

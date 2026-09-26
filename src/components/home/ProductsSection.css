@@ -140,6 +140,10 @@
   text-transform: uppercase;
 }
 
+.phc-category-tag.phc-tag-chem {
+  background: #1E40AF;
+}
+
 .phc-jp-tag {
   position: absolute;
   top: 12px;

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Layers, Sprout, Package, Plus, Trash2, Edit3, RotateCcw,
-  ExternalLink, Search, Check, X, Shield, Upload, LogOut, CheckCircle2, AlertCircle, Sparkles
+  ExternalLink, Search, Check, X, Shield, Upload, LogOut, CheckCircle2, AlertCircle, Sparkles,
+  Database, RefreshCw
 } from 'lucide-react';
 import { useDataContext } from '../context/DataContext';
 import { compressImage, FALLBACK_PRODUCT_IMAGE } from '../utils/imageCompressor';
@@ -30,7 +31,8 @@ const Admin = () => {
     addCategory, updateCategory, deleteCategory,
     addCrop, updateCrop, deleteCrop,
     addProduct, updateProduct, deleteProduct,
-    resetToDefaultData, logout
+    resetToDefaultData, logout,
+    isSupabaseLoading, supabaseError, refreshProducts, seedInitialProductsToSupabase
   } = useDataContext();
 
   const [activeTab, setActiveTab] = useState('categories'); // 'categories' | 'crops' | 'products'
@@ -214,7 +216,7 @@ const Admin = () => {
     setModalMode(null);
   };
 
-  const handleProductSubmit = (e) => {
+  const handleProductSubmit = async (e) => {
     e.preventDefault();
     if (!productForm.name.trim()) return alert('Product Name is required');
 
@@ -226,21 +228,37 @@ const Admin = () => {
     };
 
     if (modalMode === 'add-product') {
-      addProduct(sanitizedProduct);
+      await addProduct(sanitizedProduct);
       setToastMessage({
         type: 'success',
-        text: `Product "${sanitizedProduct.name}" added successfully!`,
+        text: `Product "${sanitizedProduct.name}" saved to Supabase database!`,
         actionUrl: `/products?category=${sanitizedProduct.category}`
       });
     } else {
-      updateProduct(editingItem.id, sanitizedProduct);
+      await updateProduct(editingItem.id, sanitizedProduct);
       setToastMessage({
         type: 'success',
-        text: `Product "${sanitizedProduct.name}" updated successfully!`,
+        text: `Product "${sanitizedProduct.name}" updated in Supabase database!`,
         actionUrl: `/products?category=${sanitizedProduct.category}`
       });
     }
     setModalMode(null);
+  };
+
+  const handleSyncSupabase = async () => {
+    try {
+      await refreshProducts();
+      setToastMessage({ type: 'success', text: 'Products synced successfully from Supabase database!' });
+    } catch (e) {
+      setToastMessage({ type: 'warning', text: 'Supabase sync warning: ' + e.message });
+    }
+  };
+
+  const handleSeedSupabase = async () => {
+    if (window.confirm('Upload all current catalog products to your Supabase products table?')) {
+      const count = await seedInitialProductsToSupabase();
+      setToastMessage({ type: 'success', text: `Uploaded ${count} products to Supabase database successfully!` });
+    }
   };
 
   // Filtered queries
@@ -530,6 +548,39 @@ const Admin = () => {
         {/* TAB 3: PRODUCTS */}
         {activeTab === 'products' && (
           <div>
+            {/* Supabase Live Database Status Bar */}
+            <div className="admin-supabase-bar">
+              <div className="admin-supabase-status">
+                <span className={`admin-status-dot ${isSupabaseLoading ? 'syncing' : (supabaseError ? 'error' : '')}`} />
+                <div>
+                  <span className="admin-supabase-title">Supabase Database:</span>
+                  <span className="admin-supabase-url">fxvbvplnucrcamnfblol.supabase.co</span>
+                  {supabaseError && <span className="admin-supabase-err">({supabaseError})</span>}
+                </div>
+              </div>
+              <div className="admin-supabase-actions">
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-supabase"
+                  onClick={handleSyncSupabase}
+                  disabled={isSupabaseLoading}
+                  title="Fetch latest products directly from Supabase"
+                >
+                  <RefreshCw size={14} className={isSupabaseLoading ? 'admin-spin' : ''} />
+                  {isSupabaseLoading ? 'Syncing...' : 'Sync Supabase'}
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-seed"
+                  onClick={handleSeedSupabase}
+                  disabled={isSupabaseLoading}
+                  title="Upload current products to your Supabase products table"
+                >
+                  <Database size={14} /> Upload Catalog to Supabase
+                </button>
+              </div>
+            </div>
+
             <div className="admin-section-bar">
               <input
                 type="text"
@@ -609,9 +660,13 @@ const Admin = () => {
                           </button>
                           <button
                             className="admin-icon-btn delete"
-                            onClick={() => {
-                              if (window.confirm(`Delete product "${prod.name}"?`)) {
-                                deleteProduct(prod.id);
+                            onClick={async () => {
+                              if (window.confirm(`Delete product "${prod.name}" from database?`)) {
+                                await deleteProduct(prod.id);
+                                setToastMessage({
+                                  type: 'info',
+                                  text: `Product "${prod.name}" deleted from database.`
+                                });
                               }
                             }}
                             title="Delete Product"
