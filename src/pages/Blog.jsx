@@ -44,7 +44,7 @@ const Blog = () => {
   ];
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-dark)', minHeight: '100vh', paddingBottom: '100px' }}>
+    <div className="light-theme" style={{ backgroundColor: 'var(--bg-dark)', minHeight: '100vh', paddingBottom: '100px' }}>
       <div style={{ backgroundColor: 'var(--bg-card)', padding: '120px 0 60px', borderBottom: '1px solid var(--border-color)', textAlign: 'center' }}>
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

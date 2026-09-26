@@ -223,3 +223,36 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-gold);
 }
+
+/* New Light Theme Overrides */
+.light-theme {
+  --bg-dark: #F5F3EC;
+  --bg-darker: #E9EFE7;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #E9EFE7;
+
+  --green-deep: #174D32;
+  --green-fresh: #2F6B49;
+  --green-light: #8FAF98;
+  --red-japan: #C94A43;
+  --off-white: #FFFFFF;
+  --charcoal: #24312C;
+
+  --accent-gold: #C99432;
+  --accent-gold-light: #E9D7AA;
+  --accent-emerald: #174D32;
+  --accent-emerald-dark: #2F6B49;
+
+  --text-primary: #34423B;
+  --text-secondary: #6D7B73;
+  --text-muted: #6D7B73;
+  
+  --border-color: #D7DED7;
+  --border-highlight: rgba(201, 148, 50, 0.3);
+}
+
+.light-theme {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+}
+

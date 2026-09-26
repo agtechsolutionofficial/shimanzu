@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 const Contact = () => {
   return (
-    <div style={{ backgroundColor: 'var(--bg-dark)', minHeight: '100vh', paddingBottom: '100px' }}>
+    <div className="light-theme" style={{ backgroundColor: 'var(--bg-dark)', minHeight: '100vh', paddingBottom: '100px' }}>
       <div style={{ backgroundColor: 'var(--bg-card)', padding: '120px 0 60px', borderBottom: '1px solid var(--border-color)', textAlign: 'center' }}>
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -34,23 +34,23 @@ const Contact = () => {
                 <input 
                   type="text" 
                   placeholder="Your Name" 
-                  style={{ width: '100%', padding: '12px 16px', background: 'var(--bg-dark)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', color: 'white', outline: 'none' }}
+                  style={{ width: '100%', padding: '12px 16px', background: 'var(--bg-dark)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', outline: 'none' }}
                 />
                 <input 
                   type="email" 
                   placeholder="Your Email" 
-                  style={{ width: '100%', padding: '12px 16px', background: 'var(--bg-dark)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', color: 'white', outline: 'none' }}
+                  style={{ width: '100%', padding: '12px 16px', background: 'var(--bg-dark)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
               <input 
                 type="text" 
                 placeholder="Subject" 
-                style={{ width: '100%', padding: '12px 16px', background: 'var(--bg-dark)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', color: 'white', marginBottom: '16px', outline: 'none' }}
+                style={{ width: '100%', padding: '12px 16px', background: 'var(--bg-dark)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', marginBottom: '16px', outline: 'none' }}
               />
               <textarea 
                 placeholder="How can we help?" 
                 rows="5"
-                style={{ width: '100%', padding: '12px 16px', background: 'var(--bg-dark)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', color: 'white', marginBottom: '24px', resize: 'vertical', outline: 'none' }}
+                style={{ width: '100%', padding: '12px 16px', background: 'var(--bg-dark)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', marginBottom: '24px', resize: 'vertical', outline: 'none' }}
               ></textarea>
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="btn btn-gold" style={{ width: '100%' }}>Send Inquiry</motion.button>
             </form>

@@ -1,11 +1,11 @@
 .gallery-page {
-  background: #060e07;
+  background: var(--bg-dark);
   min-height: 100vh;
 }
 
 /* Hero */
 .gallery-hero {
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, #0d3318 0%, #071209 60%, #060e07 100%);
+  background: var(--bg-darker);
   padding: 125px 0 70px;
   position: relative;
   overflow: hidden;
@@ -61,7 +61,7 @@
 .gallery-title {
   font-family: var(--font-serif);
   font-size: clamp(2.8rem, 5vw, 4.5rem);
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 800;
   margin-bottom: 18px;
   line-height: 1.1;
@@ -96,7 +96,7 @@
 
 /* Filter bar */
 .gallery-filter-bar {
-  background: rgba(6,14,7,0.95);
+  background: var(--bg-card);
   border-bottom: 1px solid rgba(102,187,106,0.12);
   position: sticky;
   top: 0;
@@ -204,14 +204,14 @@
   border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
-  background: #0d2b12;
-  border: 1px solid rgba(102,187,106,0.1);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   aspect-ratio: 4/3;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .gallery-item--product {
-  background: radial-gradient(circle at center, #0f2a18 0%, #071510 100%);
+  background: var(--bg-card);
   aspect-ratio: 1/1;
 }
 

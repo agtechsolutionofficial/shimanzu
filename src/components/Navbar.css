@@ -173,5 +173,61 @@
 
 @media (max-width: 1024px) {
   .desktop-only    { display: none !important; }
-  .mobile-menu-btn { display: flex; }
+}
+
+/* Light Mode Overrides for Specific Pages */
+.navbar.light-mode {
+  background: #FFFFFF;
+  border-bottom: 1px solid #D7DED7;
+  box-shadow: none;
+}
+
+.navbar.light-mode.scrolled {
+  box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+}
+
+.navbar.light-mode .navbar-logo-img {
+  filter: none;
+}
+
+.navbar.light-mode .nav-link {
+  color: #34423B;
+}
+
+.navbar.light-mode .nav-link:hover,
+.navbar.light-mode .nav-link.active {
+  color: #2F6B49;
+  background: #E9EFE7;
+}
+
+.navbar.light-mode .navbar-cta-btn {
+  background: #174D32;
+  color: #FFFFFF;
+  box-shadow: none;
+}
+
+.navbar.light-mode .navbar-cta-btn:hover {
+  background: #2F6B49;
+  color: #FFFFFF;
+}
+
+.navbar.light-mode .mobile-menu-btn {
+  color: #174D32;
+  background: #E9EFE7;
+  border-color: #D7DED7;
+}
+
+.navbar.light-mode .mobile-nav {
+  background: #FFFFFF;
+  border-bottom: 1px solid #D7DED7;
+}
+
+.navbar.light-mode .mobile-nav-link {
+  color: #34423B;
+}
+
+.navbar.light-mode .mobile-nav-link:hover,
+.navbar.light-mode .mobile-nav-link.active {
+  background: #E9EFE7;
+  color: #2F6B49;
 }

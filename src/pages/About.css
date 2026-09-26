@@ -10,9 +10,9 @@
 
 /* Page Header */
 .about-hero-header {
-  background: radial-gradient(circle at 50% 30%, #102a1b 0%, #08160d 70%, #040c07 100%);
+  background: var(--bg-darker);
   padding: 125px 0 70px;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  border-bottom: 1px solid var(--border-color);
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -48,7 +48,7 @@
 }
 
 .about-page-title {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 2.8rem;
   font-weight: 800;
   margin-bottom: 12px;
@@ -67,9 +67,9 @@
    -------------------------------------------------------------------------- */
 .warehouse-section {
   padding: 90px 0;
-  background: radial-gradient(circle at 50% 0%, #0d2215 0%, #07150c 70%, #030a06 100%);
-  border-top: 1px solid rgba(212, 175, 55, 0.2);
-  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  background: var(--bg-darker);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   position: relative;
   overflow: hidden;
 }
@@ -88,8 +88,8 @@
 }
 
 .wh-stat-card {
-  background: rgba(14, 32, 21, 0.75);
-  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 22px 18px;
   text-align: center;
@@ -125,8 +125,8 @@
 }
 
 .godown-photo-card {
-  background: linear-gradient(180deg, rgba(16, 36, 24, 0.9) 0%, rgba(10, 24, 16, 0.98) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
@@ -146,7 +146,7 @@
   height: 320px;
   position: relative;
   overflow: hidden;
-  background-color: #061109;
+  background-color: var(--bg-darker);
 }
 
 .godown-img {

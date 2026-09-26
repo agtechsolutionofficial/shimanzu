@@ -72,7 +72,7 @@ const About = () => {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   return (
-    <div className="about-page-wrap">
+    <div className="about-page-wrap light-theme">
       {/* Page Header */}
       <div className="about-hero-header">
         <motion.div 

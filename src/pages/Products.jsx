@@ -123,7 +123,7 @@ const Products = () => {
   const hasActiveFilters = selectedFormulations.length > 0 || selectedCrops.length > 0;
 
   return (
-    <div className="fmc-products-page">
+    <div className="fmc-products-page light-theme">
       {/* 
         Case 1: When user is viewing All Categories, 
         show Categories Grid + Full Product Portfolio Showcase!

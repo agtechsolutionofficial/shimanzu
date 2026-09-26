@@ -17,8 +17,8 @@
 .crops-main-hero {
   position: relative;
   padding: 130px 0 60px;
-  background: radial-gradient(ellipse 90% 70% at 50% 10%, #0d2616 0%, #08160e 60%, #050d09 100%);
-  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  background: var(--bg-darker);
+  border-bottom: 1px solid var(--border-color);
   overflow: hidden;
 }
 
@@ -70,10 +70,10 @@
   font-size: 3.2rem;
   font-weight: 700;
   letter-spacing: -0.5px;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0 0 16px 0;
   line-height: 1.15;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  text-shadow: none;
 }
 
 .crops-hero-subtitle {
@@ -92,12 +92,12 @@
   align-items: center;
   max-width: 620px;
   margin: 0 auto;
-  background: rgba(15, 25, 18, 0.85);
+  background: var(--bg-card);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid var(--border-color);
   border-radius: 50px;
   padding: 6px 12px 6px 20px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(16, 185, 129, 0.08);
+  box-shadow: var(--shadow-card);
   transition: all 0.3s ease;
 }
 
@@ -183,7 +183,7 @@
   font-family: var(--font-serif, 'Cinzel', serif);
   font-size: 2rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
   letter-spacing: -0.3px;
 }
@@ -220,9 +220,9 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  background: rgba(18, 28, 22, 0.75);
+  background: var(--bg-card);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 16px 20px;
   cursor: pointer;
@@ -245,9 +245,9 @@
 
 .crop-card:hover {
   transform: translateY(-4px);
-  background: rgba(22, 36, 28, 0.95);
-  border-color: rgba(212, 175, 55, 0.45);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(212, 175, 55, 0.12);
+  background: var(--bg-card-hover);
+  border-color: var(--border-highlight);
+  box-shadow: var(--shadow-card);
 }
 
 .crop-card:hover::before {
@@ -294,7 +294,7 @@
   font-family: var(--font-sans, system-ui, sans-serif);
   font-size: 1.05rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0;
   transition: color 0.2s;
   white-space: nowrap;
@@ -392,8 +392,8 @@
 .crop-detail-hero {
   position: relative;
   padding: 125px 0 50px;
-  background: radial-gradient(ellipse 80% 60% at 30% 20%, #0d2c1a 0%, #08170f 65%, #050d08 100%);
-  border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+  background: var(--bg-darker);
+  border-bottom: 1px solid var(--border-color);
   overflow: hidden;
 }
 
@@ -482,7 +482,7 @@
   font-family: var(--font-serif, 'Cinzel', serif);
   font-size: 3rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0 0 14px 0;
   letter-spacing: -0.5px;
   line-height: 1.15;

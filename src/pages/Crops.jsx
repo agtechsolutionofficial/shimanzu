@@ -132,7 +132,7 @@ const Crops = () => {
   }, [CROPS, cropSearchQuery]);
 
   return (
-    <div className="fmc-crops-page">
+    <div className="fmc-crops-page light-theme">
       {/* 
         ========================================================================
         CASE 1: NO CROP SELECTED -> SHOW MAIN CROPS CATALOG

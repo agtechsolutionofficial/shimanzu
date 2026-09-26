@@ -53,7 +53,7 @@ const Gallery = () => {
   const next = () => setLightbox(i => (i + 1) % filtered.length);
 
   return (
-    <div className="gallery-page">
+    <div className="gallery-page light-theme">
       {/* Hero */}
       <div className="gallery-hero">
         <div className="gallery-hero-leaves">

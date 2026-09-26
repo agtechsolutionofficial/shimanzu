@@ -27,8 +27,11 @@ const Navbar = () => {
 
   useEffect(() => { setIsOpen(false); }, [location]);
 
+  const isLightPage = ['/about', '/products', '/crops', '/gallery', '/blog', '/contact'].some(path => location.pathname.startsWith(path));
+  const isScrolled = scrolled || isLightPage;
+
   return (
-    <header className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+    <header className={`navbar ${isScrolled ? 'scrolled' : ''} ${isLightPage ? 'light-mode' : ''}`}>
       <div className="container navbar-container" style={{ position: 'relative', zIndex: 2 }}>
         {/* Logo */}
         <Link to="/" className="navbar-logo">
