@@ -30,7 +30,7 @@ const Login = () => {
     setError('');
 
     if (!username.trim()) {
-      setError('Please enter your admin username or email');
+      setError('Please enter your admin email (admin@shimanzu.com)');
       return;
     }
     if (!password) {
@@ -45,12 +45,11 @@ const Login = () => {
       setIsLoading(false);
 
       if (result.success) {
-        const destination = location.state?.from?.pathname || '/admin';
-        navigate(destination, { replace: true });
+        navigate('/admin', { replace: true });
       } else {
-        setError(result.message || 'Invalid username or password');
+        setError(result.message || 'Invalid email or password');
       }
-    }, 400);
+    }, 300);
   };
 
   return (
@@ -94,19 +93,19 @@ const Login = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="login-form">
           <div className="login-field">
-            <label className="login-label">Username / Admin Email</label>
+            <label className="login-label">Admin Email</label>
             <div className="login-input-wrap">
               <User size={18} className="login-input-icon" />
               <input
-                type="text"
+                type="email"
                 className="login-input"
-                placeholder="e.g. admin@shimanzu.com"
+                placeholder="admin@shimanzu.com"
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value);
                   if (error) setError('');
                 }}
-                autoComplete="username"
+                autoComplete="email"
                 autoFocus
               />
             </div>

@@ -30,13 +30,12 @@ const pageVariants = {
   exit: { opacity: 0, y: -16, transition: { duration: 0.3 } },
 };
 
-// Route guard: Only allows access to Admin if authenticated, otherwise redirects to /login
+// Route guard: Access /admin directly in URL -> shows Login if unauthenticated, and Admin Dashboard once logged in
 function ProtectedAdminRoute() {
   const { isAdmin } = useDataContext();
-  const location = useLocation();
 
   if (!isAdmin) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Login />;
   }
 
   return <Admin />;
@@ -55,7 +54,7 @@ function AnimatedRoutes() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Navigate to="/admin" replace />} />
           <Route path="/admin" element={<ProtectedAdminRoute />} />
         </Routes>
       </motion.div>

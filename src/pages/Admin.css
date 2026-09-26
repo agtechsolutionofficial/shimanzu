@@ -4,7 +4,13 @@
   background-color: #0f172a;
   min-height: 100vh;
   color: #f8fafc;
-  padding: 40px 0 80px;
+  padding: 125px 0 80px;
+}
+
+@media (max-width: 768px) {
+  .admin-page {
+    padding: 110px 0 60px;
+  }
 }
 
 .admin-header {

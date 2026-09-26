@@ -6,7 +6,7 @@
 /* Hero */
 .gallery-hero {
   background: radial-gradient(ellipse 80% 60% at 50% 0%, #0d3318 0%, #071209 60%, #060e07 100%);
-  padding: 100px 0 70px;
+  padding: 125px 0 70px;
   position: relative;
   overflow: hidden;
 }

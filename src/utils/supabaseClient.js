@@ -50,25 +50,32 @@ export const normalizeProduct = (row) => {
   };
 };
 
+export const isUUID = (str) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(str || ''));
+
 // Formats product for database insert/update
-export const formatProductForDb = (prod) => {
-  return {
-    id: String(prod.id),
+export const formatProductForDb = (prod, includeId = false) => {
+  const payload = {
     name: prod.name || '',
-    brand: prod.brand || '',
+    brand: prod.brand || 'SHIMANZU',
     chemical: prod.chemical || '',
     category: prod.category || 'chemicals',
     category_label: prod.categoryLabel || prod.category_label || (prod.category ? prod.category.toUpperCase() : 'CHEMICALS'),
     group: prod.group || '',
     formulation: prod.formulation || 'SC',
     in_stock: prod.inStock !== false,
-    pack_sizes: Array.isArray(prod.packSizes) ? prod.packSizes : (prod.packSizes ? String(prod.packSizes).split(',').map(s => s.trim()) : []),
-    crops: Array.isArray(prod.crops) ? prod.crops : (prod.crops ? String(prod.crops).split(',').map(s => s.trim()) : []),
+    pack_sizes: Array.isArray(prod.packSizes) ? prod.packSizes : (prod.packSizes ? String(prod.packSizes).split(',').map(s => s.trim()) : ['1L']),
+    crops: Array.isArray(prod.crops) ? prod.crops : (prod.crops ? String(prod.crops).split(',').map(s => s.trim()) : ['All Crops']),
     targets: prod.targets || '',
     dosage: prod.dosage || '',
     description: prod.description || '',
     img_src: prod.imgSrc || prod.img_src || ''
   };
+
+  if (includeId && isUUID(prod.id)) {
+    payload.id = prod.id;
+  }
+  return payload;
 };
 
 export const supabaseApi = {
@@ -98,40 +105,29 @@ export const supabaseApi = {
   // Insert a new product
   async addProduct(product) {
     try {
-      const payload = formatProductForDb(product);
+      const payload = formatProductForDb(product, false);
       let res = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify(payload)
       });
 
-      // If snake_case column fails, try camelCase payload
+      // If full payload fails (e.g. extra columns missing in DB), retry with core table columns
       if (!res.ok) {
-        const camelPayload = {
-          id: String(product.id),
+        const corePayload = {
           name: product.name,
-          brand: product.brand,
-          chemical: product.chemical,
-          category: product.category,
-          categoryLabel: product.categoryLabel,
-          group: product.group,
-          formulation: product.formulation,
-          inStock: product.inStock,
-          packSizes: product.packSizes,
-          crops: product.crops,
-          targets: product.targets,
-          dosage: product.dosage,
-          description: product.description,
-          imgSrc: product.imgSrc
+          chemical: product.chemical || '',
+          category: product.category || 'chemicals',
+          formulation: product.formulation || 'SC'
         };
-        const retryRes = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+        const coreRes = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
           method: 'POST',
           headers: getHeaders(),
-          body: JSON.stringify(camelPayload)
+          body: JSON.stringify(corePayload)
         });
-        if (retryRes.ok) {
-          const inserted = await retryRes.json();
-          return { data: normalizeProduct(inserted[0] || camelPayload), error: null };
+        if (coreRes.ok) {
+          const inserted = await coreRes.json();
+          return { data: normalizeProduct(inserted[0] || { ...product, ...corePayload }), error: null };
         }
       }
 

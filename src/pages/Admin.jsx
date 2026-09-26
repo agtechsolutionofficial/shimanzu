@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Layers, Sprout, Package, Plus, Trash2, Edit3, RotateCcw,
   ExternalLink, Search, Check, X, Shield, Upload, LogOut, CheckCircle2, AlertCircle, Sparkles,
-  Database, RefreshCw
+  Database, RefreshCw, KeyRound
 } from 'lucide-react';
 import { useDataContext } from '../context/DataContext';
 import { compressImage, FALLBACK_PRODUCT_IMAGE } from '../utils/imageCompressor';
@@ -32,7 +32,9 @@ const Admin = () => {
     addCrop, updateCrop, deleteCrop,
     addProduct, updateProduct, deleteProduct,
     resetToDefaultData, logout,
-    isSupabaseLoading, supabaseError, refreshProducts, seedInitialProductsToSupabase
+    isSupabaseLoading, supabaseError, refreshProducts, seedInitialProductsToSupabase,
+    cleanDuplicateProductsInSupabase,
+    changeAdminPassword
   } = useDataContext();
 
   const [activeTab, setActiveTab] = useState('categories'); // 'categories' | 'crops' | 'products'
@@ -41,8 +43,16 @@ const Admin = () => {
   const [isCompressingImage, setIsCompressingImage] = useState(false);
 
   // Modals state
-  const [modalMode, setModalMode] = useState(null); // 'add-category' | 'edit-category' | 'add-crop' | 'edit-crop' | 'add-product' | 'edit-product'
+  const [modalMode, setModalMode] = useState(null); // 'add-category' | 'edit-category' | 'add-crop' | 'edit-crop' | 'add-product' | 'edit-product' | 'change-password'
   const [editingItem, setEditingItem] = useState(null);
+
+  // Change password state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+    error: ''
+  });
 
   // Form states
   const [categoryForm, setCategoryForm] = useState({
@@ -261,6 +271,20 @@ const Admin = () => {
     }
   };
 
+  const handleCleanDuplicates = async () => {
+    if (window.confirm('Clean up duplicate rows in Supabase database and keep only the 31 unique products?')) {
+      const res = await cleanDuplicateProductsInSupabase();
+      if (res.success) {
+        setToastMessage({
+          type: 'success',
+          text: `Cleaned ${res.deletedCount} duplicate rows! Exactly ${res.remainingCount} unique products remain in Supabase.`
+        });
+      } else {
+        setToastMessage({ type: 'warning', text: 'Clean failed: ' + res.message });
+      }
+    }
+  };
+
   // Filtered queries
   const filteredCategories = categories.filter(c =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -295,6 +319,16 @@ const Admin = () => {
             <Link to="/crops" className="admin-btn admin-btn-outline" target="_blank">
               <ExternalLink size={16} /> View Crops
             </Link>
+            <button
+              className="admin-btn admin-btn-outline"
+              onClick={() => {
+                setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '', error: '' });
+                setModalMode('change-password');
+              }}
+              title="Change your admin password"
+            >
+              <KeyRound size={16} /> Change Password
+            </button>
             <button
               className="admin-btn admin-btn-danger"
               onClick={() => {
@@ -571,12 +605,13 @@ const Admin = () => {
                 </button>
                 <button
                   type="button"
-                  className="admin-btn admin-btn-seed"
-                  onClick={handleSeedSupabase}
+                  className="admin-btn admin-btn-danger"
+                  style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+                  onClick={handleCleanDuplicates}
                   disabled={isSupabaseLoading}
-                  title="Upload current products to your Supabase products table"
+                  title="Remove duplicate rows from Supabase database"
                 >
-                  <Database size={14} /> Upload Catalog to Supabase
+                  <Trash2 size={14} /> Clean Duplicates
                 </button>
               </div>
             </div>
@@ -1094,6 +1129,109 @@ const Admin = () => {
                 </button>
                 <button type="submit" className="admin-btn admin-btn-primary">
                   {modalMode === 'add-product' ? 'Save Product' : 'Update Product'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {modalMode === 'change-password' && (
+        <div className="admin-modal-overlay" onClick={() => setModalMode(null)}>
+          <div className="admin-modal-box" style={{ maxWidth: '440px' }} onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <KeyRound size={20} color="#38bdf8" /> Change Admin Password
+              </h2>
+              <button className="admin-icon-btn" onClick={() => setModalMode(null)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            {passwordForm.error && (
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.4)',
+                color: '#fca5a5',
+                padding: '10px 14px',
+                borderRadius: '6px',
+                marginBottom: '16px',
+                fontSize: '0.85rem'
+              }}>
+                {passwordForm.error}
+              </div>
+            )}
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              setPasswordForm(prev => ({ ...prev, error: '' }));
+
+              if (!passwordForm.currentPassword) {
+                setPasswordForm(prev => ({ ...prev, error: 'Please enter current password' }));
+                return;
+              }
+              if (!passwordForm.newPassword || passwordForm.newPassword.length < 4) {
+                setPasswordForm(prev => ({ ...prev, error: 'New password must be at least 4 characters' }));
+                return;
+              }
+              if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+                setPasswordForm(prev => ({ ...prev, error: 'New password and confirm password do not match' }));
+                return;
+              }
+
+              const res = changeAdminPassword(passwordForm.currentPassword, passwordForm.newPassword);
+              if (res.success) {
+                setToastMessage({ type: 'success', text: 'Admin password changed successfully! Your new password is now active.' });
+                setModalMode(null);
+                setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '', error: '' });
+              } else {
+                setPasswordForm(prev => ({ ...prev, error: res.message || 'Failed to update password' }));
+              }
+            }}>
+              <div className="admin-form-group">
+                <label className="admin-form-label">Current Password</label>
+                <input
+                  type="password"
+                  className="admin-form-input"
+                  placeholder="Enter current password (default: admin@123)"
+                  value={passwordForm.currentPassword}
+                  onChange={e => setPasswordForm({ ...passwordForm, currentPassword: e.target.value, error: '' })}
+                  required
+                  autoFocus
+                />
+              </div>
+
+              <div className="admin-form-group">
+                <label className="admin-form-label">New Password</label>
+                <input
+                  type="password"
+                  className="admin-form-input"
+                  placeholder="Enter new password (min 4 chars)"
+                  value={passwordForm.newPassword}
+                  onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value, error: '' })}
+                  required
+                />
+              </div>
+
+              <div className="admin-form-group">
+                <label className="admin-form-label">Confirm New Password</label>
+                <input
+                  type="password"
+                  className="admin-form-input"
+                  placeholder="Re-type new password"
+                  value={passwordForm.confirmPassword}
+                  onChange={e => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value, error: '' })}
+                  required
+                />
+              </div>
+
+              <div className="admin-modal-footer">
+                <button type="button" className="admin-btn admin-btn-outline" onClick={() => setModalMode(null)}>
+                  Cancel
+                </button>
+                <button type="submit" className="admin-btn admin-btn-primary">
+                  Save New Password
                 </button>
               </div>
             </form>

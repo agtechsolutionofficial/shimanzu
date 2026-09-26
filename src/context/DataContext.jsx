@@ -11,7 +11,8 @@ const STORAGE_KEYS = {
   CATEGORIES: 'shimanzu_categories_v1',
   CROPS: 'shimanzu_crops_v1',
   PRODUCTS: 'shimanzu_products_v1',
-  AUTH: 'shimanzu_admin_auth_v1'
+  AUTH: 'shimanzu_admin_auth_v1',
+  PASSWORD: 'shimanzu_admin_pwd_v1'
 };
 
 export const DataProvider = ({ children }) => {
@@ -47,6 +48,41 @@ export const DataProvider = ({ children }) => {
   const [isSupabaseLoading, setIsSupabaseLoading] = useState(false);
   const [supabaseError, setSupabaseError] = useState(null);
 
+  // Helper to deduplicate products and assign matching bottle packaging image if generic fallback
+  const processProductsFromDb = (dbRows) => {
+    if (!Array.isArray(dbRows) || dbRows.length === 0) return INITIAL_PRODUCTS;
+    const seenNames = new Set();
+    const processed = [];
+
+    for (const row of dbRows) {
+      const rawName = (row.name || '').trim();
+      if (!rawName) continue; // Skip empty rows
+      const nameKey = rawName.toLowerCase();
+      if (seenNames.has(nameKey)) {
+        continue; // Skip duplicate
+      }
+      seenNames.add(nameKey);
+
+      // Look for matching local packaging image if DB image is generic unsplash or empty
+      const localMatch = INITIAL_PRODUCTS.find(
+        p => (p.name || '').trim().toLowerCase() === nameKey
+      );
+      const hasUnsplashOrEmpty = !row.imgSrc || String(row.imgSrc).includes('images.unsplash.com');
+      const finalImg = (hasUnsplashOrEmpty && localMatch && localMatch.imgSrc)
+        ? localMatch.imgSrc
+        : (row.imgSrc || (localMatch ? localMatch.imgSrc : FALLBACK_PRODUCT_IMAGE));
+
+      processed.push({
+        ...row,
+        name: rawName,
+        categoryLabel: row.categoryLabel || row.category_label || (localMatch ? localMatch.categoryLabel : (row.category ? row.category.toUpperCase() : 'AGROCHEMICAL')),
+        imgSrc: finalImg
+      });
+    }
+
+    return processed.length > 0 ? processed : INITIAL_PRODUCTS;
+  };
+
   // Fetch products from Supabase on mount
   useEffect(() => {
     let isMounted = true;
@@ -60,11 +96,13 @@ export const DataProvider = ({ children }) => {
       if (error) {
         setSupabaseError(error);
         console.warn('Supabase products fetch failed; using initial catalog:', error);
+        setProducts(INITIAL_PRODUCTS);
       } else if (Array.isArray(data) && data.length > 0) {
-        setProducts(data);
+        const unique = processProductsFromDb(data);
+        setProducts(unique);
         setSupabaseError(null);
       } else {
-        console.info('Supabase products table is empty; displaying initial catalog');
+        setProducts(INITIAL_PRODUCTS);
       }
       setIsSupabaseLoading(false);
     };
@@ -76,7 +114,15 @@ export const DataProvider = ({ children }) => {
     };
   }, []);
 
-  // 4. Admin Auth state with localStorage persistence
+  // 4. Admin Auth & Password state with localStorage persistence
+  const [adminPassword, setAdminPassword] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEYS.PASSWORD) || 'admin@123';
+    } catch {
+      return 'admin@123';
+    }
+  });
+
   const [isAdmin, setIsAdmin] = useState(() => {
     try {
       return localStorage.getItem(STORAGE_KEYS.AUTH) === 'true';
@@ -89,10 +135,10 @@ export const DataProvider = ({ children }) => {
     const u = (username || '').trim().toLowerCase();
     const p = (password || '').trim();
 
-    // Only allowed credentials
+    // Validate email and current admin password (default: admin@123)
     if (
-      (u === 'admin@shimanzu.com') &&
-      (p === 'shimanzu@123')
+      u === 'admin@shimanzu.com' &&
+      p === adminPassword
     ) {
       setIsAdmin(true);
       try {
@@ -105,8 +151,42 @@ export const DataProvider = ({ children }) => {
 
     return { 
       success: false, 
-      message: 'Invalid username or password.' 
+      message: 'Invalid email or password. Please try again.' 
     };
+  };
+
+  const changeAdminPassword = (currentPassword, newPassword) => {
+    const cur = (currentPassword || '').trim();
+    const next = (newPassword || '').trim();
+
+    if (cur !== adminPassword) {
+      return {
+        success: false,
+        message: 'Current password does not match.'
+      };
+    }
+
+    if (!next || next.length < 4) {
+      return {
+        success: false,
+        message: 'New password must be at least 4 characters long.'
+      };
+    }
+
+    try {
+      localStorage.setItem(STORAGE_KEYS.PASSWORD, next);
+      setAdminPassword(next);
+      return {
+        success: true,
+        message: 'Admin password changed successfully!'
+      };
+    } catch (e) {
+      console.error('Failed to save new password to localStorage', e);
+      return {
+        success: false,
+        message: 'Failed to save password in browser storage.'
+      };
+    }
   };
 
   const logout = () => {
@@ -281,7 +361,8 @@ export const DataProvider = ({ children }) => {
     if (error) {
       setSupabaseError(error);
     } else if (Array.isArray(data) && data.length > 0) {
-      setProducts(data);
+      const unique = processProductsFromDb(data);
+      setProducts(unique);
       setSupabaseError(null);
     }
     setIsSupabaseLoading(false);
@@ -298,6 +379,54 @@ export const DataProvider = ({ children }) => {
     await refreshProducts();
     setIsSupabaseLoading(false);
     return successCount;
+  };
+
+  // Helper to remove duplicate products from Supabase database
+  const cleanDuplicateProductsInSupabase = async () => {
+    setIsSupabaseLoading(true);
+    try {
+      const { data, error } = await supabaseApi.getProducts();
+      if (error || !Array.isArray(data)) {
+        setIsSupabaseLoading(false);
+        return { success: false, message: error || 'Failed to fetch products' };
+      }
+
+      const seenNames = new Set();
+      const duplicatesToDelete = [];
+      const keepProducts = [];
+
+      for (const p of data) {
+        const rawName = (p.name || '').trim();
+        const key = rawName.toLowerCase();
+        if (!key || seenNames.has(key)) {
+          duplicatesToDelete.push(p.id);
+        } else {
+          seenNames.add(key);
+          keepProducts.push(p);
+        }
+      }
+
+      console.info(`Cleaning ${duplicatesToDelete.length} duplicates from Supabase...`);
+
+      let deletedCount = 0;
+      for (const id of duplicatesToDelete) {
+        const res = await supabaseApi.deleteProduct(id);
+        if (!res.error) deletedCount++;
+      }
+
+      const unique = processProductsFromDb(keepProducts);
+      setProducts(unique);
+      setIsSupabaseLoading(false);
+
+      return {
+        success: true,
+        deletedCount,
+        remainingCount: unique.length
+      };
+    } catch (err) {
+      setIsSupabaseLoading(false);
+      return { success: false, message: err.message };
+    }
   };
 
   // Reset to initial demo catalog
@@ -325,6 +454,7 @@ export const DataProvider = ({ children }) => {
     supabaseError,
     refreshProducts,
     seedInitialProductsToSupabase,
+    cleanDuplicateProductsInSupabase,
     addCategory,
     updateCategory,
     deleteCategory,
@@ -336,6 +466,8 @@ export const DataProvider = ({ children }) => {
     deleteProduct,
     resetToDefaultData,
     isAdmin,
+    adminPassword,
+    changeAdminPassword,
     login,
     logout
   };
