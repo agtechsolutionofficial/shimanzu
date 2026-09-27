@@ -12,28 +12,28 @@ import slide6 from '../assets/images/slide_6.mp4';
 
 const timeline = [
   { 
-    type: 'video', src: seedlingVideo, duration: 10000,
+    type: 'video', src: seedlingVideo, duration: 5000,
     title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow"
   },
   
   { 
-    type: 'video', src: slide2, duration: 10000,
+    type: 'video', src: slide2, duration: 5000,
     title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth"
   },
   { 
-    type: 'video', src: slide3, duration: 10000,
+    type: 'video', src: slide3, duration: 5000,
     title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow"
   },
    { 
-    type: 'video', src: slide4, duration: 10000,
+    type: 'video', src: slide4, duration: 5000,
     title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth"
   },
   { 
-    type: 'video', src: slide5, duration: 10000,
+    type: 'video', src: slide5, duration: 5000,
     title1: "Maximizing Yields:", title2: "Japanese Technology for", titleAccent: "Healthy Crops"
   },
   { 
-    type: 'video', src: slide6, duration: 10000,
+    type: 'video', src: slide6, duration: 4000,
     title1: "Tested for Excellence:", title2: "Japanese Technology for", titleAccent: "Better Crop Solutions"
   }
 ];

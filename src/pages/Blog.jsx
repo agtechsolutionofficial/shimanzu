@@ -2,12 +2,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Search, Folder, Calendar, ArrowRight, Leaf, Shield, FlaskConical, Settings, Send, User } from 'lucide-react';
 import './Blog.css';
+import slide15Img from '../assets/images/slide_15.jpg';
 
 const blog1Img = 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=800';
 const blog2Img = 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=800';
 const blog3Img = 'https://images.unsplash.com/photo-1560493676-04071c5f467b?w=800';
 const blog4Img = 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800';
-const blog5Img = 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=800';
+const blog5Img = slide15Img;
 const blog6Img = 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=800';
 
 const Blog = () => {
@@ -78,7 +79,7 @@ const Blog = () => {
   if (selectedBlog) {
     return (
       <div className="blog-page">
-        <div className="container" style={{ padding: '60px 0' }}>
+        <div className="container" style={{ padding: '120px 0 60px' }}>
           <button 
             onClick={() => setSelectedBlog(null)}
             style={{ marginBottom: '24px', background: 'transparent', border: 'none', color: '#174D32', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem' }}
