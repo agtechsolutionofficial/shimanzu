@@ -1,14 +1,15 @@
 .gallery-page {
-  background: #060e07;
+  background: #FDFBF7;
   min-height: 100vh;
 }
 
 /* Hero */
 .gallery-hero {
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, #0d3318 0%, #071209 60%, #060e07 100%);
+  background: linear-gradient(135deg, #F4F9F6 0%, #E8F5E9 100%);
   padding: 125px 0 70px;
   position: relative;
   overflow: hidden;
+  border-bottom: 1px solid rgba(23, 77, 50, 0.1);
 }
 
 /* Decorative leaves */
@@ -17,7 +18,7 @@
   position: absolute;
   width: 340px;
   height: 340px;
-  background: radial-gradient(ellipse at center, rgba(34,100,34,0.35) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(23, 77, 50, 0.08) 0%, transparent 70%);
   border-radius: 50%;
   filter: blur(2px);
 }
@@ -29,8 +30,8 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(102,187,106,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(102,187,106,0.025) 1px, transparent 1px);
+    linear-gradient(rgba(23, 77, 50, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 77, 50, 0.03) 1px, transparent 1px);
   background-size: 52px 52px;
 }
 
@@ -47,21 +48,21 @@
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 3px;
-  color: #66BB6A;
+  color: #174D32;
   text-transform: uppercase;
   margin-bottom: 20px;
   padding: 7px 18px;
-  background: rgba(102,187,106,0.08);
-  border: 1px solid rgba(102,187,106,0.3);
+  background: #E8F5E9;
+  border: 1px solid #2E7D32;
   border-radius: 50px;
 }
 
-.gallery-eyebrow-icon { color: #66BB6A; flex-shrink: 0; }
+.gallery-eyebrow-icon { color: #174D32; flex-shrink: 0; }
 
 .gallery-title {
   font-family: var(--font-serif);
   font-size: clamp(2.8rem, 5vw, 4.5rem);
-  color: #fff;
+  color: #081B10;
   font-weight: 800;
   margin-bottom: 18px;
   line-height: 1.1;
@@ -69,7 +70,7 @@
 
 .gallery-subtitle {
   font-size: 1rem;
-  color: #8fa89a;
+  color: #4B5563;
   max-width: 540px;
   margin: 0 auto 28px;
   line-height: 1.75;
@@ -92,12 +93,12 @@
 .gallery-divider span:last-child {
   background: linear-gradient(90deg, #2E7D32, transparent);
 }
-.gallery-divider-leaf { color: #66BB6A; }
+.gallery-divider-leaf { color: #174D32; }
 
 /* Filter bar */
 .gallery-filter-bar {
-  background: rgba(6,14,7,0.95);
-  border-bottom: 1px solid rgba(102,187,106,0.12);
+  background: rgba(253, 251, 247, 0.95);
+  border-bottom: 1px solid rgba(23, 77, 50, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -116,8 +117,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: #FFFFFF;
+  border: 1px solid rgba(23, 77, 50, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
   border-radius: 50px;
   padding: 5px;
 }
@@ -131,7 +133,7 @@
   border-radius: 50px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #90A4AE;
+  color: #64748B;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -140,14 +142,14 @@
 }
 
 .gallery-filter-btn:hover {
-  color: #fff;
-  background: rgba(102,187,106,0.1);
+  color: #081B10;
+  background: rgba(23, 77, 50, 0.05);
 }
 
 .gallery-filter-btn.active {
-  background: #2E7D32;
-  color: #fff;
-  box-shadow: 0 4px 18px rgba(46,125,50,0.45);
+  background: #174D32;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(23, 77, 50, 0.2);
 }
 
 .gallery-filter-icon { flex-shrink: 0; }
@@ -155,8 +157,8 @@
 .gallery-filter-count {
   font-size: 0.72rem;
   font-weight: 700;
-  background: rgba(255,255,255,0.12);
-  color: #CFD8DC;
+  background: rgba(23, 77, 50, 0.1);
+  color: #174D32;
   border-radius: 20px;
   padding: 1px 8px;
   min-width: 22px;
@@ -164,14 +166,14 @@
 }
 
 .gallery-filter-btn.active .gallery-filter-count {
-  background: rgba(255,255,255,0.2);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
 }
 
 .gallery-filter-divider {
   width: 1px;
   height: 28px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(23, 77, 50, 0.1);
   margin: 0 16px;
   flex-shrink: 0;
 }
@@ -181,8 +183,8 @@
   align-items: center;
   gap: 6px;
   font-size: 0.82rem;
-  color: #66BB6A;
-  font-weight: 600;
+  color: #174D32;
+  font-weight: 700;
   flex-shrink: 0;
   white-space: nowrap;
 }
@@ -204,20 +206,20 @@
   border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
-  background: #0d2b12;
-  border: 1px solid rgba(102,187,106,0.1);
+  background: #FFFFFF;
+  border: 1px solid rgba(23, 77, 50, 0.1);
   aspect-ratio: 4/3;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .gallery-item--product {
-  background: radial-gradient(circle at center, #0f2a18 0%, #071510 100%);
+  background: #F8F9FA;
   aspect-ratio: 1/1;
 }
 
 .gallery-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(102,187,106,0.25);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px #2E7D32;
 }
 
 .gallery-img {
@@ -247,7 +249,7 @@
 .gallery-item-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(5,13,8,0.9) 0%, rgba(5,13,8,0.2) 50%, transparent 100%);
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -259,15 +261,16 @@
 .gallery-item:hover .gallery-item-overlay { opacity: 1; }
 
 .gallery-zoom-icon {
-  color: #fff;
-  background: rgba(102,187,106,0.3);
-  border: 1px solid rgba(102,187,106,0.5);
+  color: #174D32;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(23, 77, 50, 0.3);
   border-radius: 50%;
   padding: 8px;
   width: 44px;
   height: 44px;
   margin-bottom: 12px;
   backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .gallery-item-info {
@@ -285,14 +288,14 @@
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 2px;
-  color: #66BB6A;
+  color: #174D32;
   text-transform: uppercase;
 }
 
 .gallery-item-title {
   font-size: 0.85rem;
-  font-weight: 600;
-  color: #fff;
+  font-weight: 800;
+  color: #081B10;
   text-align: center;
 }
 
@@ -383,12 +386,12 @@
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 2px;
-  color: #66BB6A;
+  color: #34D399;
   text-transform: uppercase;
-  background: rgba(102,187,106,0.1);
+  background: rgba(16, 185, 129, 0.15);
   padding: 3px 12px;
   border-radius: 20px;
-  border: 1px solid rgba(102,187,106,0.25);
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .gallery-lb-title {

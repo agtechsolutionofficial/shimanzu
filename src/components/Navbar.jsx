@@ -19,6 +19,10 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
+  // Pages with light background — navbar should always show scrolled (dark text) style
+  const lightBgPages = ['/products', '/about', '/contact', '/crops', '/gallery', '/blog'];
+  const isLightPage = lightBgPages.some(p => location.pathname.startsWith(p));
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener('scroll', onScroll);
@@ -28,7 +32,7 @@ const Navbar = () => {
   useEffect(() => { setIsOpen(false); }, [location]);
 
   return (
-    <header className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+    <header className={`navbar ${(scrolled || isLightPage) ? 'scrolled' : ''}`}>
       <div className="container navbar-container" style={{ position: 'relative', zIndex: 2 }}>
         {/* Logo */}
         <Link to="/" className="navbar-logo">

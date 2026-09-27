@@ -3,24 +3,49 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import './HeroSection.css';
 
-import gif1 from '../assets/images/gif1-min.gif';
-import gif2 from '../assets/images/gif2-min.gif';
 import seedlingVideo from '../assets/images/Seedling_growing_from_soil-clip-1_20260925110529.mp4';
+import slide2 from '../assets/images/slide2.mp4';
+import slide3 from '../assets/images/slide3.mp4';
+import slide4 from '../assets/images/slide4.mp4';
+import slide5 from '../assets/images/slide5.mp4';
+import slide6 from '../assets/images/slide_6.mp4';
 
 const timeline = [
-  { type: 'gif',   src: gif1,          duration: 6000 },
-  { type: 'gif',   src: gif2,          duration: 6000 },
-  { type: 'video', src: seedlingVideo, duration: 12000 },
+  { 
+    type: 'video', src: seedlingVideo, duration: 10000,
+    title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow"
+  },
+  
+  { 
+    type: 'video', src: slide2, duration: 10000,
+    title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth"
+  },
+  { 
+    type: 'video', src: slide3, duration: 10000,
+    title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow"
+  },
+   { 
+    type: 'video', src: slide4, duration: 10000,
+    title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth"
+  },
+  { 
+    type: 'video', src: slide5, duration: 10000,
+    title1: "Maximizing Yields:", title2: "Japanese Technology for", titleAccent: "Healthy Crops"
+  },
+  { 
+    type: 'video', src: slide6, duration: 10000,
+    title1: "Tested for Excellence:", title2: "Japanese Technology for", titleAccent: "Better Crop Solutions"
+  }
 ];
 
 const kbClass = ['kb-zoom-in', 'kb-pan-left', 'kb-pan-right', 'kb-zoom-out', 'kb-zoom-in-left', 'kb-zoom-in-right'];
 const FADE = 800;
 
 const HeroSection = () => {
-  const [cur, setCur]           = useState(0);
-  const [nxt, setNxt]           = useState(null);
+  const [cur, setCur] = useState(0);
+  const [nxt, setNxt] = useState(null);
   const [entering, setEntering] = useState(false);
-  const timerRef                = useRef(null);
+  const timerRef = useRef(null);
 
   const advance = (from) => {
     const next = (from + 1) % timeline.length;
@@ -58,6 +83,7 @@ const HeroSection = () => {
             muted
             loop
             playsInline
+            style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'translateZ(0)', backfaceVisibility: 'hidden', perspective: 1000 }}
             className="hero-gif"
           />
           <div className="hero-overlay" />
@@ -81,12 +107,12 @@ const HeroSection = () => {
         {renderLayer(cur, entering ? 'layer-exit' : 'layer-active')}
         {nxt !== null && renderLayer(nxt, 'layer-enter')}
 
-<div className="container hero-container">
+        <div className="container hero-container">
           <div className="hero-content">
-            <h1 className="hero-title">
-              Advanced Agricultural<br />
-              Solutions for a<br />
-              <span className="hero-title-accent">Better Tomorrow</span>
+            <h1 className="hero-title" key={`title-${cur}`}>
+              {timeline[cur].title1}<br />
+              {timeline[cur].title2}<br />
+              <span className="hero-title-accent">{timeline[cur].titleAccent}</span>
             </h1>
             <p className="hero-desc">
               Shimanzu Japan develops and provides premium agricultural chemical and crop-care solutions — combining Japanese scientific precision with deep understanding of farmer needs for sustainable, high-yield agriculture.

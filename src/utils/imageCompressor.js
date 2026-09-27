@@ -52,8 +52,8 @@ export const compressImage = (file, maxWidth = 800, maxHeight = 800, quality = 0
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert to lightweight JPEG data URL
-        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        // Convert to PNG data URL to preserve transparent background
+        const compressedDataUrl = canvas.toDataURL('image/png');
         resolve(compressedDataUrl);
       };
 

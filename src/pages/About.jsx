@@ -75,19 +75,33 @@ const About = () => {
     <div className="about-page-wrap">
       {/* Page Header */}
       <div className="about-hero-header">
+        <div className="about-hero-bg" style={{ backgroundImage: `url(${aboutMainImg})` }}></div>
+        <div className="about-hero-overlay"></div>
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="container"
+          className="container about-hero-content"
         >
-          <span className="about-badge-pill">
-            <Building2 size={14} /> SHIMANZU CHEMICALS PVT. LTD.
-          </span>
-          <h1 className="about-page-title">About Shimanzu</h1>
-          <p className="about-page-subtitle">
-            Pioneering Japanese agricultural technology, world-class formulations, and nationwide supply chain infrastructure.
-          </p>
+          <div className="about-hero-text">
+            <div className="about-eyebrow">
+              <span className="eyebrow-text">SHIMANZU CHEMICALS PVT. LTD.</span>
+              <div className="eyebrow-line"></div>
+            </div>
+            <h1 className="about-page-title">About Shimanzu</h1>
+            <p className="about-page-subtitle">
+              Pioneering Japanese agricultural technology, world-class formulations,<br/>and nationwide supply chain infrastructure.
+            </p>
+            <div className="about-dots">
+               <span className="dot-line"></span>
+               <span className="dot"></span>
+               <span className="dot"></span>
+               <span className="dot"></span>
+            </div>
+          </div>
+          <div className="about-hero-script">
+            <span className="script-text">Better Crops<br/>Brighter Future</span>
+          </div>
         </motion.div>
       </div>
 
@@ -125,8 +139,8 @@ const About = () => {
             viewport={vp}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <span className="section-pill-badge" style={{ marginBottom: '14px' }}>OUR HERITAGE</span>
-            <h2 className="h3" style={{ color: '#ffffff', marginBottom: '20px' }}>Our Legacy of Quality & Precision</h2>
+            <span className="section-pill-badge" style={{ marginBottom: '14px', display: 'inline-block', background: '#E8F5E9', color: '#174D32', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1.5px', padding: '4px 14px', borderRadius: '9999px', border: '1px solid #2E7D32' }}>OUR HERITAGE</span>
+            <h2 className="h3" style={{ color: '#081B10', marginBottom: '20px' }}>Our Legacy of Quality & Precision</h2>
             <p className="text-secondary" style={{ marginBottom: '16px', lineHeight: '1.8' }}>
               Shimanzu Chemicals Private Limited is committed to bringing the pinnacle of Japanese agricultural technology to farmers across India and the globe. By establishing state-of-the-art manufacturing plants, we ensure that every formulation meets the highest standards of purity, efficacy, and environmental safety.
             </p>
@@ -139,11 +153,11 @@ const About = () => {
               <div style={{ background: 'rgba(27,94,32,0.15)', borderRadius: '12px', padding: '16px', borderLeft: '3px solid #66BB6A' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#66BB6A', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Our Mission</div>
                 <p style={{ fontSize: '0.82rem', color: '#90A4AE', lineHeight: '1.6' }}>To empower every farmer with scientifically advanced, safe, and effective agrochemical solutions that maximize yield and promote sustainable land stewardship.</p>
-              </div>
+               </div>
               <div style={{ background: 'rgba(27,94,32,0.15)', borderRadius: '12px', padding: '16px', borderLeft: '3px solid #66BB6A' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#66BB6A', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Our Vision</div>
                 <p style={{ fontSize: '0.82rem', color: '#90A4AE', lineHeight: '1.6' }}>To be the most trusted agricultural chemical company in Asia, recognized for Japanese precision, product integrity, and farmer-first innovation.</p>
-              </div>
+               </div>
             </div>
 
             {/* Highlights */}
@@ -164,19 +178,19 @@ const About = () => {
         </div>
 
         {/* 3 Pillars */}
-        <div className="grid grid-cols-3 gap-6 text-center" style={{ marginBottom: '90px' }}>
+        <div className="grid grid-cols-3 gap-8 text-center" style={{ marginBottom: '90px' }}>
           <motion.div 
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
             viewport={vp}
-            style={{ padding: '36px 28px', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}
+            className="pillar-card"
           >
-            <div style={{ color: 'var(--accent-gold)', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-              <FlaskConical size={32} />
+            <div className="pillar-icon">
+              <FlaskConical size={36} />
             </div>
-            <h3 className="h4 text-emerald" style={{ marginBottom: '14px' }}>R&D Infrastructure</h3>
-            <p className="text-muted" style={{ lineHeight: '1.6' }}>Equipped with advanced GLC, HPLC, and UV testing capabilities ensuring 100% molecular purity and formulation stability.</p>
+            <h3 className="pillar-title">R&D Infrastructure</h3>
+            <p className="pillar-desc">Equipped with advanced GLC, HPLC, and UV testing capabilities ensuring 100% molecular purity and formulation stability.</p>
           </motion.div>
           
           <motion.div 
@@ -185,13 +199,13 @@ const About = () => {
             initial="hidden"
             whileInView="visible"
             viewport={vp}
-            style={{ padding: '36px 28px', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}
+            className="pillar-card"
           >
-            <div style={{ color: 'var(--accent-gold)', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-              <Award size={32} />
+            <div className="pillar-icon">
+              <Award size={36} />
             </div>
-            <h3 className="h4 text-emerald" style={{ marginBottom: '14px' }}>Certified Manufacturing</h3>
-            <p className="text-muted" style={{ lineHeight: '1.6' }}>ISO 9001:2015 & 14001:2015 certified plants capable of producing complex formulations (EC, SC, WG) under strict Japanese supervision.</p>
+            <h3 className="pillar-title">Certified Manufacturing</h3>
+            <p className="pillar-desc">ISO 9001:2015 & 14001:2015 certified plants capable of producing complex formulations (EC, SC, WG) under strict Japanese supervision.</p>
           </motion.div>
           
           <motion.div 
@@ -200,13 +214,13 @@ const About = () => {
             initial="hidden"
             whileInView="visible"
             viewport={vp}
-            style={{ padding: '36px 28px', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}
+            className="pillar-card"
           >
-            <div style={{ color: 'var(--accent-gold)', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-              <Globe size={32} />
+            <div className="pillar-icon">
+              <Globe size={36} />
             </div>
-            <h3 className="h4 text-emerald" style={{ marginBottom: '14px' }}>Global Supply Chain</h3>
-            <p className="text-muted" style={{ lineHeight: '1.6' }}>Exporting high-efficacy agrochemicals and rutile grade pigments to over 157 countries worldwide with guaranteed lot traceability.</p>
+            <h3 className="pillar-title">Global Supply Chain</h3>
+            <p className="pillar-desc">Exporting high-efficacy agrochemicals and rutile grade pigments to over 157 countries worldwide with guaranteed lot traceability.</p>
           </motion.div>
         </div>
       </div>
@@ -217,13 +231,14 @@ const About = () => {
       <section className="warehouse-section">
         <div className="container">
           <div className="warehouse-header-wrap">
-            <span className="about-badge-pill">
-              <Warehouse size={14} /> WAREHOUSING & INVENTORY SCALE
-            </span>
-            <h2 className="h2" style={{ color: '#ffffff', marginBottom: '14px' }}>
+            <div className="about-eyebrow" style={{ justifyContent: 'center' }}>
+              <span className="eyebrow-text">WAREHOUSING & INVENTORY SCALE</span>
+              <div className="eyebrow-line"></div>
+            </div>
+            <h2 className="heritage-title" style={{ textAlign: 'center' }}>
               Our Godown & Storage Infrastructure
             </h2>
-            <p className="text-secondary" style={{ fontSize: '1.05rem', lineHeight: '1.6' }}>
+            <p className="heritage-desc" style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 40px' }}>
               Real-time glimpse inside Shimanzu's massive storage facilities. With modern climate regulation, high-throughput logistics aisles, and extensive safety protocols, we maintain ample buffer inventory to serve agricultural demand year-round.
             </p>
           </div>

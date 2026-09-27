@@ -36,6 +36,8 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 /* ── Image layer with Ken Burns ── */
@@ -67,9 +69,9 @@
   inset: 0;
   background: linear-gradient(
     110deg,
-    rgba(10, 25, 16, 0.88) 0%,
-    rgba(10, 25, 16, 0.55) 55%,
-    rgba(10, 25, 16, 0.2) 100%
+    rgba(10, 25, 16, 0.5) 0%,
+    rgba(10, 25, 16, 0.2) 55%,
+    rgba(10, 25, 16, 0.05) 100%
   );
   z-index: 1;
 }
@@ -109,15 +111,15 @@
 
 .hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(2.6rem, 5vw, 5rem);
+  font-size: clamp(1.5rem, 3.2vw, 3rem);
   color: #fff;
-  line-height: 1.1;
-  margin-bottom: 22px;
+  line-height: 1.2;
+  margin-bottom: 18px;
   font-weight: 700;
 }
 
 .hero-title-accent {
-  background: linear-gradient(90deg, #66BB6A, #A5D6A7);
+  background: linear-gradient(90deg, #26822a, #085d0b);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

@@ -1,22 +1,23 @@
-/* ProductCard.css — Dark theme */
+/* ProductCard.css — Light theme */
 
 .fmc-product-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background: #fff;
+  border: 1px solid #dde5dd;
+  border-radius: 16px;
   overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   display: flex;
   flex-direction: column;
   height: 100%;
   cursor: pointer;
   position: relative;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
 }
 
 .fmc-product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card);
-  border-color: var(--border-highlight);
+  transform: translateY(-5px);
+  box-shadow: 0 14px 36px rgba(0,0,0,0.12);
+  border-color: #a5c8a5;
 }
 
 /* Image */
@@ -24,7 +25,7 @@
   position: relative;
   width: 100%;
   height: 200px;
-  background: radial-gradient(ellipse at center, #0f2a18 0%, #071510 100%);
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 50%, #dcedc8 100%);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -32,49 +33,28 @@
   padding: 10px;
 }
 
+.fmc-card-media::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 65% 80%, rgba(102,187,106,0.2) 0%, transparent 65%),
+              radial-gradient(ellipse at 20% 55%, rgba(56,142,60,0.12) 0%, transparent 55%);
+  pointer-events: none;
+}
+
 .fmc-card-img {
-  width: 80%;
-  height: 80%;
+  width: 85%;
+  height: 85%;
   object-fit: contain;
   transition: transform 0.35s ease;
-  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.12));
+  mix-blend-mode: multiply;
+  position: relative;
+  z-index: 1;
 }
 
 .fmc-product-card:hover .fmc-card-img {
   transform: scale(1.08);
-}
-
-.fmc-card-brand-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(0deg, rgba(5,13,8,0.85) 0%, transparent 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  text-align: center;
-}
-
-.fmc-brand-text {
-  font-family: var(--font-sans);
-  font-weight: 800;
-  font-size: 0.75rem;
-  letter-spacing: 1.5px;
-  color: #ffffff;
-  text-transform: uppercase;
-  line-height: 1.1;
-}
-
-.fmc-brand-sub {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--accent-gold);
-  text-transform: uppercase;
-  margin-top: 2px;
 }
 
 /* Card Body */
@@ -83,7 +63,7 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid #eef2ee;
   position: relative;
 }
 
@@ -96,33 +76,31 @@
 }
 
 .fmc-card-category-label {
-  font-family: var(--font-sans);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: var(--text-muted);
+  color: #888;
   margin-bottom: 6px;
 }
 
 .fmc-card-title {
-  font-family: var(--font-sans);
   font-size: 1rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--accent-gold);
+  color: #1a1a1a;
   line-height: 1.3;
   margin: 0 0 8px 0;
   transition: color 0.2s ease;
 }
 
 .fmc-product-card:hover .fmc-card-title {
-  color: var(--accent-gold-light);
+  color: #1b5e20;
 }
 
 .fmc-card-chemical {
   font-size: 0.8rem;
-  color: var(--text-secondary);
+  color: #555;
   margin-bottom: 12px;
   line-height: 1.4;
   display: -webkit-box;
@@ -142,41 +120,40 @@
 .fmc-crop-tag {
   font-size: 0.68rem;
   font-weight: 500;
-  color: var(--text-secondary);
-  background-color: rgba(255,255,255,0.06);
-  border: 1px solid var(--border-color);
+  color: #2e7d32;
+  background: rgba(46,125,50,0.08);
+  border: 1px solid rgba(46,125,50,0.2);
   padding: 2px 8px;
-  border-radius: var(--radius-sm);
+  border-radius: 20px;
 }
 
 /* Footer */
 .fmc-card-footer {
   margin-top: auto;
   padding-top: 10px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid #eef2ee;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .fmc-group-badge {
-  font-family: var(--font-sans);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: #999;
 }
 
 .fmc-view-link {
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--accent-gold);
+  color: #2e7d32;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: color 0.2s ease;
 }
 
 .fmc-view-link:hover {
-  color: var(--accent-gold-light);
+  color: #1b5e20;
 }

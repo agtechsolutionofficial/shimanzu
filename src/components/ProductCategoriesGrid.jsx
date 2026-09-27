@@ -1,58 +1,67 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { FlaskConical, Leaf, Bug, Sprout, Scissors, Beaker } from 'lucide-react';
 import { useDataContext } from '../context/DataContext';
 import './ProductCategoriesGrid.css';
+
+const CATEGORY_ICONS = {
+  chemicals: Beaker,
+  herbicides: Leaf,
+  fungicides: FlaskConical,
+  insecticides: Bug,
+  'at-plant': Sprout,
+  'harvest-aids': Scissors,
+};
 
 const ProductCategoriesGrid = ({ categories: propCategories, selectedCategoryId, onSelectCategory }) => {
   const { categories: contextCategories } = useDataContext();
   const displayCategories = propCategories || contextCategories;
+
   return (
-    <section className="categories-section" id="product-categories-grid">
-      <div className="categories-container">
-        {/* Header matching user's reference image */}
-        <div className="categories-header">
-          <h2 className="categories-main-title">PRODUCT CATEGORIES</h2>
-          <span className="categories-subtitle">Select a product category.</span>
-          <div className="categories-header-line" />
+    <section className="pcg-section">
+      <div className="pcg-container">
+        {/* Header */}
+        <div className="pcg-header">
+          <div className="pcg-header-left">
+            <span className="pcg-label">OUR PRODUCT RANGE</span>
+            <h2 className="pcg-title">
+              PRODUCT <span className="pcg-title-green">CATEGORIES</span>
+            </h2>
+            <p className="pcg-subtitle">
+              Select a product category and explore our wide range of high-quality agricultural solutions.
+            </p>
+          </div>
+          <div className="pcg-header-right">
+            <span className="pcg-cursive">Healthy Crops<br />Brighter Future</span>
+          </div>
         </div>
 
-        {/* 2-Column Responsive Grid */}
-        <div className="categories-grid">
+        {/* Grid */}
+        <div className="pcg-grid">
           {displayCategories.map((cat, idx) => {
-            const isSelected = selectedCategoryId === cat.id;
-
+            const Icon = CATEGORY_ICONS[cat.id] || Leaf;
             return (
               <motion.div
                 key={cat.id}
-                className={`category-card ${isSelected ? 'is-active' : ''}`}
+                className={`pcg-card ${selectedCategoryId === cat.id ? 'pcg-card-active' : ''}`}
                 onClick={() => onSelectCategory(cat.id)}
-                initial={{ opacity: 0, y: 18 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
                 transition={{ duration: 0.35, delay: idx * 0.06 }}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onSelectCategory(cat.id);
-                  }
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectCategory(cat.id); }
                 }}
                 aria-label={`Select category ${cat.name}`}
               >
-                {/* Left colored stripe */}
-                <div
-                  className="category-stripe"
-                  style={{ backgroundColor: cat.accentColor }}
-                />
-
-                {/* Left crop image */}
-                <div className="category-image-wrap">
+                {/* Left image */}
+                <div className="pcg-card-img-wrap">
                   <img
                     src={cat.image}
                     alt={cat.name}
-                    className="category-card-img"
+                    className="pcg-card-img"
                     loading="lazy"
                     onError={(e) => {
                       e.currentTarget.onerror = null;
@@ -62,20 +71,22 @@ const ProductCategoriesGrid = ({ categories: propCategories, selectedCategoryId,
                 </div>
 
                 {/* Right content */}
-                <div className="category-content">
-                  <div>
-                    <h3 className="category-title">{cat.name}</h3>
-                    <p className="category-description">{cat.description}</p>
+                <div className="pcg-card-body">
+                  <div className="pcg-icon-badge">
+                    <Icon size={18} />
                   </div>
-
-                  <div className="category-card-footer">
-                    <span className="category-item-count">
-                      {cat.productCount} Products
+                  <h3 className="pcg-card-title">{cat.name}</h3>
+                  <p className="pcg-card-desc">{cat.description}</p>
+                  <div className="pcg-card-footer">
+                    <span className="pcg-count">
+                      <FlaskConical size={12} /> {cat.productCount} PRODUCTS
                     </span>
-                    <div className="category-arrow-btn" aria-hidden="true">
-                      <ChevronRight />
-                    </div>
+                    <button className="pcg-view-btn">
+                      View Products →
+                    </button>
                   </div>
+                  {/* Decorative leaf */}
+                  <span className="pcg-deco-leaf">🌿</span>
                 </div>
               </motion.div>
             );
