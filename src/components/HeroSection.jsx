@@ -7,7 +7,7 @@ import seedlingVideo from '../assets/images/Seedling_growing_from_soil-clip-1_20
 import slide2 from '../assets/images/slide2.mp4';
 import slide3 from '../assets/images/slide3.mp4';
 import slide4 from '../assets/images/slide4.mp4';
-import slide5 from '../assets/images/slide5.mp4';
+import slide5 from '../assets/images/slide8.mp4';
 import slide6 from '../assets/images/slide_6.mp4';
 
 const timeline = [
@@ -108,7 +108,7 @@ const HeroSection = () => {
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  transform: 'translateZ(0)',
+                  transform: 'scale(1.08) translateZ(0)',
                   backfaceVisibility: 'hidden'
                 }}
               />
