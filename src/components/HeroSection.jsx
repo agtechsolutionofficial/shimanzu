@@ -38,74 +38,84 @@ const timeline = [
   }
 ];
 
-const kbClass = ['kb-zoom-in', 'kb-pan-left', 'kb-pan-right', 'kb-zoom-out', 'kb-zoom-in-left', 'kb-zoom-in-right'];
-const FADE = 800;
-
 const HeroSection = () => {
   const [cur, setCur] = useState(0);
-  const [nxt, setNxt] = useState(null);
-  const [entering, setEntering] = useState(false);
+  const videoRefs = useRef([]);
   const timerRef = useRef(null);
 
-  const advance = (from) => {
-    const next = (from + 1) % timeline.length;
-    setNxt(next);
-    setEntering(true);
-    setTimeout(() => {
-      setCur(next);
-      setNxt(null);
-      setEntering(false);
-    }, FADE);
-  };
-
   useEffect(() => {
-    timerRef.current = setTimeout(() => advance(cur), timeline[cur].duration);
-    return () => clearTimeout(timerRef.current);
-  }, [cur]);
+    // 1. Ensure active video is playing
+    const activeVideo = videoRefs.current[cur];
+    if (activeVideo && activeVideo.paused) {
+      activeVideo.play().catch(() => {});
+    }
 
-  const renderLayer = (index, cls) => {
-    const item = timeline[index];
-    if (!item) return null;
-    if (item.type === 'gif') {
-      return (
-        <div key={`${index}-${cls}`} className={`hero-layer ${cls}`}>
-          <img src={item.src} alt="Shimanzu agriculture" className="hero-gif" />
-          <div className="hero-overlay" />
-        </div>
-      );
+    // 2. Pre-warm and start next video so frames are ready before cross-fade starts
+    const nextIdx = (cur + 1) % timeline.length;
+    const nextVideo = videoRefs.current[nextIdx];
+    if (nextVideo) {
+      nextVideo.currentTime = 0;
+      nextVideo.play().catch(() => {});
     }
-    if (item.type === 'video') {
-      return (
-        <div key={`${index}-${cls}`} className={`hero-layer ${cls}`}>
-          <video
-            src={item.src}
-            autoPlay
-            muted
-            loop
-            playsInline
-            style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'translateZ(0)', backfaceVisibility: 'hidden', perspective: 1000 }}
-            className="hero-gif"
-          />
-          <div className="hero-overlay" />
-        </div>
-      );
-    }
-    const kb = kbClass[index % kbClass.length];
-    return (
-      <div key={`${index}-${cls}`} className={`hero-layer ${cls}`}>
-        <div className={`hero-img-bg ${kb}`} style={{ backgroundImage: `url(${item.src})` }} />
-        <div className="hero-overlay" />
-      </div>
-    );
-  };
+
+    // 3. Pause other videos after crossfade completes (1.4s) to conserve CPU
+    const pauseTimeout = setTimeout(() => {
+      videoRefs.current.forEach((v, i) => {
+        if (i !== cur && i !== nextIdx && v && !v.paused) {
+          v.pause();
+        }
+      });
+    }, 1400);
+
+    // 4. Advance to next slide
+    timerRef.current = setTimeout(() => {
+      setCur(nextIdx);
+    }, timeline[cur].duration);
+
+    return () => {
+      clearTimeout(pauseTimeout);
+      clearTimeout(timerRef.current);
+    };
+  }, [cur]);
 
   const scrollDown = () => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
 
   return (
     <section className="hero">
       <div className="hero-stage">
-        {renderLayer(cur, entering ? 'layer-exit' : 'layer-active')}
-        {nxt !== null && renderLayer(nxt, 'layer-enter')}
+        {timeline.map((item, index) => {
+          const isActive = index === cur;
+          return (
+            <div
+              key={`hero-layer-${index}`}
+              className="hero-layer"
+              style={{
+                opacity: isActive ? 1 : 0,
+                zIndex: isActive ? 2 : 1,
+                transition: 'opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                pointerEvents: 'none'
+              }}
+            >
+              <video
+                ref={el => (videoRefs.current[index] = el)}
+                src={item.src}
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className="hero-gif"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                }}
+              />
+              <div className="hero-overlay" />
+            </div>
+          );
+        })}
 
         <div className="container hero-container">
           <div className="hero-content">

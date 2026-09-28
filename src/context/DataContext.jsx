@@ -43,10 +43,60 @@ export const DataProvider = ({ children }) => {
     return INITIAL_CROPS;
   });
 
-  // 3. Products state — loaded from Supabase database with INITIAL_PRODUCTS fallback
-  const [products, setProducts] = useState(INITIAL_PRODUCTS);
+  // 3. Products state — cached in localStorage, loaded from Supabase database with INITIAL_PRODUCTS fallback
+  const [products, setProducts] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Re-hydrate images from local packaging catalog if empty or fallback
+          return parsed.map(p => {
+            const nameKey = (p.name || '').trim().toLowerCase();
+            const localMatch = INITIAL_PRODUCTS.find(
+              lp => (lp.name || '').trim().toLowerCase() === nameKey
+            );
+            return {
+              ...p,
+              imgSrc: (p.imgSrc && p.imgSrc !== FALLBACK_PRODUCT_IMAGE)
+                ? p.imgSrc
+                : (localMatch?.imgSrc || FALLBACK_PRODUCT_IMAGE)
+            };
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load products from localStorage', e);
+    }
+    return INITIAL_PRODUCTS;
+  });
   const [isSupabaseLoading, setIsSupabaseLoading] = useState(false);
   const [supabaseError, setSupabaseError] = useState(null);
+
+  // Sync products to localStorage whenever products state updates
+  // Strip giant base64 images (>10KB) so the entire JSON is ~20KB and effortlessly fits in localStorage
+  useEffect(() => {
+    try {
+      if (Array.isArray(products) && products.length > 0) {
+        const compactPayload = products.map(p => {
+          const isHeavyBase64 = typeof p.imgSrc === 'string' && p.imgSrc.startsWith('data:') && p.imgSrc.length > 10000;
+          if (isHeavyBase64) {
+            const localMatch = INITIAL_PRODUCTS.find(
+              lp => (lp.name || '').trim().toLowerCase() === (p.name || '').trim().toLowerCase()
+            );
+            return {
+              ...p,
+              imgSrc: localMatch?.imgSrc || FALLBACK_PRODUCT_IMAGE
+            };
+          }
+          return p;
+        });
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(compactPayload));
+      }
+    } catch (e) {
+      console.warn('Failed to save products to localStorage', e);
+    }
+  }, [products]);
 
   // Helper to deduplicate products and assign matching bottle packaging image if generic fallback
   const processProductsFromDb = (dbRows) => {
@@ -95,14 +145,15 @@ export const DataProvider = ({ children }) => {
 
       if (error) {
         setSupabaseError(error);
-        console.warn('Supabase products fetch failed; using initial catalog:', error);
-        setProducts(INITIAL_PRODUCTS);
+        console.warn('Supabase products fetch failed; using cached/initial catalog:', error);
+        // Retain currently cached products; don't revert to 31 if 43 were already loaded
+        setProducts(prev => (Array.isArray(prev) && prev.length > 0 ? prev : INITIAL_PRODUCTS));
       } else if (Array.isArray(data) && data.length > 0) {
         const unique = processProductsFromDb(data);
         setProducts(unique);
         setSupabaseError(null);
       } else {
-        setProducts(INITIAL_PRODUCTS);
+        setProducts(prev => (Array.isArray(prev) && prev.length > 0 ? prev : INITIAL_PRODUCTS));
       }
       setIsSupabaseLoading(false);
     };
@@ -293,14 +344,16 @@ export const DataProvider = ({ children }) => {
       if (error) {
         setSupabaseError(error);
         console.warn('Supabase addProduct failed:', error);
+        return { success: false, error, data: product };
       } else if (data) {
         setProducts(prev => prev.map(p => (p.id === id ? data : p)));
+        return { success: true, data };
       }
+      return { success: true, data: product };
     } catch (err) {
       console.error('Failed to sync added product to Supabase:', err);
+      return { success: false, error: err.message, data: product };
     }
-
-    return product;
   };
 
   const updateProduct = async (id, updatedFields) => {
@@ -330,11 +383,15 @@ export const DataProvider = ({ children }) => {
       if (error) {
         setSupabaseError(error);
         console.warn('Supabase updateProduct failed:', error);
+        return { success: false, error };
       } else if (data) {
         setProducts(prev => prev.map(p => (p.id === id ? data : p)));
+        return { success: true, data };
       }
+      return { success: true, data: targetUpdated || updatedFields };
     } catch (err) {
       console.error('Failed to sync updated product to Supabase:', err);
+      return { success: false, error: err.message };
     }
   };
 
@@ -348,9 +405,12 @@ export const DataProvider = ({ children }) => {
       if (error) {
         setSupabaseError(error);
         console.warn('Supabase deleteProduct failed:', error);
+        return { success: false, error };
       }
+      return { success: true };
     } catch (err) {
       console.error('Failed to delete product in Supabase:', err);
+      return { success: false, error: err.message };
     }
   };
 
@@ -358,14 +418,24 @@ export const DataProvider = ({ children }) => {
   const refreshProducts = async () => {
     setIsSupabaseLoading(true);
     const { data, error } = await supabaseApi.getProducts();
+    let result = { success: false };
+
     if (error) {
       setSupabaseError(error);
+      result = { success: false, error };
     } else if (Array.isArray(data) && data.length > 0) {
       const unique = processProductsFromDb(data);
       setProducts(unique);
       setSupabaseError(null);
+      result = { success: true, count: unique.length };
+    } else {
+      setProducts(INITIAL_PRODUCTS);
+      setSupabaseError(null);
+      result = { success: true, count: INITIAL_PRODUCTS.length };
     }
+
     setIsSupabaseLoading(false);
+    return result;
   };
 
   // Helper to bulk seed initial products to Supabase if empty

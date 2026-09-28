@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Layers, Sprout, Package, Plus, Trash2, Edit3, RotateCcw,
   ExternalLink, Search, Check, X, Shield, Upload, LogOut, CheckCircle2, AlertCircle, Sparkles,
-  Database, RefreshCw, KeyRound
+  KeyRound, Loader2
 } from 'lucide-react';
 import { useDataContext } from '../context/DataContext';
 import { compressImage, FALLBACK_PRODUCT_IMAGE } from '../utils/imageCompressor';
@@ -32,8 +32,6 @@ const Admin = () => {
     addCrop, updateCrop, deleteCrop,
     addProduct, updateProduct, deleteProduct,
     resetToDefaultData, logout,
-    isSupabaseLoading, supabaseError, refreshProducts, seedInitialProductsToSupabase,
-    cleanDuplicateProductsInSupabase,
     changeAdminPassword
   } = useDataContext();
 
@@ -41,6 +39,44 @@ const Admin = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [toastMessage, setToastMessage] = useState(null);
   const [isCompressingImage, setIsCompressingImage] = useState(false);
+  const [isProductSaving, setIsProductSaving] = useState(false);
+
+  const toastTimeoutRef = useRef(null);
+
+  // Show toast with duplicate prevention and auto-dismiss
+  const showToast = useCallback((newToast) => {
+    if (!newToast) {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      setToastMessage(null);
+      return;
+    }
+
+    // Prevent duplicate toast if the exact same message is currently showing
+    if (toastMessage && toastMessage.text === newToast.text) {
+      return;
+    }
+
+    // Clear previous timer so timers don't conflict
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
+    // Replace current toast immediately (never stack double toasts)
+    setToastMessage(newToast);
+
+    // Auto-dismiss after 4.5 seconds
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage(null);
+    }, 4500);
+  }, [toastMessage]);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Modals state
   const [modalMode, setModalMode] = useState(null); // 'add-category' | 'edit-category' | 'add-crop' | 'edit-crop' | 'add-product' | 'edit-product' | 'change-password'
@@ -204,10 +240,10 @@ const Admin = () => {
 
     if (modalMode === 'add-category') {
       addCategory(categoryForm);
-      setToastMessage({ type: 'success', text: `Category "${categoryForm.name}" added successfully!` });
+      showToast({ type: 'success', text: `Category "${categoryForm.name}" added successfully!` });
     } else {
       updateCategory(editingItem.id, categoryForm);
-      setToastMessage({ type: 'success', text: `Category "${categoryForm.name}" updated successfully!` });
+      showToast({ type: 'success', text: `Category "${categoryForm.name}" updated successfully!` });
     }
     setModalMode(null);
   };
@@ -218,10 +254,10 @@ const Admin = () => {
 
     if (modalMode === 'add-crop') {
       addCrop(cropForm);
-      setToastMessage({ type: 'success', text: `Crop "${cropForm.name}" added successfully!` });
+      showToast({ type: 'success', text: `Crop "${cropForm.name}" added successfully!` });
     } else {
       updateCrop(editingItem.id, cropForm);
-      setToastMessage({ type: 'success', text: `Crop "${cropForm.name}" updated successfully!` });
+      showToast({ type: 'success', text: `Crop "${cropForm.name}" updated successfully!` });
     }
     setModalMode(null);
   };
@@ -229,59 +265,58 @@ const Admin = () => {
   const handleProductSubmit = async (e) => {
     e.preventDefault();
     if (!productForm.name.trim()) return alert('Product Name is required');
+    if (isProductSaving) return;
 
-    const sanitizedProduct = {
-      ...productForm,
-      name: productForm.name.trim(),
-      chemical: productForm.chemical.trim() || 'Japanese Formulation Standard',
-      imgSrc: productForm.imgSrc || FALLBACK_PRODUCT_IMAGE
-    };
-
-    if (modalMode === 'add-product') {
-      await addProduct(sanitizedProduct);
-      setToastMessage({
-        type: 'success',
-        text: `Product "${sanitizedProduct.name}" saved to Supabase database!`,
-        actionUrl: `/products?category=${sanitizedProduct.category}`
-      });
-    } else {
-      await updateProduct(editingItem.id, sanitizedProduct);
-      setToastMessage({
-        type: 'success',
-        text: `Product "${sanitizedProduct.name}" updated in Supabase database!`,
-        actionUrl: `/products?category=${sanitizedProduct.category}`
-      });
-    }
-    setModalMode(null);
-  };
-
-  const handleSyncSupabase = async () => {
+    setIsProductSaving(true);
     try {
-      await refreshProducts();
-      setToastMessage({ type: 'success', text: 'Products synced successfully from Supabase database!' });
-    } catch (e) {
-      setToastMessage({ type: 'warning', text: 'Supabase sync warning: ' + e.message });
-    }
-  };
+      const sanitizedProduct = {
+        ...productForm,
+        name: productForm.name.trim(),
+        chemical: productForm.chemical.trim() || 'Japanese Formulation Standard',
+        imgSrc: productForm.imgSrc || FALLBACK_PRODUCT_IMAGE
+      };
 
-  const handleSeedSupabase = async () => {
-    if (window.confirm('Upload all current catalog products to your Supabase products table?')) {
-      const count = await seedInitialProductsToSupabase();
-      setToastMessage({ type: 'success', text: `Uploaded ${count} products to Supabase database successfully!` });
-    }
-  };
-
-  const handleCleanDuplicates = async () => {
-    if (window.confirm('Clean up duplicate rows in Supabase database and keep only the 31 unique products?')) {
-      const res = await cleanDuplicateProductsInSupabase();
-      if (res.success) {
-        setToastMessage({
-          type: 'success',
-          text: `Cleaned ${res.deletedCount} duplicate rows! Exactly ${res.remainingCount} unique products remain in Supabase.`
-        });
+      if (modalMode === 'add-product') {
+        const res = await addProduct(sanitizedProduct);
+        if (res && res.success === false) {
+          showToast({
+            type: 'error',
+            text: `Failed to upload product "${sanitizedProduct.name}". ${res.error || 'Please try again.'}`
+          });
+          return;
+        } else {
+          showToast({
+            type: 'success',
+            text: `Product "${sanitizedProduct.name}" uploaded successfully!`,
+            actionUrl: `/products?category=${sanitizedProduct.category}`
+          });
+          setModalMode(null);
+        }
       } else {
-        setToastMessage({ type: 'warning', text: 'Clean failed: ' + res.message });
+        const res = await updateProduct(editingItem.id, sanitizedProduct);
+        if (res && res.success === false) {
+          showToast({
+            type: 'error',
+            text: `Failed to update product "${sanitizedProduct.name}". ${res.error || 'Please try again.'}`
+          });
+          return;
+        } else {
+          showToast({
+            type: 'success',
+            text: `Product "${sanitizedProduct.name}" updated successfully!`,
+            actionUrl: `/products?category=${sanitizedProduct.category}`
+          });
+          setModalMode(null);
+        }
       }
+    } catch (err) {
+      console.error('Error saving product:', err);
+      showToast({
+        type: 'error',
+        text: `Error saving product: ${err.message || 'Please try again.'}`
+      });
+    } finally {
+      setIsProductSaving(false);
     }
   };
 
@@ -330,17 +365,6 @@ const Admin = () => {
               <KeyRound size={16} /> Change Password
             </button>
             <button
-              className="admin-btn admin-btn-danger"
-              onClick={() => {
-                if (window.confirm('Reset all catalog data back to default demo data? All custom additions will be reverted.')) {
-                  resetToDefaultData();
-                  setToastMessage({ type: 'info', text: 'Catalog data reset to default demo data.' });
-                }
-              }}
-            >
-              <RotateCcw size={16} /> Reset to Demo
-            </button>
-            <button
               className="admin-btn admin-btn-logout"
               onClick={() => {
                 if (window.confirm('Are you sure you want to log out of the admin panel?')) {
@@ -354,11 +378,17 @@ const Admin = () => {
           </div>
         </div>
 
-        {/* Dynamic Toast / Feedback Banner */}
+        {/* Dynamic Toast / Feedback Banner (Single instance, never doubled) */}
         {toastMessage && (
           <div className={`admin-toast-banner ${toastMessage.type || 'success'}`}>
             <div className="admin-toast-content">
-              <CheckCircle2 size={18} color="#10b981" />
+              {toastMessage.type === 'error' || toastMessage.type === 'fail' ? (
+                <AlertCircle size={18} color="#ef4444" />
+              ) : toastMessage.type === 'warning' ? (
+                <AlertCircle size={18} color="#f59e0b" />
+              ) : (
+                <CheckCircle2 size={18} color="#10b981" />
+              )}
               <span>{toastMessage.text}</span>
               {toastMessage.actionUrl && (
                 <Link to={toastMessage.actionUrl} className="admin-toast-link" target="_blank">
@@ -366,7 +396,14 @@ const Admin = () => {
                 </Link>
               )}
             </div>
-            <button className="admin-toast-close" onClick={() => setToastMessage(null)}>
+            <button
+              className="admin-toast-close"
+              onClick={() => {
+                if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+                setToastMessage(null);
+              }}
+              title="Close notification"
+            >
               <X size={16} />
             </button>
           </div>
@@ -582,40 +619,6 @@ const Admin = () => {
         {/* TAB 3: PRODUCTS */}
         {activeTab === 'products' && (
           <div>
-            {/* Supabase Live Database Status Bar */}
-            <div className="admin-supabase-bar">
-              <div className="admin-supabase-status">
-                <span className={`admin-status-dot ${isSupabaseLoading ? 'syncing' : (supabaseError ? 'error' : '')}`} />
-                <div>
-                  <span className="admin-supabase-title">Supabase Database:</span>
-                  <span className="admin-supabase-url">fxvbvplnucrcamnfblol.supabase.co</span>
-                  {supabaseError && <span className="admin-supabase-err">({supabaseError})</span>}
-                </div>
-              </div>
-              <div className="admin-supabase-actions">
-                <button
-                  type="button"
-                  className="admin-btn admin-btn-supabase"
-                  onClick={handleSyncSupabase}
-                  disabled={isSupabaseLoading}
-                  title="Fetch latest products directly from Supabase"
-                >
-                  <RefreshCw size={14} className={isSupabaseLoading ? 'admin-spin' : ''} />
-                  {isSupabaseLoading ? 'Syncing...' : 'Sync Supabase'}
-                </button>
-                <button
-                  type="button"
-                  className="admin-btn admin-btn-danger"
-                  style={{ padding: '6px 14px', fontSize: '0.82rem' }}
-                  onClick={handleCleanDuplicates}
-                  disabled={isSupabaseLoading}
-                  title="Remove duplicate rows from Supabase database"
-                >
-                  <Trash2 size={14} /> Clean Duplicates
-                </button>
-              </div>
-            </div>
-
             <div className="admin-section-bar">
               <input
                 type="text"
@@ -697,11 +700,18 @@ const Admin = () => {
                             className="admin-icon-btn delete"
                             onClick={async () => {
                               if (window.confirm(`Delete product "${prod.name}" from database?`)) {
-                                await deleteProduct(prod.id);
-                                setToastMessage({
-                                  type: 'info',
-                                  text: `Product "${prod.name}" deleted from database.`
-                                });
+                                const res = await deleteProduct(prod.id);
+                                if (res && res.success === false) {
+                                  showToast({
+                                    type: 'error',
+                                    text: `Failed to delete product "${prod.name}". ${res.error || 'Please try again.'}`
+                                  });
+                                } else {
+                                  showToast({
+                                    type: 'info',
+                                    text: `Product "${prod.name}" deleted successfully.`
+                                  });
+                                }
                               }
                             }}
                             title="Delete Product"
@@ -920,13 +930,19 @@ const Admin = () => {
 
       {/* PRODUCT MODAL */}
       {(modalMode === 'add-product' || modalMode === 'edit-product') && (
-        <div className="admin-modal-overlay" onClick={() => setModalMode(null)}>
+        <div className="admin-modal-overlay" onClick={() => !isProductSaving && setModalMode(null)}>
           <div className="admin-modal-box" onClick={e => e.stopPropagation()}>
             <div className="admin-modal-header">
               <h3 className="admin-modal-title">
                 {modalMode === 'add-product' ? 'Add New Product' : 'Edit Product'}
               </h3>
-              <button className="admin-icon-btn" onClick={() => setModalMode(null)}>
+              <button
+                type="button"
+                className="admin-icon-btn"
+                onClick={() => !isProductSaving && setModalMode(null)}
+                disabled={isProductSaving}
+                title={isProductSaving ? "Please wait..." : "Close"}
+              >
                 <X size={18} />
               </button>
             </div>
@@ -1069,8 +1085,9 @@ const Admin = () => {
                       onChange={e => handleImageUpload(e.target.files[0], (val) => setProductForm({ ...productForm, imgSrc: val }))}
                     />
                     {isCompressingImage && (
-                      <div className="admin-compressing-tag">
-                        ⏳ Optimizing & compressing image for instant storage...
+                      <div className="admin-compressing-tag" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#38bdf8', marginTop: '6px' }}>
+                        <Loader2 size={14} className="admin-spin" />
+                        <span>Optimizing & compressing image for instant storage...</span>
                       </div>
                     )}
                   </div>
@@ -1124,11 +1141,42 @@ const Admin = () => {
               </div>
 
               <div className="admin-modal-footer">
-                <button type="button" className="admin-btn admin-btn-outline" onClick={() => setModalMode(null)}>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-outline"
+                  onClick={() => !isProductSaving && setModalMode(null)}
+                  disabled={isProductSaving}
+                  style={isProductSaving ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="admin-btn admin-btn-primary">
-                  {modalMode === 'add-product' ? 'Save Product' : 'Update Product'}
+                <button
+                  type="submit"
+                  className="admin-btn admin-btn-primary"
+                  disabled={isProductSaving || isCompressingImage}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    minWidth: '160px',
+                    cursor: (isProductSaving || isCompressingImage) ? 'not-allowed' : 'pointer',
+                    opacity: (isProductSaving || isCompressingImage) ? 0.75 : 1
+                  }}
+                >
+                  {isProductSaving ? (
+                    <>
+                      <Loader2 size={16} className="admin-spin" />
+                      <span>{modalMode === 'add-product' ? 'Uploading Product...' : 'Updating Product...'}</span>
+                    </>
+                  ) : isCompressingImage ? (
+                    <>
+                      <Loader2 size={16} className="admin-spin" />
+                      <span>Processing Image...</span>
+                    </>
+                  ) : (
+                    modalMode === 'add-product' ? 'Upload Product' : 'Update Product'
+                  )}
                 </button>
               </div>
             </form>
@@ -1182,7 +1230,7 @@ const Admin = () => {
 
               const res = changeAdminPassword(passwordForm.currentPassword, passwordForm.newPassword);
               if (res.success) {
-                setToastMessage({ type: 'success', text: 'Admin password changed successfully! Your new password is now active.' });
+                showToast({ type: 'success', text: 'Admin password changed successfully! Your new password is now active.' });
                 setModalMode(null);
                 setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '', error: '' });
               } else {

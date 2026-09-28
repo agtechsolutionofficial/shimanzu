@@ -78,11 +78,43 @@ export const formatProductForDb = (prod, includeId = false) => {
   return payload;
 };
 
+const fetchWithRetry = async (url, options = {}, retries = 2, delay = 1000, timeout = 10000) => {
+  let lastError;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeoutId);
+      return res;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      lastError = err;
+      // Wait before retrying on transient network failures
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, delay * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError;
+};
+
+const formatErrorMessage = (err) => {
+  if (err?.name === 'AbortError') {
+    return 'Connection timed out (Supabase cold start or slow network)';
+  }
+  if (err?.message === 'Failed to fetch' || err?.message?.includes('NetworkError')) {
+    return 'Failed to fetch (Supabase project may be paused or offline)';
+  }
+  return err?.message || 'Network error';
+};
+
 export const supabaseApi = {
   // Fetch all products from Supabase
   async getProducts() {
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*`, {
+      const res = await fetchWithRetry(`${SUPABASE_URL}/rest/v1/products?select=*`, {
         method: 'GET',
         headers: getHeaders()
       });
@@ -97,8 +129,9 @@ export const supabaseApi = {
       const normalized = Array.isArray(rows) ? rows.map(normalizeProduct) : [];
       return { data: normalized, error: null };
     } catch (err) {
-      console.warn('Supabase getProducts network error:', err);
-      return { data: null, error: err.message };
+      const friendlyMsg = formatErrorMessage(err);
+      console.warn('Supabase getProducts network error:', friendlyMsg, err);
+      return { data: null, error: friendlyMsg };
     }
   },
 
@@ -140,8 +173,9 @@ export const supabaseApi = {
       const inserted = await res.json();
       return { data: normalizeProduct(inserted[0] || payload), error: null };
     } catch (err) {
-      console.warn('Supabase addProduct network error:', err);
-      return { data: product, error: err.message };
+      const friendlyMsg = formatErrorMessage(err);
+      console.warn('Supabase addProduct network error:', friendlyMsg, err);
+      return { data: product, error: friendlyMsg };
     }
   },
 
@@ -181,8 +215,9 @@ export const supabaseApi = {
       const updated = await res.json();
       return { data: normalizeProduct(updated[0] || payload), error: null };
     } catch (err) {
-      console.warn('Supabase updateProduct network error:', err);
-      return { data: updates, error: err.message };
+      const friendlyMsg = formatErrorMessage(err);
+      console.warn('Supabase updateProduct network error:', friendlyMsg, err);
+      return { data: updates, error: friendlyMsg };
     }
   },
 
@@ -202,8 +237,9 @@ export const supabaseApi = {
 
       return { error: null };
     } catch (err) {
-      console.warn('Supabase deleteProduct network error:', err);
-      return { error: err.message };
+      const friendlyMsg = formatErrorMessage(err);
+      console.warn('Supabase deleteProduct network error:', friendlyMsg, err);
+      return { error: friendlyMsg };
     }
   }
 };
