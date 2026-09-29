@@ -1,16 +1,18 @@
+import defaultBottleImg from '../assets/images/transparent (1).png';
+
 /**
  * Client-side image compressor using HTML5 Canvas.
- * Resizes large images (e.g., 5-15MB phone photos) down to reasonable dimensions (max 800px)
- * and compresses them to ~40-80KB WebP/JPEG data URLs.
+ * Resizes large images down to reasonable dimensions (max 600px)
+ * and compresses them to ~20-40KB WebP/JPEG data URLs.
  * This prevents browser localStorage QuotaExceededError and ensures lightning-fast rendering.
  */
-export const compressImage = (file, maxWidth = 800, maxHeight = 800, quality = 0.8) => {
+export const compressImage = (file, maxWidth = 600, maxHeight = 600, quality = 0.75) => {
   return new Promise((resolve, reject) => {
     if (!file) {
       return reject(new Error('No file provided'));
     }
 
-    // If file is already an SVG or tiny, or not an image
+    // If file is not an image
     if (!file.type.startsWith('image/')) {
       return reject(new Error('File is not an image'));
     }
@@ -52,8 +54,20 @@ export const compressImage = (file, maxWidth = 800, maxHeight = 800, quality = 0
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert to PNG data URL to preserve transparent background
-        const compressedDataUrl = canvas.toDataURL('image/png');
+        // Convert to WebP data URL (preserves transparency + highly compact ~20-40KB)
+        let compressedDataUrl;
+        try {
+          compressedDataUrl = canvas.toDataURL('image/webp', quality);
+        } catch (e) {
+          // fallback
+        }
+        if (!compressedDataUrl || !compressedDataUrl.startsWith('data:image/webp')) {
+          try {
+            compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          } catch (e) {
+            compressedDataUrl = canvas.toDataURL('image/png');
+          }
+        }
         resolve(compressedDataUrl);
       };
 
@@ -67,5 +81,6 @@ export const compressImage = (file, maxWidth = 800, maxHeight = 800, quality = 0
   });
 };
 
-// Fallback high-quality product image URL
-export const FALLBACK_PRODUCT_IMAGE = 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=600&q=80';
+// Fallback authentic product packaging image (Shimanzu bottle packaging instead of random tomatoes/crops)
+export const FALLBACK_PRODUCT_IMAGE = defaultBottleImg;
+

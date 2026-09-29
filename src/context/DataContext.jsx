@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CATEGORIES as INITIAL_CATEGORIES } from '../data/categoriesData';
 import { CROPS as INITIAL_CROPS } from '../data/cropsData';
-import { PRODUCTS as INITIAL_PRODUCTS } from '../data/productsData';
-import { FALLBACK_PRODUCT_IMAGE } from '../utils/imageCompressor';
-import { supabaseApi } from '../utils/supabaseClient';
+import { PACKAGING_BOTTLES } from '../data/productsData';
+import { supabaseApi, normalizeProduct } from '../utils/supabaseClient';
 
 const DataContext = createContext(null);
 
@@ -11,8 +10,117 @@ const STORAGE_KEYS = {
   CATEGORIES: 'shimanzu_categories_v1',
   CROPS: 'shimanzu_crops_v1',
   PRODUCTS: 'shimanzu_products_v1',
+  QUERIES: 'shimanzu_queries_v1',
   AUTH: 'shimanzu_admin_auth_v1',
   PASSWORD: 'shimanzu_admin_pwd_v1'
+};
+
+export const INITIAL_QUERIES = [
+  {
+    id: 'query-101',
+    name: 'Ramesh Patel',
+    email: 'ramesh.farmer@gmail.com',
+    phone: '+91 98251 44820',
+    location: 'Surat, Gujarat',
+    productInterest: 'TEBCIN (Fungicide)',
+    subject: 'Bulk order requirement for Paddy Season',
+    message: 'We require 200 Litres of TEBCIN for our co-operative paddy fields in Olpad block to control Sheath Blight. Please share dealer quotation and delivery timeline.',
+    date: '2026-09-28T14:30:00Z',
+    status: 'new'
+  },
+  {
+    id: 'query-102',
+    name: 'Vikram Singh (Agro Chem Dist.)',
+    email: 'vikram.singh@agrochemindia.com',
+    phone: '+91 94140 88219',
+    location: 'Indore, Madhya Pradesh',
+    productInterest: 'Ghiroilkona R-999 (PW)',
+    subject: 'Distributorship & 25kg Bag pricing for Coatings',
+    message: 'We are chemical stockists in Indore dealing in industrial paints and masterbatch formulations. We would like to place an initial order for 10 metric tons of Ghiroilkona R-999 Rutile Grade pigment.',
+    date: '2026-09-27T10:15:00Z',
+    status: 'contacted'
+  },
+  {
+    id: 'query-103',
+    name: 'Dr. Suresh Deshmukh',
+    email: 'suresh.horticulture@yahoo.com',
+    phone: '+91 98220 31405',
+    location: 'Nashik, Maharashtra',
+    productInterest: 'MANGO BAR (PGR)',
+    subject: 'Dosage clarification for 8-year-old Alphonso trees',
+    message: 'Can you please provide the technical bulletin and soil drenching schedule for MANGO BAR (Paclobutrazol 23% SC) for October collar drenching?',
+    date: '2026-09-26T16:45:00Z',
+    status: 'resolved'
+  },
+  {
+    id: 'query-104',
+    name: 'Harpreet Singh Mann',
+    email: 'mann.farms@outlook.com',
+    phone: '+91 98142 55901',
+    location: 'Ludhiana, Punjab',
+    productInterest: 'SHIM PYROX (Herbicide)',
+    subject: 'Wheat Phalaris minor pre-emergence application',
+    message: 'Need advice on tank mixing SHIM PYROX (Pyroxasulfone 85% WG) with other selective herbicides for zero-till wheat sowing.',
+    date: '2026-09-25T09:20:00Z',
+    status: 'new'
+  }
+];
+
+const CUSTOM_IMAGES_KEY = 'shimanzu_custom_product_images';
+
+const getCustomImagesMap = () => {
+  try {
+    const raw = localStorage.getItem(CUSTOM_IMAGES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+};
+
+const persistCustomImage = (id, name, imgSrc) => {
+  if (!imgSrc || typeof imgSrc !== 'string' || imgSrc.length > 200000) return;
+  try {
+    const map = getCustomImagesMap();
+    if (id) map[String(id)] = imgSrc;
+    if (name) map[String(name).trim().toLowerCase()] = imgSrc;
+    localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(map));
+  } catch (e) {
+    // Quota reached, ignore silently
+  }
+};
+
+const resolveProductImage = (prod, customMap = null) => {
+  const map = customMap || getCustomImagesMap();
+  const nameKey = (prod?.name || '').trim().toLowerCase();
+  const idKey = String(prod?.id || '');
+
+  // 1. Prioritize user custom uploaded image (data URL or saved in custom image map)
+  if (map[idKey]) return map[idKey];
+  if (map[nameKey]) return map[nameKey];
+  if (prod?.imgSrc && (String(prod.imgSrc).startsWith('data:') || String(prod.imgSrc).startsWith('blob:'))) {
+    return prod.imgSrc;
+  }
+
+  const currentImg = String(prod?.imgSrc || prod?.img_src || '').trim();
+
+  // If product has no image (e.g. newly added without image), return empty string - NO DEFAULT IMAGE!
+  if (!currentImg) {
+    return '';
+  }
+
+  // If already a valid custom URL or data URL
+  if (!currentImg.includes('images.unsplash.com') && !currentImg.includes('chemicals.jpg')) {
+    return currentImg;
+  }
+
+  // 2. Only if it had legacy unsplash photo or generic chemicals.jpg, assign Japanese packaging
+  if ((currentImg.includes('images.unsplash.com') || currentImg.includes('chemicals.jpg')) && PACKAGING_BOTTLES && PACKAGING_BOTTLES.length > 0 && nameKey) {
+    const charCodeSum = nameKey.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const bottleIndex = charCodeSum % PACKAGING_BOTTLES.length;
+    return PACKAGING_BOTTLES[bottleIndex] || '';
+  }
+
+  return '';
 };
 
 export const DataProvider = ({ children }) => {
@@ -43,117 +151,154 @@ export const DataProvider = ({ children }) => {
     return INITIAL_CROPS;
   });
 
-  // 3. Products state — cached in localStorage, loaded from Supabase database with INITIAL_PRODUCTS fallback
+  // 3. Customer Queries state with localStorage persistence
+  const [queries, setQueries] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.QUERIES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load queries from localStorage', e);
+    }
+    return INITIAL_QUERIES;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.QUERIES, JSON.stringify(queries));
+    } catch (e) {}
+  }, [queries]);
+
+  const addQuery = (queryData) => {
+    const newQuery = {
+      ...queryData,
+      id: 'query-' + Date.now(),
+      date: new Date().toISOString(),
+      status: 'new'
+    };
+    setQueries(prev => [newQuery, ...prev]);
+    return newQuery;
+  };
+
+  const updateQueryStatus = (id, newStatus) => {
+    setQueries(prev => prev.map(q => q.id === id ? { ...q, status: newStatus } : q));
+  };
+
+  const deleteQuery = (id) => {
+    setQueries(prev => prev.filter(q => q.id !== id));
+  };
+
+  // 3. Products state — ONLY dynamic database products (zero static data fallback)
   const [products, setProducts] = useState(() => {
+    const customMap = getCustomImagesMap();
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // Re-hydrate images from local packaging catalog if empty or fallback
-          return parsed.map(p => {
-            const nameKey = (p.name || '').trim().toLowerCase();
-            const localMatch = INITIAL_PRODUCTS.find(
-              lp => (lp.name || '').trim().toLowerCase() === nameKey
-            );
-            return {
-              ...p,
-              imgSrc: (p.imgSrc && p.imgSrc !== FALLBACK_PRODUCT_IMAGE)
-                ? p.imgSrc
-                : (localMatch?.imgSrc || FALLBACK_PRODUCT_IMAGE)
-            };
-          });
+        // Only load if it's the real live database catalog (more than 31 items)
+        if (Array.isArray(parsed) && parsed.length > 31) {
+          return parsed.map(p => ({
+            ...p,
+            imgSrc: resolveProductImage(p, customMap)
+          }));
+        } else {
+          // Immediately purge old static 31 items from cache!
+          localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
         }
       }
     } catch (e) {
       console.error('Failed to load products from localStorage', e);
     }
-    return INITIAL_PRODUCTS;
+    return [];
   });
   const [isSupabaseLoading, setIsSupabaseLoading] = useState(false);
   const [supabaseError, setSupabaseError] = useState(null);
 
   // Sync products to localStorage whenever products state updates
-  // Strip giant base64 images (>10KB) so the entire JSON is ~20KB and effortlessly fits in localStorage
   useEffect(() => {
     try {
       if (Array.isArray(products) && products.length > 0) {
-        const compactPayload = products.map(p => {
-          const isHeavyBase64 = typeof p.imgSrc === 'string' && p.imgSrc.startsWith('data:') && p.imgSrc.length > 10000;
-          if (isHeavyBase64) {
-            const localMatch = INITIAL_PRODUCTS.find(
-              lp => (lp.name || '').trim().toLowerCase() === (p.name || '').trim().toLowerCase()
-            );
-            return {
-              ...p,
-              imgSrc: localMatch?.imgSrc || FALLBACK_PRODUCT_IMAGE
-            };
-          }
-          return p;
+        // Strip large base64 strings so 73 products take ~25KB and always fit in 5MB limit
+        const lightweight = products.map(p => {
+          const isHuge = p.imgSrc && typeof p.imgSrc === 'string' && p.imgSrc.startsWith('data:') && p.imgSrc.length > 30000;
+          return isHuge ? { ...p, imgSrc: '' } : p;
         });
-        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(compactPayload));
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(lightweight));
       }
     } catch (e) {
-      console.warn('Failed to save products to localStorage', e);
+      try {
+        localStorage.removeItem(CUSTOM_IMAGES_KEY);
+        const minimal = products.map(({ imgSrc, ...rest }) => rest);
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(minimal));
+      } catch (innerErr) {
+        // Ignore fallback error
+      }
     }
   }, [products]);
 
-  // Helper to deduplicate products and assign matching bottle packaging image if generic fallback
+  // Helper to process products from database and assign matching bottle packaging images
   const processProductsFromDb = (dbRows) => {
-    if (!Array.isArray(dbRows) || dbRows.length === 0) return INITIAL_PRODUCTS;
-    const seenNames = new Set();
+    if (!Array.isArray(dbRows) || dbRows.length === 0) return [];
+    const seenIds = new Set();
     const processed = [];
+    const customMap = getCustomImagesMap();
 
-    for (const row of dbRows) {
-      const rawName = (row.name || '').trim();
-      if (!rawName) continue; // Skip empty rows
-      const nameKey = rawName.toLowerCase();
-      if (seenNames.has(nameKey)) {
-        continue; // Skip duplicate
-      }
-      seenNames.add(nameKey);
+    for (const rawRow of dbRows) {
+      const row = normalizeProduct(rawRow);
+      if (!row || !row.name) continue; // Skip empty rows
+      const rawName = row.name.trim();
+      if (!rawName) continue;
 
-      // Look for matching local packaging image if DB image is generic unsplash or empty
-      const localMatch = INITIAL_PRODUCTS.find(
-        p => (p.name || '').trim().toLowerCase() === nameKey
-      );
-      const hasUnsplashOrEmpty = !row.imgSrc || String(row.imgSrc).includes('images.unsplash.com');
-      const finalImg = (hasUnsplashOrEmpty && localMatch && localMatch.imgSrc)
-        ? localMatch.imgSrc
-        : (row.imgSrc || (localMatch ? localMatch.imgSrc : FALLBACK_PRODUCT_IMAGE));
+      const idKey = String(row.id || '').trim().toLowerCase();
+
+      // Avoid duplicate row IDs while preserving ALL distinct database products (all 73 rows)
+      if (idKey && seenIds.has(idKey)) continue;
+      if (idKey) seenIds.add(idKey);
+
+      const finalImg = resolveProductImage({ ...row, name: rawName }, customMap);
 
       processed.push({
         ...row,
         name: rawName,
-        categoryLabel: row.categoryLabel || row.category_label || (localMatch ? localMatch.categoryLabel : (row.category ? row.category.toUpperCase() : 'AGROCHEMICAL')),
+        categoryLabel: row.categoryLabel || (row.category ? row.category.toUpperCase() : 'AGROCHEMICAL'),
         imgSrc: finalImg
       });
     }
 
-    return processed.length > 0 ? processed : INITIAL_PRODUCTS;
+    return processed;
   };
 
-  // Fetch products from Supabase on mount
+  // Fetch products from Supabase on mount with auto-retry if cold start / statement timeout
   useEffect(() => {
     let isMounted = true;
+    let retryTimer = null;
 
-    const loadSupabaseProducts = async () => {
+    const loadSupabaseProducts = async (attempt = 1) => {
       setIsSupabaseLoading(true);
-      const { data, error } = await supabaseApi.getProducts();
+      const { data, error, rawCount } = await supabaseApi.getProducts();
 
       if (!isMounted) return;
 
       if (error) {
         setSupabaseError(error);
-        console.warn('Supabase products fetch failed; using cached/initial catalog:', error);
-        // Retain currently cached products; don't revert to 31 if 43 were already loaded
-        setProducts(prev => (Array.isArray(prev) && prev.length > 0 ? prev : INITIAL_PRODUCTS));
+        console.warn(`Supabase products fetch (attempt ${attempt}) warning:`, error);
+        setProducts(prev => (Array.isArray(prev) ? prev : []));
+        
+        // If Supabase is cold starting or unfreezing, retry up to 3 times
+        if (attempt < 3) {
+          retryTimer = setTimeout(() => {
+            if (isMounted) loadSupabaseProducts(attempt + 1);
+          }, attempt * 3500);
+        }
       } else if (Array.isArray(data) && data.length > 0) {
         const unique = processProductsFromDb(data);
         setProducts(unique);
         setSupabaseError(null);
+        console.info(`✓ Loaded ${unique.length} live products directly from Supabase (Raw rows: ${rawCount})`);
       } else {
-        setProducts(prev => (Array.isArray(prev) && prev.length > 0 ? prev : INITIAL_PRODUCTS));
+        setProducts(prev => (Array.isArray(prev) ? prev : []));
       }
       setIsSupabaseLoading(false);
     };
@@ -162,6 +307,7 @@ export const DataProvider = ({ children }) => {
 
     return () => {
       isMounted = false;
+      if (retryTimer) clearTimeout(retryTimer);
     };
   }, []);
 
@@ -332,8 +478,12 @@ export const DataProvider = ({ children }) => {
       targets: newProd.targets || '',
       dosage: newProd.dosage || '',
       description: newProd.description || '',
-      imgSrc: newProd.imgSrc || 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=600&q=80'
+      imgSrc: newProd.imgSrc ? newProd.imgSrc.trim() : ''
     };
+
+    if (product.imgSrc && (product.imgSrc.startsWith('data:') || product.imgSrc.startsWith('blob:'))) {
+      persistCustomImage(id, product.name, product.imgSrc);
+    }
 
     // 1. Optimistic UI update
     setProducts(prev => [product, ...prev]);
@@ -377,6 +527,10 @@ export const DataProvider = ({ children }) => {
       return p;
     }));
 
+    if (updatedFields.imgSrc) {
+      persistCustomImage(id, updatedFields.name || targetUpdated?.name, updatedFields.imgSrc);
+    }
+
     // Persist to Supabase
     try {
       const { data, error } = await supabaseApi.updateProduct(id, targetUpdated || updatedFields);
@@ -399,6 +553,12 @@ export const DataProvider = ({ children }) => {
     // 1. Optimistic UI update
     setProducts(prev => prev.filter(p => p.id !== id));
 
+    try {
+      const map = getCustomImagesMap();
+      delete map[String(id)];
+      localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(map));
+    } catch (e) {}
+
     // 2. Persist to Supabase
     try {
       const { error } = await supabaseApi.deleteProduct(id);
@@ -417,21 +577,21 @@ export const DataProvider = ({ children }) => {
   // Re-fetch products from Supabase
   const refreshProducts = async () => {
     setIsSupabaseLoading(true);
-    const { data, error } = await supabaseApi.getProducts();
+    const { data, error, rawCount } = await supabaseApi.getProducts();
     let result = { success: false };
 
     if (error) {
       setSupabaseError(error);
-      result = { success: false, error };
+      result = { success: false, error, count: products.length };
     } else if (Array.isArray(data) && data.length > 0) {
       const unique = processProductsFromDb(data);
       setProducts(unique);
       setSupabaseError(null);
-      result = { success: true, count: unique.length };
+      result = { success: true, count: unique.length, rawCount };
     } else {
-      setProducts(INITIAL_PRODUCTS);
+      setProducts([]);
       setSupabaseError(null);
-      result = { success: true, count: INITIAL_PRODUCTS.length };
+      result = { success: true, count: 0, rawCount: 0 };
     }
 
     setIsSupabaseLoading(false);
@@ -440,15 +600,7 @@ export const DataProvider = ({ children }) => {
 
   // Helper to bulk seed initial products to Supabase if empty
   const seedInitialProductsToSupabase = async () => {
-    setIsSupabaseLoading(true);
-    let successCount = 0;
-    for (const prod of INITIAL_PRODUCTS) {
-      const { error } = await supabaseApi.addProduct(prod);
-      if (!error) successCount++;
-    }
-    await refreshProducts();
-    setIsSupabaseLoading(false);
-    return successCount;
+    return 0;
   };
 
   // Helper to remove duplicate products from Supabase database
@@ -503,7 +655,7 @@ export const DataProvider = ({ children }) => {
   const resetToDefaultData = () => {
     setCategories(INITIAL_CATEGORIES);
     setCrops(INITIAL_CROPS);
-    setProducts(INITIAL_PRODUCTS);
+    setProducts([]);
     localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
     localStorage.removeItem(STORAGE_KEYS.CROPS);
     localStorage.removeItem('shimanzu_products_v1');
@@ -534,6 +686,10 @@ export const DataProvider = ({ children }) => {
     addProduct,
     updateProduct,
     deleteProduct,
+    queries,
+    addQuery,
+    updateQueryStatus,
+    deleteQuery,
     resetToDefaultData,
     isAdmin,
     adminPassword,

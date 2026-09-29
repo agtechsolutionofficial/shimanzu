@@ -14,6 +14,11 @@ const SUPABASE_ANON_KEY =
   import.meta.env?.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4dmJ2cGxudWNyY2FtbmZibG9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0NjUwMTMsImV4cCI6MjEwNTA0MTAxM30.rhhbTtgUf8rRjY615MorQKFz0_Ud3xY7JmzZ3Mw3NQo';
 
+const getQueryHeaders = () => ({
+  apikey: SUPABASE_ANON_KEY,
+  Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+});
+
 const getHeaders = () => ({
   apikey: SUPABASE_ANON_KEY,
   Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
@@ -21,31 +26,144 @@ const getHeaders = () => ({
   Prefer: 'return=representation'
 });
 
-// Normalizes a database row to match frontend product schema
+// Normalizes a database row to match frontend product schema, supporting all column name variations
 export const normalizeProduct = (row) => {
   if (!row) return null;
+
+  // 1. Name
+  const name = String(
+    row.name || 
+    row.productName || 
+    row.product_name || 
+    row.title || 
+    row.product_title || 
+    'Untitled Product'
+  ).trim();
+
+  // 2. Chemical
+  const chemical = String(
+    row.chemical || 
+    row.chemicalComposition || 
+    row.chemical_composition || 
+    row.composition || 
+    row.active_ingredient || 
+    ''
+  ).trim();
+
+  // 3. Brand
+  const brand = String(
+    row.brand || 
+    row.brandOverlay || 
+    row.brand_overlay || 
+    'SHIMANZU'
+  ).trim();
+
+  // 4. Category
+  const rawCat = String(row.category || row.category_key || '').toLowerCase().trim();
+  let category = 'chemicals';
+  if (rawCat.includes('fungicide')) category = 'fungicides';
+  else if (rawCat.includes('herbicide')) category = 'herbicides';
+  else if (rawCat.includes('insecticide') || rawCat.includes('miticide')) category = 'insecticides';
+  else if (rawCat.includes('at-plant') || rawCat.includes('biofertilizer') || rawCat.includes('growth regulator') || rawCat.includes('plant growth')) category = 'at-plant';
+  else if (rawCat.includes('harvest')) category = 'harvest-aids';
+  else if (rawCat.includes('precision')) category = 'precision-platforms';
+  else if (rawCat.includes('chemical') || rawCat.includes('pigment')) category = 'chemicals';
+  else if (row.category) category = String(row.category).toLowerCase().trim();
+
+  // 5. Category label
+  const categoryLabel = String(
+    row.categoryLabel || 
+    row.category_label || 
+    row.category || 
+    (category ? category.toUpperCase() : 'AGROCHEMICAL')
+  ).trim();
+
+  // 6. Formulation
+  const formulation = String(row.formulation || row.formulation_type || 'SC').trim();
+
+  // 7. Group / Mode of action
+  const group = String(
+    row.group || 
+    row.groupModeOfAction || 
+    row.group_mode_of_action || 
+    `${formulation} FORMULATION`
+  ).trim();
+
+  // 8. In Stock
+  const inStock = row.inStock !== undefined 
+    ? Boolean(row.inStock) 
+    : (row.in_stock !== undefined ? Boolean(row.in_stock) : true);
+
+  // 9. Pack sizes
+  let packSizes = ['1L'];
+  const rawPack = row.packSizes || row.pack_sizes || row.packSize || row.pack_size;
+  if (Array.isArray(rawPack) && rawPack.length > 0) {
+    packSizes = rawPack.map(s => String(s).trim()).filter(Boolean);
+  } else if (typeof rawPack === 'string' && rawPack.trim()) {
+    packSizes = rawPack.split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  // 10. Crops
+  let crops = ['All Crops'];
+  const rawCrops = row.crops || row.targetCrops || row.target_crops;
+  if (Array.isArray(rawCrops) && rawCrops.length > 0) {
+    crops = rawCrops.map(s => String(s).trim()).filter(Boolean);
+  } else if (typeof rawCrops === 'string' && rawCrops.trim()) {
+    crops = rawCrops.split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  // 11. Targets
+  const targets = String(
+    row.targets || 
+    row.targetPestsDiseases || 
+    row.target_pests_diseases || 
+    row.target_pests || 
+    ''
+  ).trim();
+
+  // 12. Dosage
+  const dosage = String(
+    row.dosage || 
+    row.recommendedDosage || 
+    row.recommended_dosage || 
+    ''
+  ).trim();
+
+  // 13. Description
+  const description = String(
+    row.description || 
+    row.productOverviewAndEfficacy || 
+    row.product_overview || 
+    row.overview || 
+    ''
+  ).trim();
+
+  // 14. Image
+  const imgSrc = String(
+    row.imgSrc || 
+    row.img_src || 
+    row.image || 
+    row.image_url || 
+    row.imageUrl || 
+    ''
+  ).trim();
+
   return {
-    id: String(row.id),
-    name: row.name || 'Untitled Product',
-    brand: row.brand || '',
-    chemical: row.chemical || '',
-    category: row.category || 'chemicals',
-    categoryLabel: row.categoryLabel || row.category_label || (row.category ? row.category.toUpperCase() : 'CHEMICALS'),
-    group: row.group || `${row.formulation || 'SC'} FORMULATION`,
-    formulation: row.formulation || 'SC',
-    inStock: row.inStock !== undefined ? Boolean(row.inStock) : (row.in_stock !== undefined ? Boolean(row.in_stock) : true),
-    packSizes: Array.isArray(row.packSizes)
-      ? row.packSizes
-      : (Array.isArray(row.pack_sizes)
-          ? row.pack_sizes
-          : (row.packSizes || row.pack_sizes ? String(row.packSizes || row.pack_sizes).split(',').map(s => s.trim()).filter(Boolean) : ['1L'])),
-    crops: Array.isArray(row.crops)
-      ? row.crops
-      : (row.crops ? String(row.crops).split(',').map(s => s.trim()).filter(Boolean) : ['All Crops']),
-    targets: row.targets || '',
-    dosage: row.dosage || '',
-    description: row.description || '',
-    imgSrc: row.imgSrc || row.img_src || row.image || 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=600&q=80',
+    id: String(row.id || ('prod-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-'))),
+    name,
+    brand,
+    chemical,
+    category,
+    categoryLabel,
+    group,
+    formulation,
+    inStock,
+    packSizes,
+    crops,
+    targets,
+    dosage,
+    description,
+    imgSrc,
     createdAt: row.created_at || row.createdAt || null
   };
 };
@@ -78,7 +196,7 @@ export const formatProductForDb = (prod, includeId = false) => {
   return payload;
 };
 
-const fetchWithRetry = async (url, options = {}, retries = 2, delay = 1000, timeout = 10000) => {
+const fetchWithRetry = async (url, options = {}, retries = 2, delay = 1000, timeout = 30000) => {
   let lastError;
   for (let attempt = 0; attempt <= retries; attempt++) {
     const controller = new AbortController();
@@ -111,23 +229,31 @@ const formatErrorMessage = (err) => {
 };
 
 export const supabaseApi = {
-  // Fetch all products from Supabase
+  // Fetch all products dynamically from Supabase
   async getProducts() {
+    const url = `${SUPABASE_URL}/rest/v1/products?select=*&order=name.asc`;
+    const headers = getQueryHeaders();
+
     try {
-      const res = await fetchWithRetry(`${SUPABASE_URL}/rest/v1/products?select=*`, {
-        method: 'GET',
-        headers: getHeaders()
-      });
+      // 1. Direct native fetch (avoids any preflight issues or abrupt AbortController triggers)
+      let res;
+      try {
+        res = await fetch(url, { method: 'GET', headers });
+      } catch (directErr) {
+        console.warn('Direct fetch attempt failed, using fetchWithRetry with 30s timeout...', directErr);
+        res = await fetchWithRetry(url, { method: 'GET', headers }, 2, 1000, 30000);
+      }
 
       if (!res.ok) {
         const errorText = await res.text();
         console.warn('Supabase fetch products warning:', res.status, errorText);
-        return { data: null, error: errorText };
+        return { data: null, error: `${res.status}: ${errorText}` };
       }
 
       const rows = await res.json();
-      const normalized = Array.isArray(rows) ? rows.map(normalizeProduct) : [];
-      return { data: normalized, error: null };
+      console.info(`✓ Successfully fetched ${rows.length} rows directly from Supabase!`);
+      const normalized = Array.isArray(rows) ? rows.map(normalizeProduct).filter(Boolean) : [];
+      return { data: normalized, error: null, rawCount: rows.length };
     } catch (err) {
       const friendlyMsg = formatErrorMessage(err);
       console.warn('Supabase getProducts network error:', friendlyMsg, err);

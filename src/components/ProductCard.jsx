@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FALLBACK_PRODUCT_IMAGE } from '../utils/imageCompressor';
+import { Package } from 'lucide-react';
 import './ProductCard.css';
 
 const ProductCard = ({ product, onViewClick }) => {
@@ -33,19 +33,30 @@ const ProductCard = ({ product, onViewClick }) => {
       aria-label={`View details for ${product.name}`}
     >
       {/* Top Media */}
-      <div className="fmc-card-media">
-        <img 
-          src={product.imgSrc || FALLBACK_PRODUCT_IMAGE} 
-          alt={product.name} 
-          className="fmc-card-img"
-          loading="lazy" 
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = FALLBACK_PRODUCT_IMAGE;
-          }}
-        />
-        
+      <div className={`fmc-card-media ${!product.imgSrc ? 'has-no-image' : ''}`}>
+        {product.imgSrc ? (
+          <img 
+            src={product.imgSrc} 
+            alt={product.name} 
+            className="fmc-card-img"
+            loading="lazy" 
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              const placeholder = e.currentTarget.parentElement?.querySelector('.fmc-card-no-image-placeholder');
+              if (placeholder) placeholder.style.display = 'flex';
+            }}
+          />
+        ) : null}
 
+        <div 
+          className="fmc-card-no-image-placeholder"
+          style={{ display: product.imgSrc ? 'none' : 'flex' }}
+        >
+          <div className="fmc-no-img-badge">
+            <Package size={30} strokeWidth={1.5} />
+          </div>
+          <span className="fmc-no-img-title">No Image Uploaded</span>
+        </div>
       </div>
 
       {/* Card Body */}

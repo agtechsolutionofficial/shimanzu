@@ -62,10 +62,28 @@ function AnimatedRoutes() {
   );
 }
 
+function AppLayout() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/login');
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {!isAdminRoute && <Navbar />}
+      <main style={{ flexGrow: 1 }}>
+        <AnimatedRoutes />
+      </main>
+      {!isAdminRoute && <Footer />}
+    </div>
+  );
+}
+
 function App() {
-  // One-time clear of old products localStorage cache so new images load correctly
   useEffect(() => {
-    localStorage.removeItem('shimanzu_products_v1');
+    document.title = 'Shimanzu Japan';
+    const link = document.querySelector("link[rel*='icon']");
+    if (link) {
+      link.href = `/favicon.svg?v=${Date.now()}`;
+    }
   }, []);
 
   return (
@@ -74,13 +92,7 @@ function App() {
         <LoadingScreen />
         <ScrollToTop />
         <CustomCursor />
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <Navbar />
-          <main style={{ flexGrow: 1 }}>
-            <AnimatedRoutes />
-          </main>
-          <Footer />
-        </div>
+        <AppLayout />
       </Router>
     </DataProvider>
   );

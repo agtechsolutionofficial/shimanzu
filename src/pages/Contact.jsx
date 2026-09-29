@@ -1,9 +1,38 @@
-import React from 'react';
-import { MapPin, Phone, Mail, User, FileText, MessageSquare, Leaf, Send } from 'lucide-react';
+import React, { useState } from 'react';
+import { MapPin, Phone, Mail, User, FileText, MessageSquare, Leaf, Send, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useDataContext } from '../context/DataContext';
 import './Contact.css';
 
 const Contact = () => {
+  const { addQuery } = useDataContext();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: ''
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.email.trim()) return;
+
+    addQuery({
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim() || 'Not specified',
+      location: 'Website Lead',
+      productInterest: formData.subject.trim() || 'General Inquiry',
+      subject: formData.subject.trim() || 'Contact Form Submission',
+      message: formData.message.trim() || 'Customer requested assistance via contact page.'
+    });
+
+    setSubmitted(true);
+    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+  };
+
   return (
     <div className="contact-page">
       {/* Hero Section */}
@@ -45,40 +74,94 @@ const Contact = () => {
               <p className="form-subtitle">Your Name and Email Address help us get back to you quickly.</p>
             </div>
             
-            <form onSubmit={e => e.preventDefault()}>
-              <div className="form-row">
-                <div className="input-group">
-                  <User size={18} className="input-icon" />
-                  <input type="text" placeholder="Your Name" className="contact-input" />
+            {submitted ? (
+              <div style={{
+                background: 'rgba(23, 77, 50, 0.08)',
+                border: '1px solid #174D32',
+                borderRadius: '12px',
+                padding: '24px',
+                textAlign: 'center',
+                margin: '20px 0'
+              }}>
+                <CheckCircle2 size={40} color="#174D32" style={{ margin: '0 auto 12px' }} />
+                <h3 style={{ color: '#174D32', margin: '0 0 8px 0', fontSize: '1.2rem', fontWeight: 700 }}>Thank you for reaching out!</h3>
+                <p style={{ color: '#334155', margin: 0, fontSize: '0.95rem' }}>Your inquiry has been received. Our agrochemical team will contact you shortly.</p>
+                <button
+                  type="button"
+                  onClick={() => setSubmitted(false)}
+                  style={{
+                    marginTop: '16px',
+                    background: '#174D32',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '8px 18px',
+                    borderRadius: '6px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Send another message
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <div className="form-row">
+                  <div className="input-group">
+                    <User size={18} className="input-icon" />
+                    <input
+                      type="text"
+                      placeholder="Your Name *"
+                      required
+                      value={formData.name}
+                      onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      className="contact-input"
+                    />
+                  </div>
+                  <div className="input-group">
+                    <Mail size={18} className="input-icon" />
+                    <input
+                      type="email"
+                      placeholder="Your Email *"
+                      required
+                      value={formData.email}
+                      onChange={e => setFormData({ ...formData, email: e.target.value })}
+                      className="contact-input"
+                    />
+                  </div>
                 </div>
+                
                 <div className="input-group">
-                  <Mail size={18} className="input-icon" />
-                  <input type="email" placeholder="Your Email" className="contact-input" />
+                  <FileText size={18} className="input-icon" />
+                  <input
+                    type="text"
+                    placeholder="Subject / Product of Interest"
+                    value={formData.subject}
+                    onChange={e => setFormData({ ...formData, subject: e.target.value })}
+                    className="contact-input"
+                  />
                 </div>
-              </div>
-              
-              <div className="input-group">
-                <FileText size={18} className="input-icon" />
-                <input type="text" placeholder="Subject" className="contact-input" />
-              </div>
-              
-              <div className="input-group">
-                <MessageSquare size={18} className="input-icon" />
-                <textarea 
-                  placeholder="How can we help?" 
-                  className="contact-input contact-textarea"
-                ></textarea>
-              </div>
-              
-              <motion.button 
-                whileHover={{ scale: 1.01 }} 
-                whileTap={{ scale: 0.98 }} 
-                type="submit" 
-                className="submit-btn"
-              >
-                <Send size={18} /> SEND INQUIRY &rarr;
-              </motion.button>
-            </form>
+                
+                <div className="input-group">
+                  <MessageSquare size={18} className="input-icon" />
+                  <textarea 
+                    placeholder="How can we help?" 
+                    value={formData.message}
+                    onChange={e => setFormData({ ...formData, message: e.target.value })}
+                    className="contact-input contact-textarea"
+                    rows={4}
+                  ></textarea>
+                </div>
+                
+                <motion.button 
+                  whileHover={{ scale: 1.01 }} 
+                  whileTap={{ scale: 0.98 }} 
+                  type="submit" 
+                  className="submit-btn"
+                >
+                  <Send size={18} /> SEND INQUIRY &rarr;
+                </motion.button>
+              </form>
+            )}
           </motion.div>
 
           {/* Contact Details */}

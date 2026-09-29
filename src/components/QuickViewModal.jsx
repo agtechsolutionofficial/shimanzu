@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, MessageCircle, ZoomIn, ZoomOut } from 'lucide-react';
-import { FALLBACK_PRODUCT_IMAGE } from '../utils/imageCompressor';
+import { X, CheckCircle2, MessageCircle, ZoomIn, ZoomOut, Package } from 'lucide-react';
 import './QuickViewModal.css';
 
 const QuickViewModal = ({ product, onClose }) => {
@@ -24,19 +23,36 @@ const QuickViewModal = ({ product, onClose }) => {
           {/* Image Column */}
           <div className="modal-image-col">
             <div className="modal-img-frame">
-              <img
-                src={product.imgSrc || FALLBACK_PRODUCT_IMAGE}
-                alt={product.name}
-                className="modal-img"
-                style={{ transform: `scale(${zoom})` }}
-                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_PRODUCT_IMAGE; }}
-              />
+              {product.imgSrc ? (
+                <img
+                  src={product.imgSrc}
+                  alt={product.name}
+                  className="modal-img"
+                  style={{ transform: `scale(${zoom})` }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const ph = e.currentTarget.parentElement?.querySelector('.modal-no-img-placeholder');
+                    if (ph) ph.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div 
+                className="modal-no-img-placeholder"
+                style={{ display: product.imgSrc ? 'none' : 'flex' }}
+              >
+                <div className="modal-no-img-icon-box">
+                  <Package size={44} strokeWidth={1.5} />
+                </div>
+                <span>No Image Available</span>
+              </div>
             </div>
             {/* Zoom button */}
-            <button className="modal-zoom-btn" onClick={handleZoom} title={zoom >= 2.5 ? 'Reset zoom' : 'Zoom in'}>
-              {zoom >= 2.5 ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
-              <span>{zoom >= 2.5 ? 'Reset' : 'Zoom'}</span>
-            </button>
+            {product.imgSrc && (
+              <button className="modal-zoom-btn" onClick={handleZoom} title={zoom >= 2.5 ? 'Reset zoom' : 'Zoom in'}>
+                {zoom >= 2.5 ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
+                <span>{zoom >= 2.5 ? 'Reset' : 'Zoom'}</span>
+              </button>
+            )}
           </div>
 
           {/* Info Column */}
