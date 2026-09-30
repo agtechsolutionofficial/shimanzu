@@ -3,13 +3,16 @@ import { X, CheckCircle2, MessageCircle, ZoomIn, ZoomOut, Package } from 'lucide
 import './QuickViewModal.css';
 
 const QuickViewModal = ({ product, onClose }) => {
-  const [zoom, setZoom] = useState(1);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [transformOrigin, setTransformOrigin] = useState('center center');
 
   if (!product) return null;
 
-  const handleZoom = (e) => {
-    e.stopPropagation();
-    setZoom(prev => prev >= 2.5 ? 1 : prev + 0.4);
+  const handleMouseMove = (e) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setTransformOrigin(`${x}% ${y}%`);
   };
 
   return (
@@ -28,7 +31,17 @@ const QuickViewModal = ({ product, onClose }) => {
                   src={product.imgSrc}
                   alt={product.name}
                   className="modal-img"
-                  style={{ transform: `scale(${zoom})` }}
+                  style={{ 
+                    transform: isZoomed ? 'scale(2.5)' : 'scale(1)',
+                    transformOrigin: transformOrigin,
+                    cursor: isZoomed ? 'crosshair' : 'zoom-in'
+                  }}
+                  onMouseEnter={() => setIsZoomed(true)}
+                  onMouseLeave={() => {
+                    setIsZoomed(false);
+                    setTimeout(() => setTransformOrigin('center center'), 300);
+                  }}
+                  onMouseMove={handleMouseMove}
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     const ph = e.currentTarget.parentElement?.querySelector('.modal-no-img-placeholder');
@@ -46,13 +59,6 @@ const QuickViewModal = ({ product, onClose }) => {
                 <span>No Image Available</span>
               </div>
             </div>
-            {/* Zoom button */}
-            {product.imgSrc && (
-              <button className="modal-zoom-btn" onClick={handleZoom} title={zoom >= 2.5 ? 'Reset zoom' : 'Zoom in'}>
-                {zoom >= 2.5 ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
-                <span>{zoom >= 2.5 ? 'Reset' : 'Zoom'}</span>
-              </button>
-            )}
           </div>
 
           {/* Info Column */}
