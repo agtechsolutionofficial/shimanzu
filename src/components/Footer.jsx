@@ -65,7 +65,7 @@ const Footer = () => (
           <h4 className="footer-title">Reach Us</h4>
           <div className="contact-item">
             <MapPin size={18} className="contact-icon" />
-            <span>Plot No 271, Village Nawada, Uttam Nagar, New Delhi - 110059</span>
+            <span>Plot No. 271, Village Nawada, Uttam Nagar, New Delhi - 110059</span>
           </div>
           <div className="contact-item">
             <Phone size={18} className="contact-icon" />

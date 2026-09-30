@@ -205,7 +205,7 @@ const About = () => {
               <Award size={36} />
             </div>
             <h3 className="pillar-title">Certified Manufacturing</h3>
-            <p className="pillar-desc">ISO 9001:2015 & 14001:2015 certified plants capable of producing complex formulations (EC, SC, WG) under strict Japanese supervision.</p>
+            <p className="pillar-desc">ISO 9001:2015 & 14001:2015 certified plants capable of producing complex formulations meeting EC, SC, and WG standards under strict Japanese supervision.</p>
           </motion.div>
           
           <motion.div 
@@ -220,7 +220,7 @@ const About = () => {
               <Globe size={36} />
             </div>
             <h3 className="pillar-title">Global Supply Chain</h3>
-            <p className="pillar-desc">Exporting high-efficacy agrochemicals and rutile grade pigments to over 157 countries worldwide with guaranteed lot traceability.</p>
+            <p className="pillar-desc">Exporting high-efficacy agrochemicals and rutile-grade pigments to over 157 countries worldwide with guaranteed lot traceability.</p>
           </motion.div>
         </div>
       </div>
@@ -247,19 +247,19 @@ const About = () => {
           <div className="warehouse-stats-bar">
             <div className="wh-stat-card">
               <div className="wh-stat-number">50,000+</div>
-              <div className="wh-stat-label">SQ. FT. STORAGE AREA</div>
+              <div className="wh-stat-label">Square Feet Storage Area</div>
             </div>
             <div className="wh-stat-card">
               <div className="wh-stat-number">500+ MT</div>
-              <div className="wh-stat-label">READY INVENTORY BUFFER</div>
+              <div className="wh-stat-label">Ready Inventory Buffer</div>
             </div>
             <div className="wh-stat-card">
               <div className="wh-stat-number">100%</div>
-              <div className="wh-stat-label">BATCH TRACEABILITY</div>
+              <div className="wh-stat-label">Batch Traceability</div>
             </div>
             <div className="wh-stat-card">
               <div className="wh-stat-number">24/7</div>
-              <div className="wh-stat-label">EXPEDITED DISPATCH</div>
+              <div className="wh-stat-label">Expedited Dispatch</div>
             </div>
           </div>
 
