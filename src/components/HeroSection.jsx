@@ -7,7 +7,7 @@ import seedlingVideo from '../assets/images/Seedling_growing_from_soil-clip-1_20
 import slide2 from '../assets/images/slide2.mp4';
 import slide3 from '../assets/images/slide3.mp4';
 import slide4 from '../assets/images/slide4.mp4';
-import slide5 from '../assets/images/slide8.mp4';
+import dioxideVideo from '../assets/images/DIOXIDE VIDEO.mp4';
 import slide6 from '../assets/images/slide_6.mp4';
 
 const timeline = [
@@ -24,12 +24,12 @@ const timeline = [
     type: 'video', src: slide3, duration: 5000,
     title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow"
   },
-   { 
-    type: 'video', src: slide4, duration: 5000,
+  { 
+    type: 'video', src: dioxideVideo, duration: 5000,
     title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth"
   },
   { 
-    type: 'video', src: slide5, duration: 5000,
+    type: 'video', src: slide4, duration: 5000,
     title1: "Maximizing Yields:", title2: "Japanese Technology for", titleAccent: "Healthy Crops"
   },
   { 
