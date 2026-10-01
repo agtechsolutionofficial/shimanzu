@@ -271,7 +271,7 @@ const Products = () => {
                   <button 
                     type="button"
                     className="fmc-back-btn" 
-                    style={{ marginTop: '14px', background: '#2e7d32', borderColor: '#2e7d32' }}
+                    style={{ marginTop: '14px', background: '#2e7d32', borderColor: '#2e7d32', color: '#fff' }}
                     onClick={resetFilters}
                   >
                     Reset Filters

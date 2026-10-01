@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronDown } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import './HeroSection.css';
 
 import seedlingVideo from '../assets/images/Seedling_growing_from_soil-clip-1_20260925110529.mp4';
 import slide2 from '../assets/images/slide2.mp4';
-import slide3 from '../assets/images/slide3.mp4';
+import slide3 from '../assets/images/video_20261001_201600_edit.mp4';
 import slide4 from '../assets/images/slide4.mp4';
 import dioxideVideo from '../assets/images/DIOXIDE VIDEO.mp4';
 import slide6 from '../assets/images/slide_6.mp4';
@@ -21,7 +21,7 @@ const timeline = [
     title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth"
   },
   { 
-    type: 'video', src: slide3, duration: 5000,
+    type: 'video', src: slide3, duration: 12000,
     title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow"
   },
   { 
@@ -78,6 +78,14 @@ const HeroSection = () => {
     };
   }, [cur]);
 
+  const handleNext = () => {
+    setCur((prev) => (prev + 1) % timeline.length);
+  };
+
+  const handlePrev = () => {
+    setCur((prev) => (prev - 1 + timeline.length) % timeline.length);
+  };
+
   const scrollDown = () => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
 
   return (
@@ -108,7 +116,6 @@ const HeroSection = () => {
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  transform: 'scale(1.08) translateZ(0)',
                   backfaceVisibility: 'hidden'
                 }}
               />
@@ -157,13 +164,21 @@ const HeroSection = () => {
         </div>
 
         {/* Scroll down indicator */}
-        <button className="hero-scroll-btn" onClick={scrollDown} aria-label="Scroll down">
+       { /*<button className="hero-scroll-btn" onClick={scrollDown} aria-label="Scroll down">
           <ChevronDown size={22} />
+        </button>*/}
+
+        {/* Navigation Buttons */}
+        <button className="hero-nav-btn hero-nav-prev" onClick={handlePrev} aria-label="Previous Slide">
+          <ChevronLeft size={28} />
+        </button>
+        <button className="hero-nav-btn hero-nav-next" onClick={handleNext} aria-label="Next Slide">
+          <ChevronRight size={28} />
         </button>
 
         {/* Progress bar */}
         <div className="hero-progress">
-          <div className="hero-progress-bar" style={{ animationDuration: '33s' }} />
+          <div className="hero-progress-bar" style={{ animationDuration: '39s' }} />
         </div>
       </div>
     </section>

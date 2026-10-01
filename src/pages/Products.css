@@ -123,12 +123,18 @@
 }
 
 @media (max-width: 900px) {
-  .fmc-layout-columns { flex-direction: column; }
+  .fmc-layout-columns { 
+    flex-direction: column; 
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 .fmc-results-area {
   flex: 1;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Category Pills Bar */

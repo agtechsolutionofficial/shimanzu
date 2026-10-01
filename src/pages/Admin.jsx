@@ -1766,6 +1766,17 @@ const Admin = () => {
               </div>
 
               <div className="admin-form-group">
+                <label className="admin-form-label">Short Name (For Filters/Badges)</label>
+                <input
+                  type="text"
+                  className="admin-form-input"
+                  placeholder="e.g. Fungicides"
+                  value={categoryForm.shortName}
+                  onChange={e => setCategoryForm({ ...categoryForm, shortName: e.target.value })}
+                />
+              </div>
+
+              <div className="admin-form-group">
                 <label className="admin-form-label">Accent Color</label>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <input
