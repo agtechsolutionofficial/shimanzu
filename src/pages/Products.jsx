@@ -19,7 +19,7 @@ const Products = () => {
   const [selectedCrops, setSelectedCrops] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showCategoryCards, setShowCategoryCards] = useState(false);
+  const [showCategoryCards, setShowCategoryCards] = useState(!categoryParam);
 
   // Sync state with URL params
   useEffect(() => {
@@ -174,9 +174,10 @@ const Products = () => {
         </section>
       )}
 
-      {/* Main 2-column Catalog Layout (Always active for All Types & individual categories) */}
-      <section className="fmc-main-layout">
-        <div className="container">
+      {/* Main 2-column Catalog Layout */}
+      {!showCategoryCards && (
+        <section className="fmc-main-layout">
+          <div className="container">
           <div className="fmc-layout-columns">
             {/* Left Filter Sidebar */}
             <FilterSidebar 
@@ -282,6 +283,7 @@ const Products = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Quick View Modal */}
       {selectedProduct && (

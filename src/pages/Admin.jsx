@@ -1795,6 +1795,16 @@ const Admin = () => {
               </div>
 
               <div className="admin-form-group">
+                <label className="admin-form-label">Category Image (Upload)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="admin-form-input"
+                  onChange={e => handleImageUpload(e.target.files[0], (val) => setCategoryForm({ ...categoryForm, image: val }))}
+                />
+              </div>
+
+              <div className="admin-form-group">
                 <label className="admin-form-label">Overview Description</label>
                 <textarea
                   className="admin-form-textarea"
