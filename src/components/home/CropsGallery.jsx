@@ -2,16 +2,17 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { CROPS } from '../../data/cropsData';
+import { useDataContext } from '../../context/DataContext';
 import './CropsGallery.css';
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.07, ease: 'easeOut' } }) };
 const vp = { once: true, margin: '-50px' };
 
-// Show first 12 crops
-const DISPLAY_CROPS = CROPS.slice(0, 12);
+const CropsGallery = () => {
+  const { crops } = useDataContext();
+  const displayCrops = crops.slice(0, 12);
 
-const CropsGallery = () => (
+  return (
   <section className="crops-gallery-section">
     <div className="container">
       <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} className="crops-gallery-header">
@@ -23,7 +24,7 @@ const CropsGallery = () => (
       </motion.div>
 
       <div className="crops-gallery-grid">
-        {DISPLAY_CROPS.map((crop, i) => (
+        {displayCrops.map((crop, i) => (
           <motion.div
             key={crop.id}
             custom={i}
@@ -57,6 +58,7 @@ const CropsGallery = () => (
       </motion.div>
     </div>
   </section>
-);
+  );
+}
 
 export default CropsGallery;
