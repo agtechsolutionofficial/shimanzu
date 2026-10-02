@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Users, Globe, Leaf } from 'lucide-react';
 import './HeroSection.css';
 
 import seedlingVideo from '../assets/images/Seedling_growing_from_soil-clip-1_20260925110529.mp4';
@@ -145,19 +145,28 @@ const HeroSection = () => {
 
             {/* Stats strip */}
             <div className="hero-stats">
-              <div className="hero-stat">
-                <span className="hs-num">20,000+</span>
-                <span className="hs-label">Farmers Served</span>
+              <div className="hero-stat-wrapper">
+                <Users size={32} color="#38E54D" className="hero-stat-icon" />
+                <div className="hero-stat">
+                  <span className="hs-num">20,000+</span>
+                  <span className="hs-label">Farmers Served</span>
+                </div>
               </div>
               <div className="hero-stat-divider" />
-              <div className="hero-stat">
-                <span className="hs-num">157+</span>
-                <span className="hs-label">Export Countries</span>
+              <div className="hero-stat-wrapper">
+                <Globe size={32} color="#38E54D" className="hero-stat-icon" />
+                <div className="hero-stat">
+                  <span className="hs-num">157+</span>
+                  <span className="hs-label">Export Countries</span>
+                </div>
               </div>
               <div className="hero-stat-divider" />
-              <div className="hero-stat">
-                <span className="hs-num">200+</span>
-                <span className="hs-label">Quality Products</span>
+              <div className="hero-stat-wrapper">
+                <Leaf size={32} color="#38E54D" className="hero-stat-icon" />
+                <div className="hero-stat">
+                  <span className="hs-num">200+</span>
+                  <span className="hs-label">Quality Products</span>
+                </div>
               </div>
             </div>
           </div>

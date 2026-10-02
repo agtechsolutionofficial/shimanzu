@@ -11,7 +11,7 @@
 .blog-hero {
   position: relative;
   background-color: #F1F6F2;
-  padding: 80px 0;
+  padding: 60px 0 80px 0;
   border-bottom: 1px solid rgba(23, 77, 50, 0.1);
   overflow: hidden;
 }
