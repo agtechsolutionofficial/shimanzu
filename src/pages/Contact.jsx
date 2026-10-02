@@ -40,7 +40,7 @@ const Contact = () => {
         <div className="contact-hero-bg"></div>
         <div className="contact-hero-leaves-left"></div>
         <div className="container contact-hero-container">
-          <motion.div 
+          <motion.div
             className="contact-hero-content"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -60,9 +60,9 @@ const Contact = () => {
       {/* Main Content */}
       <div className="container">
         <div className="contact-layout">
-          
+
           {/* Contact Form Card */}
-          <motion.div 
+          <motion.div
             className="contact-form-card"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -73,7 +73,7 @@ const Contact = () => {
               <h2 className="form-title"><Leaf size={28} color="#174D32" /> Send us a Message</h2>
               <p className="form-subtitle">Your Name and Email Address help us get back to you quickly.</p>
             </div>
-            
+
             {submitted ? (
               <div style={{
                 background: 'rgba(23, 77, 50, 0.08)',
@@ -129,7 +129,7 @@ const Contact = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="input-group">
                   <FileText size={18} className="input-icon" />
                   <input
@@ -140,22 +140,22 @@ const Contact = () => {
                     className="contact-input"
                   />
                 </div>
-                
+
                 <div className="input-group">
                   <MessageSquare size={18} className="input-icon" />
-                  <textarea 
-                    placeholder="How can we help?" 
+                  <textarea
+                    placeholder="How can we help?"
                     value={formData.message}
                     onChange={e => setFormData({ ...formData, message: e.target.value })}
                     className="contact-input contact-textarea"
                     rows={4}
                   ></textarea>
                 </div>
-                
-                <motion.button 
-                  whileHover={{ scale: 1.01 }} 
-                  whileTap={{ scale: 0.98 }} 
-                  type="submit" 
+
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
                   className="submit-btn"
                 >
                   <Send size={18} /> SEND INQUIRY &rarr;
@@ -166,9 +166,9 @@ const Contact = () => {
 
           {/* Contact Details */}
           <div className="info-cards-container">
-            
+
             {/* Call Us */}
-            <motion.div 
+            <motion.div
               className="info-card"
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -188,7 +188,7 @@ const Contact = () => {
             </motion.div>
 
             {/* Email Us */}
-            <motion.div 
+            <motion.div
               className="info-card"
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -208,7 +208,7 @@ const Contact = () => {
             </motion.div>
 
             {/* Visit HQ */}
-            <motion.div 
+            <motion.div
               className="info-card"
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -220,7 +220,7 @@ const Contact = () => {
               </div>
               <div className="info-content">
                 <h3 className="info-title">Visit HQ</h3>
-                <p className="info-text-primary">Plot No 271, Village Nawada</p>
+                <p className="info-text-primary">Plot No. 271, Village Nawada</p>
                 <p className="info-text-secondary">Uttam Nagar, New Delhi - 110059</p>
               </div>
               <div className="info-card-line"></div>

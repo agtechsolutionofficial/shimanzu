@@ -1705,6 +1705,17 @@ const Admin = () => {
                 </div>
 
                 <div className="admin-form-group full">
+                  <label className="admin-form-label">Product Overview & Efficacy</label>
+                  <textarea
+                    className="admin-form-textarea"
+                    rows={3}
+                    placeholder="Detailed technical overview and advantages..."
+                    value={productForm.description}
+                    onChange={e => setProductForm({ ...productForm, description: e.target.value })}
+                  />
+                </div>
+
+                <div className="admin-form-group full">
                   <label className="admin-form-label">Update Packaging Photo</label>
                   <input
                     type="file"
