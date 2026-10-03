@@ -5,7 +5,7 @@ import './HeroSection.css';
 
 import seedlingVideo from '../assets/images/Seedling_growing_from_soil-clip-1_20260925110529.mp4';
 import slide2 from '../assets/images/slide2.mp4';
-import slide3 from '../assets/images/video_20261001_201600_edit.mp4';
+import slide3 from '../assets/images/slide3.mp4';
 import slide4 from '../assets/images/slide4.mp4';
 import dioxideVideo from '../assets/images/DIOXIDE VIDEO.mp4';
 import slide6 from '../assets/images/slide_6.mp4';
@@ -21,11 +21,11 @@ const timeline = [
     title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth"
   },
   { 
-    type: 'video', src: slide3, duration: 12000,
+    type: 'video', src: slide3, duration: 16000,
     title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow"
   },
   { 
-    type: 'video', src: dioxideVideo, duration: 5000,
+    type: 'video', src: dioxideVideo, duration: 6000,
     title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth"
   },
   { 
@@ -187,7 +187,7 @@ const HeroSection = () => {
 
         {/* Progress bar */}
         <div className="hero-progress">
-          <div className="hero-progress-bar" style={{ animationDuration: '39s' }} />
+          <div className="hero-progress-bar" style={{ animationDuration: '44s' }} />
         </div>
       </div>
     </section>
