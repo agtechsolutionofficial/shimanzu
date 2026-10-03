@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CATEGORIES as INITIAL_CATEGORIES } from '../data/categoriesData';
 import { CROPS as INITIAL_CROPS } from '../data/cropsData';
-import { PACKAGING_BOTTLES } from '../data/productsData';
-import { supabaseApi, normalizeProduct } from '../utils/supabaseClient';
+import { mongoApi, normalizeProduct, normalizeCategory } from '../utils/apiClient';
 
 const DataContext = createContext(null);
 
@@ -124,21 +122,33 @@ const resolveProductImage = (prod, customMap = null) => {
 };
 
 export const DataProvider = ({ children }) => {
-  // 1. Categories state with localStorage persistence
+  // 1. Categories state loaded directly from MongoDB Atlas (Zero static fallback)
   const [categories, setCategories] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.some(c => c.id === 'chemicals')) {
-          return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(c => ({
+            ...c,
+            image: (c.image && (String(c.image).startsWith('http') || String(c.image).startsWith('data:'))) ? c.image : ''
+          }));
         }
       }
     } catch (e) {
       console.error('Failed to load categories from localStorage', e);
     }
-    return INITIAL_CATEGORIES;
+    return [];
   });
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(false);
+  const [categoriesError, setCategoriesError] = useState(null);
+
+  const resolveCategoryImage = (cat) => {
+    if (cat?.image && (String(cat.image).startsWith('http') || String(cat.image).startsWith('data:') || String(cat.image).startsWith('blob:'))) {
+      return cat.image;
+    }
+    return '';
+  };
 
   // 2. Crops state with localStorage persistence
   const [crops, setCrops] = useState(() => {
@@ -270,45 +280,73 @@ export const DataProvider = ({ children }) => {
     return processed;
   };
 
-  // Fetch products from Supabase on mount with auto-retry if cold start / statement timeout
+  // Fetch products from MongoDB Atlas on mount
   useEffect(() => {
     let isMounted = true;
     let retryTimer = null;
 
-    const loadSupabaseProducts = async (attempt = 1) => {
+    const loadDatabaseProducts = async (attempt = 1) => {
       setIsSupabaseLoading(true);
-      const { data, error, rawCount } = await supabaseApi.getProducts();
+      const { data, error, rawCount } = await mongoApi.getProducts();
 
       if (!isMounted) return;
 
       if (error) {
         setSupabaseError(error);
-        console.warn(`Supabase products fetch (attempt ${attempt}) warning:`, error);
+        console.warn(`MongoDB products fetch (attempt ${attempt}) warning:`, error);
         setProducts(prev => (Array.isArray(prev) ? prev : []));
         
-        // If Supabase is cold starting or unfreezing, retry up to 3 times
         if (attempt < 3) {
           retryTimer = setTimeout(() => {
-            if (isMounted) loadSupabaseProducts(attempt + 1);
-          }, attempt * 3500);
+            if (isMounted) loadDatabaseProducts(attempt + 1);
+          }, attempt * 2500);
         }
       } else if (Array.isArray(data) && data.length > 0) {
         const unique = processProductsFromDb(data);
         setProducts(unique);
         setSupabaseError(null);
-        console.info(`✓ Loaded ${unique.length} live products directly from Supabase (Raw rows: ${rawCount})`);
+        console.info(`✓ Loaded ${unique.length} live products directly from MongoDB Atlas (Raw: ${rawCount})`);
       } else {
         setProducts(prev => (Array.isArray(prev) ? prev : []));
       }
       setIsSupabaseLoading(false);
     };
 
-    loadSupabaseProducts();
+    loadDatabaseProducts();
 
     return () => {
       isMounted = false;
       if (retryTimer) clearTimeout(retryTimer);
     };
+  }, []);
+
+  // Fetch categories from MongoDB Atlas on mount
+  const loadDatabaseCategories = async (attempt = 1) => {
+    setIsCategoriesLoading(true);
+    try {
+      const { data, error, rawCount } = await mongoApi.getCategories();
+      if (error) {
+        console.warn(`MongoDB categories fetch (attempt ${attempt}):`, error);
+        setCategoriesError(error);
+      } else if (Array.isArray(data) && data.length > 0) {
+        const resolved = data.map(c => ({
+          ...c,
+          image: resolveCategoryImage(c)
+        }));
+        setCategories(resolved);
+        setCategoriesError(null);
+        console.info(`✓ Loaded ${resolved.length} categories directly from MongoDB Atlas!`);
+      }
+    } catch (err) {
+      console.warn('Error loading categories from MongoDB:', err);
+      setCategoriesError(err.message);
+    } finally {
+      setIsCategoriesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDatabaseCategories();
   }, []);
 
   // 4. Admin Auth & Password state with localStorage persistence
@@ -412,30 +450,118 @@ export const DataProvider = ({ children }) => {
     }
   }, [crops]);
 
-  // CATEGORY CRUD
-  const addCategory = (newCat) => {
+  // CATEGORY CRUD (Connected to MongoDB Atlas & Cloudinary)
+  const addCategory = async (newCat) => {
     const id = newCat.id || newCat.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    let finalImg = (newCat.image || '').trim();
+
+    // If image is a base64 or blob string, upload directly to Cloudinary (folder: shimanzu_categories)
+    if (finalImg && (finalImg.startsWith('data:') || finalImg.startsWith('blob:'))) {
+      try {
+        const uploadRes = await mongoApi.uploadImageToCloudinary(finalImg, 'shimanzu_categories');
+        if (uploadRes && uploadRes.url) {
+          finalImg = uploadRes.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Cloudinary upload category error:', uploadErr);
+      }
+    }
+
     const category = {
       ...newCat,
       id,
-      shortName: newCat.shortName || newCat.name,
+      _id: id,
+      name: newCat.name.trim(),
+      shortName: newCat.shortName ? newCat.shortName.trim() : newCat.name.trim(),
       accentColor: newCat.accentColor || '#10B981',
-      image: newCat.image || 'https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?auto=format&fit=crop&w=800&q=80',
-      description: newCat.description || '',
-      fullDescription: newCat.fullDescription || newCat.description || '',
-      productCount: 0
+      image: finalImg, // Real Cloudinary URL or empty string, NO static default image!
+      description: newCat.description ? newCat.description.trim() : '',
+      fullDescription: newCat.fullDescription ? newCat.fullDescription.trim() : (newCat.description ? newCat.description.trim() : ''),
+      productCount: 0,
+      created_at: new Date().toISOString()
     };
-    setCategories(prev => [...prev, category]);
-    return category;
+
+    // 1. Optimistic UI update
+    setCategories(prev => {
+      const filtered = prev.filter(c => c.id !== id);
+      return [...filtered, category];
+    });
+
+    // 2. Persist to MongoDB Atlas
+    try {
+      const { data, error } = await mongoApi.addCategory(category);
+      if (error) {
+        console.warn('MongoDB addCategory warning:', error);
+        return { success: false, error, data: category };
+      } else if (data) {
+        setCategories(prev => prev.map(c => c.id === id ? { ...data, image: resolveCategoryImage(data) } : c));
+        return { success: true, data };
+      }
+    } catch (err) {
+      console.error('Error adding category to MongoDB:', err);
+      return { success: false, error: err.message };
+    }
+    return { success: true, data: category };
   };
 
-  const updateCategory = (id, updatedFields) => {
-    setCategories(prev => prev.map(cat => cat.id === id ? { ...cat, ...updatedFields } : cat));
+  const updateCategory = async (id, updatedFields) => {
+    let finalImg = updatedFields.image !== undefined ? (updatedFields.image || '').trim() : undefined;
+
+    // If image is a base64 or blob string, upload directly to Cloudinary (folder: shimanzu_categories)
+    if (finalImg && (finalImg.startsWith('data:') || finalImg.startsWith('blob:'))) {
+      try {
+        const uploadRes = await mongoApi.uploadImageToCloudinary(finalImg, 'shimanzu_categories');
+        if (uploadRes && uploadRes.url) {
+          finalImg = uploadRes.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Cloudinary category update upload warning:', uploadErr);
+      }
+    }
+
+    const sanitizedFields = {
+      ...updatedFields,
+      ...(finalImg !== undefined ? { image: finalImg } : {})
+    };
+    delete sanitizedFields._id;
+
+    // 1. Optimistic UI update
+    setCategories(prev => prev.map(cat => cat.id === id ? { ...cat, ...sanitizedFields } : cat));
+
+    // 2. Persist to MongoDB Atlas
+    try {
+      const { data, error } = await mongoApi.updateCategory(id, sanitizedFields);
+      if (error) {
+        console.warn('MongoDB updateCategory warning:', error);
+        return { success: false, error };
+      }
+      if (data) {
+        setCategories(prev => prev.map(cat => cat.id === id ? { ...data, image: resolveCategoryImage(data) } : cat));
+      }
+      return { success: true, data };
+    } catch (err) {
+      console.error('Error updating category in MongoDB:', err);
+      return { success: false, error: err.message };
+    }
   };
 
-  const deleteCategory = (id) => {
-    setCategories(prev => prev.filter(cat => cat.id !== id));
-    // Optional: unlink or remove products in this category or leave them
+  const deleteCategory = async (id) => {
+    try {
+      const { error } = await mongoApi.deleteCategory(id);
+      if (error) {
+        console.warn('MongoDB deleteCategory error:', error);
+        return { success: false, error };
+      }
+      setCategories(prev => prev.filter(cat => cat.id !== id));
+      return { success: true };
+    } catch (err) {
+      console.error('Error deleting category in MongoDB:', err);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const refreshCategories = () => {
+    return loadDatabaseCategories();
   };
 
   // CROP CRUD
@@ -460,9 +586,23 @@ export const DataProvider = ({ children }) => {
     setCrops(prev => prev.filter(c => c.id !== id));
   };
 
-  // PRODUCT CRUD
+  // PRODUCT CRUD (Connected to MongoDB Atlas & Cloudinary)
   const addProduct = async (newProd) => {
     const id = newProd.id || 'prod-' + Date.now();
+    let finalImg = newProd.imgSrc ? newProd.imgSrc.trim() : '';
+
+    // If image is a base64 string, upload to Cloudinary for permanent hosting
+    if (finalImg && (finalImg.startsWith('data:') || finalImg.startsWith('blob:'))) {
+      try {
+        const uploadRes = await mongoApi.uploadImageToCloudinary(finalImg);
+        if (uploadRes && uploadRes.url) {
+          finalImg = uploadRes.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Cloudinary upload warning:', uploadErr);
+      }
+    }
+
     const product = {
       ...newProd,
       id,
@@ -478,7 +618,7 @@ export const DataProvider = ({ children }) => {
       targets: newProd.targets || '',
       dosage: newProd.dosage || '',
       description: newProd.description || '',
-      imgSrc: newProd.imgSrc ? newProd.imgSrc.trim() : ''
+      imgSrc: finalImg
     };
 
     if (product.imgSrc && (product.imgSrc.startsWith('data:') || product.imgSrc.startsWith('blob:'))) {
@@ -488,12 +628,12 @@ export const DataProvider = ({ children }) => {
     // 1. Optimistic UI update
     setProducts(prev => [product, ...prev]);
 
-    // 2. Persist to Supabase
+    // 2. Persist to MongoDB Atlas
     try {
-      const { data, error } = await supabaseApi.addProduct(product);
+      const { data, error } = await mongoApi.addProduct(product);
       if (error) {
         setSupabaseError(error);
-        console.warn('Supabase addProduct failed:', error);
+        console.warn('MongoDB addProduct warning:', error);
         return { success: false, error, data: product };
       } else if (data) {
         setProducts(prev => prev.map(p => (p.id === id ? data : p)));
@@ -501,18 +641,32 @@ export const DataProvider = ({ children }) => {
       }
       return { success: true, data: product };
     } catch (err) {
-      console.error('Failed to sync added product to Supabase:', err);
+      console.error('Failed to sync added product to MongoDB:', err);
       return { success: false, error: err.message, data: product };
     }
   };
 
   const updateProduct = async (id, updatedFields) => {
     let targetUpdated = null;
+    let fieldsToUpdate = { ...updatedFields };
+
+    // If new image is base64, upload to Cloudinary
+    if (fieldsToUpdate.imgSrc && (fieldsToUpdate.imgSrc.startsWith('data:') || fieldsToUpdate.imgSrc.startsWith('blob:'))) {
+      try {
+        const uploadRes = await mongoApi.uploadImageToCloudinary(fieldsToUpdate.imgSrc);
+        if (uploadRes && uploadRes.url) {
+          fieldsToUpdate.imgSrc = uploadRes.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Cloudinary upload warning:', uploadErr);
+      }
+    }
+
     setProducts(prev => prev.map(p => {
       if (p.id === id) {
-        const updated = { ...p, ...updatedFields };
-        if (updatedFields.category && (!updatedFields.categoryLabel || updatedFields.categoryLabel === p.categoryLabel)) {
-          const cat = categories.find(c => c.id === updatedFields.category);
+        const updated = { ...p, ...fieldsToUpdate };
+        if (fieldsToUpdate.category && (!fieldsToUpdate.categoryLabel || fieldsToUpdate.categoryLabel === p.categoryLabel)) {
+          const cat = categories.find(c => c.id === fieldsToUpdate.category);
           if (cat) updated.categoryLabel = cat.name;
         }
         if (typeof updated.packSizes === 'string') {
@@ -527,24 +681,24 @@ export const DataProvider = ({ children }) => {
       return p;
     }));
 
-    if (updatedFields.imgSrc) {
-      persistCustomImage(id, updatedFields.name || targetUpdated?.name, updatedFields.imgSrc);
+    if (fieldsToUpdate.imgSrc) {
+      persistCustomImage(id, fieldsToUpdate.name || targetUpdated?.name, fieldsToUpdate.imgSrc);
     }
 
-    // Persist to Supabase
+    // Persist to MongoDB Atlas
     try {
-      const { data, error } = await supabaseApi.updateProduct(id, targetUpdated || updatedFields);
+      const { data, error } = await mongoApi.updateProduct(id, targetUpdated || fieldsToUpdate);
       if (error) {
         setSupabaseError(error);
-        console.warn('Supabase updateProduct failed:', error);
+        console.warn('MongoDB updateProduct warning:', error);
         return { success: false, error };
       } else if (data) {
         setProducts(prev => prev.map(p => (p.id === id ? data : p)));
         return { success: true, data };
       }
-      return { success: true, data: targetUpdated || updatedFields };
+      return { success: true, data: targetUpdated || fieldsToUpdate };
     } catch (err) {
-      console.error('Failed to sync updated product to Supabase:', err);
+      console.error('Failed to sync updated product to MongoDB:', err);
       return { success: false, error: err.message };
     }
   };
@@ -559,25 +713,25 @@ export const DataProvider = ({ children }) => {
       localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(map));
     } catch (e) {}
 
-    // 2. Persist to Supabase
+    // 2. Persist to MongoDB Atlas
     try {
-      const { error } = await supabaseApi.deleteProduct(id);
+      const { error } = await mongoApi.deleteProduct(id);
       if (error) {
         setSupabaseError(error);
-        console.warn('Supabase deleteProduct failed:', error);
+        console.warn('MongoDB deleteProduct warning:', error);
         return { success: false, error };
       }
       return { success: true };
     } catch (err) {
-      console.error('Failed to delete product in Supabase:', err);
+      console.error('Failed to delete product in MongoDB:', err);
       return { success: false, error: err.message };
     }
   };
 
-  // Re-fetch products from Supabase
+  // Re-fetch products from MongoDB
   const refreshProducts = async () => {
     setIsSupabaseLoading(true);
-    const { data, error, rawCount } = await supabaseApi.getProducts();
+    const { data, error, rawCount } = await mongoApi.getProducts();
     let result = { success: false };
 
     if (error) {
@@ -598,16 +752,16 @@ export const DataProvider = ({ children }) => {
     return result;
   };
 
-  // Helper to bulk seed initial products to Supabase if empty
+  // Helper to bulk seed initial products if empty
   const seedInitialProductsToSupabase = async () => {
     return 0;
   };
 
-  // Helper to remove duplicate products from Supabase database
+  // Helper to remove duplicate products from database
   const cleanDuplicateProductsInSupabase = async () => {
     setIsSupabaseLoading(true);
     try {
-      const { data, error } = await supabaseApi.getProducts();
+      const { data, error } = await mongoApi.getProducts();
       if (error || !Array.isArray(data)) {
         setIsSupabaseLoading(false);
         return { success: false, message: error || 'Failed to fetch products' };
@@ -628,11 +782,11 @@ export const DataProvider = ({ children }) => {
         }
       }
 
-      console.info(`Cleaning ${duplicatesToDelete.length} duplicates from Supabase...`);
+      console.info(`Cleaning ${duplicatesToDelete.length} duplicates from MongoDB...`);
 
       let deletedCount = 0;
       for (const id of duplicatesToDelete) {
-        const res = await supabaseApi.deleteProduct(id);
+        const res = await mongoApi.deleteProduct(id);
         if (!res.error) deletedCount++;
       }
 
@@ -651,11 +805,11 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  // Reset to initial demo catalog
+  // Reset demo catalog
   const resetToDefaultData = () => {
-    setCategories(INITIAL_CATEGORIES);
     setCrops(INITIAL_CROPS);
     setProducts([]);
+    loadDatabaseCategories();
     localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
     localStorage.removeItem(STORAGE_KEYS.CROPS);
     localStorage.removeItem('shimanzu_products_v1');
@@ -674,9 +828,14 @@ export const DataProvider = ({ children }) => {
     products,
     isSupabaseLoading,
     supabaseError,
+    isDatabaseLoading: isSupabaseLoading,
+    databaseError: supabaseError,
     refreshProducts,
     seedInitialProductsToSupabase,
     cleanDuplicateProductsInSupabase,
+    isCategoriesLoading,
+    categoriesError,
+    refreshCategories,
     addCategory,
     updateCategory,
     deleteCategory,

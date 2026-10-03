@@ -58,16 +58,28 @@ const ProductCategoriesGrid = ({ categories: propCategories, selectedCategoryId,
               >
                 {/* Left image */}
                 <div className="pcg-card-img-wrap">
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className="pcg-card-img"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?auto=format&fit=crop&w=800&q=80';
-                    }}
-                  />
+                  {cat.image ? (
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      className="pcg-card-img"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '100%',
+                      height: '100%',
+                      background: `linear-gradient(135deg, ${cat.accentColor || '#1b5e20'}22, ${cat.accentColor || '#1b5e20'}44)`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <Icon size={44} style={{ color: cat.accentColor || '#1b5e20', opacity: 0.7 }} />
+                    </div>
+                  )}
                 </div>
 
                 {/* Right content */}

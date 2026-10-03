@@ -9,7 +9,7 @@ import t2  from '../../assets/images/transparent (2).png';
 import t3  from '../../assets/images/transparent (3).png';
 import t4  from '../../assets/images/transparent (4).png';
 import t5  from '../../assets/images/transparent (5).png';
-import t6  from '../../assets/images/transparent (6).png';
+import t6  from '../../assets/images/transparent (12).png';
 import t8  from '../../assets/images/transparent (8).png';
 import t9  from '../../assets/images/transparent (9).png';
 import t10 from '../../assets/images/transparent (10).png';

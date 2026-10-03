@@ -30,6 +30,7 @@ const Admin = () => {
   const {
     categories, crops, products, queries = [],
     isSupabaseLoading, supabaseError, refreshProducts,
+    isCategoriesLoading, categoriesError, refreshCategories,
     addCategory, updateCategory, deleteCategory,
     addCrop, updateCrop, deleteCrop,
     addProduct, updateProduct, deleteProduct,
@@ -120,6 +121,7 @@ const Admin = () => {
     description: '',
     fullDescription: ''
   });
+  const [isCategorySaving, setIsCategorySaving] = useState(false);
 
   // Crop Form
   const [cropForm, setCropForm] = useState({
@@ -261,10 +263,10 @@ const Admin = () => {
 
   const openEditCategoryModal = (cat) => {
     setCategoryForm({
-      name: cat.name,
-      shortName: cat.shortName || cat.name,
+      name: cat.name || '',
+      shortName: cat.shortName || cat.name || '',
       accentColor: cat.accentColor || '#0D9488',
-      image: cat.image,
+      image: cat.image || '',
       description: cat.description || '',
       fullDescription: cat.fullDescription || cat.description || ''
     });
@@ -272,18 +274,36 @@ const Admin = () => {
     setModalMode('edit-category');
   };
 
-  const handleCategorySubmit = (e) => {
+  const handleCategorySubmit = async (e) => {
     e.preventDefault();
     if (!categoryForm.name.trim()) return alert('Category Name is required');
+    if (isCategorySaving) return;
 
-    if (modalMode === 'add-category') {
-      addCategory(categoryForm);
-      showToast({ type: 'success', text: `Category "${categoryForm.name}" created!` });
-    } else {
-      updateCategory(editingItem.id, categoryForm);
-      showToast({ type: 'success', text: `Category "${categoryForm.name}" updated!` });
+    setIsCategorySaving(true);
+    try {
+      if (modalMode === 'add-category') {
+        const res = await addCategory(categoryForm);
+        if (res && res.success === false) {
+          showToast({ type: 'error', text: `Failed to create category: ${res.error || 'Database error'}` });
+        } else {
+          showToast({ type: 'success', text: `Category "${categoryForm.name}" created and synced to MongoDB Atlas!` });
+          setModalMode(null);
+        }
+      } else {
+        const res = await updateCategory(editingItem.id, categoryForm);
+        if (res && res.success === false) {
+          showToast({ type: 'error', text: `Failed to update category: ${res.error || 'Database error'}` });
+        } else {
+          showToast({ type: 'success', text: `Category "${categoryForm.name}" updated in MongoDB Atlas!` });
+          setModalMode(null);
+        }
+      }
+    } catch (err) {
+      console.error('Error saving category:', err);
+      showToast({ type: 'error', text: `Error saving category: ${err.message}` });
+    } finally {
+      setIsCategorySaving(false);
     }
-    setModalMode(null);
   };
 
   // Crop CRUD Handlers
@@ -335,8 +355,12 @@ const Admin = () => {
       deleteCrop(item.id);
       showToast({ type: 'success', text: `Crop "${item.name}" deleted.` });
     } else if (type === 'category') {
-      deleteCategory(item.id);
-      showToast({ type: 'success', text: `Category "${item.name}" deleted.` });
+      const res = await deleteCategory(item.id);
+      if (res && res.success === false) {
+        showToast({ type: 'error', text: `Failed to delete category: ${res.error || 'Database error'}` });
+      } else {
+        showToast({ type: 'success', text: `Category "${item.name}" deleted from database.` });
+      }
     } else if (type === 'query') {
       deleteQuery(item.id);
       showToast({ type: 'success', text: `Customer query from ${item.name} removed.` });
@@ -624,10 +648,23 @@ const Admin = () => {
             )}
 
             {activeTab === 'categories' && (
-              <button className="admin-action-btn-primary" onClick={openAddCategoryModal}>
-                <Plus size={16} />
-                <span>Add Category</span>
-              </button>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  className="admin-action-btn-secondary"
+                  onClick={async () => {
+                    await refreshCategories();
+                    showToast({ type: 'success', text: 'Categories synced from MongoDB Atlas!' });
+                  }}
+                  title="Refresh categories directly from database"
+                >
+                  <RefreshCw size={15} className={isCategoriesLoading ? 'animate-spin' : ''} />
+                  <span>Sync DB</span>
+                </button>
+                <button className="admin-action-btn-primary" onClick={openAddCategoryModal}>
+                  <Plus size={16} />
+                  <span>Add Category</span>
+                </button>
+              </div>
             )}
 
             <Link to="/products" className="admin-view-site-btn" target="_blank" title="Preview public website">
@@ -1541,6 +1578,59 @@ const Admin = () => {
         {/* ===================== TAB 5: CATEGORIES ===================== */}
         {activeTab === 'categories' && (
           <div className="admin-section-wrap animate-fade-in">
+            {/* Database Sync Status Banner */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: categoriesError ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)',
+              border: `1px solid ${categoriesError ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.25)'}`,
+              borderRadius: '10px',
+              padding: '12px 18px',
+              marginBottom: '20px',
+              fontSize: '13px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  backgroundColor: categoriesError ? '#ef4444' : '#10b981',
+                  boxShadow: categoriesError ? '0 0 8px #ef4444' : '0 0 8px #10b981'
+                }} />
+                <div>
+                  <strong>{categoriesError ? 'MongoDB Connection Error' : 'MongoDB Atlas & Cloudinary Connected'}</strong>
+                  <span style={{ marginLeft: '8px', color: '#64748b' }}>
+                    {categoriesError 
+                      ? categoriesError 
+                      : `${categories.length} dynamic categories active in MongoDB Atlas. Images stored in Cloudinary.`}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  await refreshCategories();
+                  showToast({ type: 'success', text: 'Categories synced from MongoDB Atlas!' });
+                }}
+                style={{
+                  background: 'none',
+                  border: '1px solid #10b981',
+                  color: '#10b981',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <RefreshCw size={14} className={isCategoriesLoading ? 'animate-spin' : ''} /> Refresh Categories
+              </button>
+            </div>
+
             <div className="admin-categories-grid">
               {filteredCategories.length > 0 ? (
                 filteredCategories.map(cat => {
@@ -1806,13 +1896,126 @@ const Admin = () => {
               </div>
 
               <div className="admin-form-group">
-                <label className="admin-form-label">Category Image (Upload)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="admin-form-input"
-                  onChange={e => handleImageUpload(e.target.files[0], (val) => setCategoryForm({ ...categoryForm, image: val }))}
-                />
+                <label className="admin-form-label">Category Image (Upload to Cloudinary)</label>
+                <div style={{
+                  border: '1px dashed rgba(255, 255, 255, 0.2)',
+                  borderRadius: '10px',
+                  padding: '14px',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}>
+                  {categoryForm.image ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{
+                        width: '70px',
+                        height: '70px',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        background: '#070d18',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        flexShrink: 0
+                      }}>
+                        <img
+                          src={categoryForm.image}
+                          alt="Category Preview"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div style={{ flexGrow: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          {categoryForm.image.includes('cloudinary.com') ? (
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: 'rgba(16, 185, 129, 0.15)',
+                              color: '#10b981',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              fontWeight: 600
+                            }}>
+                              <CheckCircle2 size={12} /> Stored on Cloudinary
+                            </span>
+                          ) : (
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: 'rgba(56, 189, 248, 0.15)',
+                              color: '#38bdf8',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              fontWeight: 600
+                            }}>
+                              <Sparkles size={12} /> Uploads to Cloudinary on Save
+                            </span>
+                          )}
+                        </div>
+                        <p style={{ margin: 0, fontSize: '11px', color: '#94a3b8', wordBreak: 'break-all', maxHeight: '34px', overflow: 'hidden' }}>
+                          {categoryForm.image.startsWith('data:') ? 'Image selected from device' : categoryForm.image}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setCategoryForm({ ...categoryForm, image: '' })}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          color: '#ef4444',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          flexShrink: 0
+                        }}
+                      >
+                        <Trash2 size={13} /> Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '10px 0', color: '#94a3b8', fontSize: '12px' }}>
+                      <Upload size={22} style={{ color: '#10b981', margin: '0 auto 6px', display: 'block' }} />
+                      <span>No image selected. Click 'Choose File' below to pick an image.</span>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      id="category-file-input"
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => handleImageUpload(e.target.files[0], (val) => setCategoryForm({ ...categoryForm, image: val }))}
+                    />
+                    <label
+                      htmlFor="category-file-input"
+                      style={{
+                        background: '#10b981',
+                        color: '#fff',
+                        padding: '7px 16px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Upload size={14} /> {categoryForm.image ? 'Change File' : 'Choose File'}
+                    </label>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>
+                      PNG, JPG, WebP &bull; Auto-uploads to Cloudinary & saves in MongoDB
+                    </span>
+                  </div>
+                </div>
               </div>
 
               <div className="admin-form-group">
@@ -1829,8 +2032,18 @@ const Admin = () => {
                 <button type="button" className="admin-modal-cancel-btn" onClick={() => setModalMode(null)}>
                   Cancel
                 </button>
-                <button type="submit" className="admin-action-btn-primary">
-                  <Check size={16} /> Save Category
+                <button type="submit" disabled={isCategorySaving} className="admin-action-btn-primary">
+                  {isCategorySaving ? (
+                    <>
+                      <Loader2 size={16} className="admin-spin" />
+                      <span>Uploading to Cloudinary & Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check size={16} />
+                      <span>Save Category</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>
