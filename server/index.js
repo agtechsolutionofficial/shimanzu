@@ -7,9 +7,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import dns from 'node:dns';
 
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-} catch (e) {}
+// Only set custom DNS on local machines, never in production/Vercel serverless
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'production') {
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  } catch (e) {}
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,7 +56,10 @@ async function getDb() {
   if (db) return db;
   try {
     if (!mongoClient) {
-      mongoClient = new MongoClient(MONGODB_URI);
+      mongoClient = new MongoClient(MONGODB_URI, {
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 10000
+      });
       await mongoClient.connect();
       console.log('✓ Successfully connected to MongoDB Atlas (' + DB_NAME + ')');
     }
@@ -65,10 +71,12 @@ async function getDb() {
   }
 }
 
+const router = express.Router();
+
 // -------------------------------------------------------------
 // Cloudinary Upload Endpoint
 // -------------------------------------------------------------
-app.post('/api/upload', async (req, res) => {
+router.post('/upload', async (req, res) => {
   try {
     const { image, folder = 'shimanzu_products' } = req.body;
     if (!image) {
@@ -108,7 +116,6 @@ app.post('/api/upload', async (req, res) => {
       });
     } else {
       console.warn('Cloudinary upload warning:', uploadData);
-      // Fallback: Return original image so nothing breaks if Cloud Name is placeholder
       return res.json({
         success: true,
         url: image,
@@ -117,7 +124,6 @@ app.post('/api/upload', async (req, res) => {
     }
   } catch (err) {
     console.error('Upload endpoint error:', err);
-    // Graceful fallback
     return res.json({ success: true, url: req.body.image, error: err.message });
   }
 });
@@ -127,7 +133,7 @@ app.post('/api/upload', async (req, res) => {
 // -------------------------------------------------------------
 
 // GET all products
-app.get('/api/products', async (req, res) => {
+router.get('/products', async (req, res) => {
   try {
     const database = await getDb();
     const products = await database.collection('products').find({}).toArray();
@@ -140,10 +146,12 @@ app.get('/api/products', async (req, res) => {
 });
 
 // GET single product
-app.get('/api/products/:id', async (req, res) => {
+router.get('/products/:id', async (req, res) => {
   try {
     const database = await getDb();
-    const product = await database.collection('products').findOne({ id: req.params.id });
+    const product = await database.collection('products').findOne({
+      $or: [{ id: req.params.id }, { _id: req.params.id }]
+    });
     if (!product) {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }
@@ -154,7 +162,7 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 // POST add new product
-app.post('/api/products', async (req, res) => {
+router.post('/products', async (req, res) => {
   try {
     const database = await getDb();
     const prod = req.body;
@@ -168,7 +176,7 @@ app.post('/api/products', async (req, res) => {
     };
 
     await database.collection('products').updateOne(
-      { id: id },
+      { $or: [{ id: id }, { _id: id }] },
       { $set: newProduct },
       { upsert: true }
     );
@@ -181,20 +189,22 @@ app.post('/api/products', async (req, res) => {
 });
 
 // PUT update product
-app.put('/api/products/:id', async (req, res) => {
+router.put('/products/:id', async (req, res) => {
   try {
     const database = await getDb();
     const id = req.params.id;
     const updateFields = { ...req.body, updated_at: new Date().toISOString() };
     delete updateFields._id; // prevent immutable _id update error
 
-    const result = await database.collection('products').findOneAndUpdate(
-      { id: id },
-      { $set: updateFields },
-      { returnDocument: 'after' }
+    await database.collection('products').updateOne(
+      { $or: [{ id: id }, { _id: id }] },
+      { $set: updateFields }
     );
+    const updated = await database.collection('products').findOne({
+      $or: [{ id: id }, { _id: id }]
+    });
 
-    res.json({ success: true, data: result || updateFields });
+    res.json({ success: true, data: updated || updateFields });
   } catch (err) {
     console.error('Error updating product:', err);
     res.status(500).json({ success: false, error: err.message });
@@ -202,11 +212,13 @@ app.put('/api/products/:id', async (req, res) => {
 });
 
 // DELETE product
-app.delete('/api/products/:id', async (req, res) => {
+router.delete('/products/:id', async (req, res) => {
   try {
     const database = await getDb();
     const id = req.params.id;
-    await database.collection('products').deleteOne({ id: id });
+    await database.collection('products').deleteOne({
+      $or: [{ id: id }, { _id: id }]
+    });
     res.json({ success: true, message: 'Product deleted' });
   } catch (err) {
     console.error('Error deleting product:', err);
@@ -219,7 +231,7 @@ app.delete('/api/products/:id', async (req, res) => {
 // -------------------------------------------------------------
 
 // GET all categories
-app.get('/api/categories', async (req, res) => {
+router.get('/categories', async (req, res) => {
   try {
     const database = await getDb();
     const categories = await database.collection('categories').find({}).sort({ name: 1 }).toArray();
@@ -230,7 +242,7 @@ app.get('/api/categories', async (req, res) => {
 });
 
 // POST add category
-app.post('/api/categories', async (req, res) => {
+router.post('/categories', async (req, res) => {
   try {
     const database = await getDb();
     const cat = req.body;
@@ -243,7 +255,7 @@ app.post('/api/categories', async (req, res) => {
     };
 
     await database.collection('categories').updateOne(
-      { id: id },
+      { $or: [{ id: id }, { _id: id }] },
       { $set: newCategory },
       { upsert: true }
     );
@@ -255,7 +267,7 @@ app.post('/api/categories', async (req, res) => {
 });
 
 // PUT update category
-app.put('/api/categories/:id', async (req, res) => {
+router.put('/categories/:id', async (req, res) => {
   try {
     const database = await getDb();
     const id = req.params.id;
@@ -266,7 +278,9 @@ app.put('/api/categories/:id', async (req, res) => {
       { $or: [{ id: id }, { _id: id }] },
       { $set: updateFields }
     );
-    const updated = await database.collection('categories').findOne({ $or: [{ id: id }, { _id: id }] });
+    const updated = await database.collection('categories').findOne({
+      $or: [{ id: id }, { _id: id }]
+    });
 
     res.json({ success: true, data: updated || updateFields });
   } catch (err) {
@@ -275,21 +289,32 @@ app.put('/api/categories/:id', async (req, res) => {
 });
 
 // DELETE category
-app.delete('/api/categories/:id', async (req, res) => {
+router.delete('/categories/:id', async (req, res) => {
   try {
     const database = await getDb();
     const id = req.params.id;
-    await database.collection('categories').deleteOne({ $or: [{ id: id }, { _id: id }] });
+    await database.collection('categories').deleteOne({
+      $or: [{ id: id }, { _id: id }]
+    });
     res.json({ success: true, message: 'Category deleted' });
   } catch (err) {
+    console.error('Error deleting category:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
 // Health check
-app.get('/api/health', (req, res) => {
+router.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'Shimanzu API', database: 'MongoDB Atlas' });
 });
+
+router.get('/', (req, res) => {
+  res.json({ status: 'ok', service: 'Shimanzu API' });
+});
+
+// Mount router on both '/api' and '/'
+app.use('/api', router);
+app.use('/', router);
 
 export default app;
 
