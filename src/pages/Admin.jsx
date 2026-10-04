@@ -31,10 +31,12 @@ const Admin = () => {
     categories, crops, products, queries = [],
     isSupabaseLoading, supabaseError, refreshProducts,
     isCategoriesLoading, categoriesError, refreshCategories,
+    isCropsLoading, cropsError, refreshCrops,
+    isQueriesLoading, queriesError, refreshQueries,
     addCategory, updateCategory, deleteCategory,
     addCrop, updateCrop, deleteCrop,
     addProduct, updateProduct, deleteProduct,
-    updateQueryStatus, deleteQuery,
+    addQuery, updateQueryStatus, deleteQuery,
     logout, changeAdminPassword
   } = useDataContext();
 
@@ -324,16 +326,24 @@ const Admin = () => {
     setModalMode('edit-crop');
   };
 
-  const handleCropSubmit = (e) => {
+  const handleCropSubmit = async (e) => {
     e.preventDefault();
     if (!cropForm.name.trim()) return alert('Crop Name is required');
 
     if (modalMode === 'add-crop') {
-      addCrop(cropForm);
-      showToast({ type: 'success', text: `Crop "${cropForm.name}" registered!` });
+      const res = await addCrop(cropForm);
+      if (res && res.success === false) {
+        showToast({ type: 'error', text: `Failed to add crop: ${res.error || 'Database error'}` });
+      } else {
+        showToast({ type: 'success', text: `Crop "${cropForm.name}" registered and synced to MongoDB!` });
+      }
     } else {
-      updateCrop(editingItem.id, cropForm);
-      showToast({ type: 'success', text: `Crop "${cropForm.name}" updated!` });
+      const res = await updateCrop(editingItem.id, cropForm);
+      if (res && res.success === false) {
+        showToast({ type: 'error', text: `Failed to update crop: ${res.error || 'Database error'}` });
+      } else {
+        showToast({ type: 'success', text: `Crop "${cropForm.name}" updated in MongoDB Atlas!` });
+      }
     }
     setModalMode(null);
   };
@@ -352,8 +362,8 @@ const Admin = () => {
       await deleteProduct(item.id);
       showToast({ type: 'success', text: `Product "${item.name}" deleted.` });
     } else if (type === 'crop') {
-      deleteCrop(item.id);
-      showToast({ type: 'success', text: `Crop "${item.name}" deleted.` });
+      await deleteCrop(item.id);
+      showToast({ type: 'success', text: `Crop "${item.name}" deleted from MongoDB.` });
     } else if (type === 'category') {
       const res = await deleteCategory(item.id);
       if (res && res.success === false) {
@@ -362,8 +372,8 @@ const Admin = () => {
         showToast({ type: 'success', text: `Category "${item.name}" deleted from database.` });
       }
     } else if (type === 'query') {
-      deleteQuery(item.id);
-      showToast({ type: 'success', text: `Customer query from ${item.name} removed.` });
+      await deleteQuery(item.id);
+      showToast({ type: 'success', text: `Customer query from ${item.name} removed from MongoDB.` });
     }
 
     setModalMode(null);
@@ -641,9 +651,36 @@ const Admin = () => {
             )}
 
             {activeTab === 'crops' && (
-              <button className="admin-action-btn-primary" onClick={openAddCropModal}>
-                <Plus size={16} />
-                <span>Add Crop</span>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  className="admin-action-btn-secondary"
+                  onClick={async () => {
+                    await refreshCrops();
+                    showToast({ type: 'success', text: 'Crops synced from MongoDB Atlas!' });
+                  }}
+                  title="Refresh crops directly from database"
+                >
+                  <RefreshCw size={15} className={isCropsLoading ? 'animate-spin' : ''} />
+                  <span>Sync DB</span>
+                </button>
+                <button className="admin-action-btn-primary" onClick={openAddCropModal}>
+                  <Plus size={16} />
+                  <span>Add Crop</span>
+                </button>
+              </div>
+            )}
+
+            {activeTab === 'queries' && (
+              <button
+                className="admin-action-btn-secondary"
+                onClick={async () => {
+                  await refreshQueries();
+                  showToast({ type: 'success', text: 'Queries synced from MongoDB Atlas!' });
+                }}
+                title="Refresh customer leads from database"
+              >
+                <RefreshCw size={15} className={isQueriesLoading ? 'animate-spin' : ''} />
+                <span>Sync DB</span>
               </button>
             )}
 

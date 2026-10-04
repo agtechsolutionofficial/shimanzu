@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CROPS as INITIAL_CROPS } from '../data/cropsData';
-import { mongoApi, normalizeProduct, normalizeCategory } from '../utils/apiClient';
+import { mongoApi, normalizeProduct, normalizeCategory, normalizeCrop, normalizeQuery } from '../utils/apiClient';
 
 const DataContext = createContext(null);
 
@@ -13,56 +12,7 @@ const STORAGE_KEYS = {
   PASSWORD: 'shimanzu_admin_pwd_v1'
 };
 
-export const INITIAL_QUERIES = [
-  {
-    id: 'query-101',
-    name: 'Ramesh Patel',
-    email: 'ramesh.farmer@gmail.com',
-    phone: '+91 98251 44820',
-    location: 'Surat, Gujarat',
-    productInterest: 'TEBCIN (Fungicide)',
-    subject: 'Bulk order requirement for Paddy Season',
-    message: 'We require 200 Litres of TEBCIN for our co-operative paddy fields in Olpad block to control Sheath Blight. Please share dealer quotation and delivery timeline.',
-    date: '2026-09-28T14:30:00Z',
-    status: 'new'
-  },
-  {
-    id: 'query-102',
-    name: 'Vikram Singh (Agro Chem Dist.)',
-    email: 'vikram.singh@agrochemindia.com',
-    phone: '+91 94140 88219',
-    location: 'Indore, Madhya Pradesh',
-    productInterest: 'Ghiroilkona R-999 (PW)',
-    subject: 'Distributorship & 25kg Bag pricing for Coatings',
-    message: 'We are chemical stockists in Indore dealing in industrial paints and masterbatch formulations. We would like to place an initial order for 10 metric tons of Ghiroilkona R-999 Rutile Grade pigment.',
-    date: '2026-09-27T10:15:00Z',
-    status: 'contacted'
-  },
-  {
-    id: 'query-103',
-    name: 'Dr. Suresh Deshmukh',
-    email: 'suresh.horticulture@yahoo.com',
-    phone: '+91 98220 31405',
-    location: 'Nashik, Maharashtra',
-    productInterest: 'MANGO BAR (PGR)',
-    subject: 'Dosage clarification for 8-year-old Alphonso trees',
-    message: 'Can you please provide the technical bulletin and soil drenching schedule for MANGO BAR (Paclobutrazol 23% SC) for October collar drenching?',
-    date: '2026-09-26T16:45:00Z',
-    status: 'resolved'
-  },
-  {
-    id: 'query-104',
-    name: 'Harpreet Singh Mann',
-    email: 'mann.farms@outlook.com',
-    phone: '+91 98142 55901',
-    location: 'Ludhiana, Punjab',
-    productInterest: 'SHIM PYROX (Herbicide)',
-    subject: 'Wheat Phalaris minor pre-emergence application',
-    message: 'Need advice on tank mixing SHIM PYROX (Pyroxasulfone 85% WG) with other selective herbicides for zero-till wheat sowing.',
-    date: '2026-09-25T09:20:00Z',
-    status: 'new'
-  }
-];
+export const INITIAL_QUERIES = [];
 
 const CUSTOM_IMAGES_KEY = 'shimanzu_custom_product_images';
 
@@ -150,18 +100,47 @@ export const DataProvider = ({ children }) => {
     return '';
   };
 
-  // 2. Crops state with localStorage persistence
+  // 2. Crops state loaded directly from MongoDB Atlas (Zero static fallback)
   const [crops, setCrops] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CROPS);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch (e) {
       console.error('Failed to load crops from localStorage', e);
     }
-    return INITIAL_CROPS;
+    return [];
   });
+  const [isCropsLoading, setIsCropsLoading] = useState(false);
+  const [cropsError, setCropsError] = useState(null);
 
-  // 3. Customer Queries state with localStorage persistence
+  const loadDatabaseCrops = async () => {
+    setIsCropsLoading(true);
+    try {
+      const { data, error } = await mongoApi.getCrops();
+      if (error) {
+        console.warn('MongoDB crops fetch warning:', error);
+        setCropsError(error);
+      } else if (Array.isArray(data) && data.length > 0) {
+        setCrops(data);
+        setCropsError(null);
+        console.info(`✓ Loaded ${data.length} crops directly from MongoDB Atlas!`);
+      }
+    } catch (err) {
+      console.warn('Error loading crops from MongoDB:', err);
+      setCropsError(err.message);
+    } finally {
+      setIsCropsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDatabaseCrops();
+  }, []);
+
+  // 3. Customer Queries state loaded directly from MongoDB Atlas
   const [queries, setQueries] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.QUERIES);
@@ -172,8 +151,34 @@ export const DataProvider = ({ children }) => {
     } catch (e) {
       console.error('Failed to load queries from localStorage', e);
     }
-    return INITIAL_QUERIES;
+    return [];
   });
+  const [isQueriesLoading, setIsQueriesLoading] = useState(false);
+  const [queriesError, setQueriesError] = useState(null);
+
+  const loadDatabaseQueries = async () => {
+    setIsQueriesLoading(true);
+    try {
+      const { data, error } = await mongoApi.getQueries();
+      if (error) {
+        console.warn('MongoDB queries fetch warning:', error);
+        setQueriesError(error);
+      } else if (Array.isArray(data)) {
+        setQueries(data);
+        setQueriesError(null);
+        console.info(`✓ Loaded ${data.length} customer inquiries directly from MongoDB Atlas!`);
+      }
+    } catch (err) {
+      console.warn('Error loading queries from MongoDB:', err);
+      setQueriesError(err.message);
+    } finally {
+      setIsQueriesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDatabaseQueries();
+  }, []);
 
   useEffect(() => {
     try {
@@ -181,23 +186,48 @@ export const DataProvider = ({ children }) => {
     } catch (e) {}
   }, [queries]);
 
-  const addQuery = (queryData) => {
+  const addQuery = async (queryData) => {
+    const id = 'query-' + Date.now();
     const newQuery = {
       ...queryData,
-      id: 'query-' + Date.now(),
+      id,
+      _id: id,
       date: new Date().toISOString(),
       status: 'new'
     };
+    // Optimistic UI update
     setQueries(prev => [newQuery, ...prev]);
-    return newQuery;
+
+    // Persist to MongoDB Atlas
+    try {
+      const { data, error } = await mongoApi.addQuery(newQuery);
+      if (error) {
+        console.warn('Failed to save query in MongoDB:', error);
+        return { success: false, error, data: newQuery };
+      }
+      return { success: true, data: data || newQuery };
+    } catch (err) {
+      console.error('Error saving customer query to MongoDB:', err);
+      return { success: false, error: err.message, data: newQuery };
+    }
   };
 
-  const updateQueryStatus = (id, newStatus) => {
+  const updateQueryStatus = async (id, newStatus) => {
     setQueries(prev => prev.map(q => q.id === id ? { ...q, status: newStatus } : q));
+    try {
+      await mongoApi.updateQuery(id, { status: newStatus });
+    } catch (err) {
+      console.warn('Failed to update query status in MongoDB:', err);
+    }
   };
 
-  const deleteQuery = (id) => {
+  const deleteQuery = async (id) => {
     setQueries(prev => prev.filter(q => q.id !== id));
+    try {
+      await mongoApi.deleteQuery(id);
+    } catch (err) {
+      console.warn('Failed to delete query in MongoDB:', err);
+    }
   };
 
   // 3. Products state — ONLY dynamic database products (zero static data fallback)
@@ -564,26 +594,101 @@ export const DataProvider = ({ children }) => {
     return loadDatabaseCategories();
   };
 
-  // CROP CRUD
-  const addCrop = (newCrop) => {
+  // CROP CRUD (Connected to MongoDB Atlas & Cloudinary)
+  const addCrop = async (newCrop) => {
     const id = newCrop.id || newCrop.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    let finalImg = (newCrop.image || '').trim();
+
+    if (finalImg && (finalImg.startsWith('data:') || finalImg.startsWith('blob:'))) {
+      try {
+        const uploadRes = await mongoApi.uploadImageToCloudinary(finalImg, 'shimanzu_crops');
+        if (uploadRes && uploadRes.url) {
+          finalImg = uploadRes.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Cloudinary upload crop error:', uploadErr);
+      }
+    }
+
     const crop = {
       ...newCrop,
       id,
+      _id: id,
       cropKey: newCrop.cropKey || newCrop.name,
-      image: newCrop.image || 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=300&q=80',
-      description: newCrop.description || `High-potency crop protection solutions for ${newCrop.name}.`
+      image: finalImg || 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+      description: newCrop.description || `High-potency crop protection solutions for ${newCrop.name}.`,
+      created_at: new Date().toISOString()
     };
-    setCrops(prev => [...prev, crop]);
-    return crop;
+
+    setCrops(prev => {
+      const filtered = prev.filter(c => c.id !== id);
+      return [...filtered, crop];
+    });
+
+    try {
+      const { data, error } = await mongoApi.addCrop(crop);
+      if (error) {
+        console.warn('MongoDB addCrop warning:', error);
+        return { success: false, error, data: crop };
+      } else if (data) {
+        setCrops(prev => prev.map(c => c.id === id ? data : c));
+        return { success: true, data };
+      }
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+    return { success: true, data: crop };
   };
 
-  const updateCrop = (id, updatedFields) => {
-    setCrops(prev => prev.map(c => c.id === id ? { ...c, ...updatedFields } : c));
+  const updateCrop = async (id, updatedFields) => {
+    let finalImg = updatedFields.image !== undefined ? (updatedFields.image || '').trim() : undefined;
+
+    if (finalImg && (finalImg.startsWith('data:') || finalImg.startsWith('blob:'))) {
+      try {
+        const uploadRes = await mongoApi.uploadImageToCloudinary(finalImg, 'shimanzu_crops');
+        if (uploadRes && uploadRes.url) {
+          finalImg = uploadRes.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Cloudinary crop update upload warning:', uploadErr);
+      }
+    }
+
+    const sanitized = {
+      ...updatedFields,
+      ...(finalImg !== undefined ? { image: finalImg } : {})
+    };
+    delete sanitized._id;
+
+    setCrops(prev => prev.map(c => c.id === id ? { ...c, ...sanitized } : c));
+
+    try {
+      const { data, error } = await mongoApi.updateCrop(id, sanitized);
+      if (error) {
+        console.warn('MongoDB updateCrop warning:', error);
+        return { success: false, error };
+      }
+      if (data) {
+        setCrops(prev => prev.map(c => c.id === id ? data : c));
+      }
+      return { success: true, data };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   };
 
-  const deleteCrop = (id) => {
+  const deleteCrop = async (id) => {
     setCrops(prev => prev.filter(c => c.id !== id));
+    try {
+      const { error } = await mongoApi.deleteCrop(id);
+      if (error) {
+        console.warn('MongoDB deleteCrop error:', error);
+        return { success: false, error };
+      }
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   };
 
   // PRODUCT CRUD (Connected to MongoDB Atlas & Cloudinary)
@@ -807,11 +912,13 @@ export const DataProvider = ({ children }) => {
 
   // Reset demo catalog
   const resetToDefaultData = () => {
-    setCrops(INITIAL_CROPS);
-    setProducts([]);
+    loadDatabaseCrops();
     loadDatabaseCategories();
+    loadDatabaseQueries();
+    setProducts([]);
     localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
     localStorage.removeItem(STORAGE_KEYS.CROPS);
+    localStorage.removeItem(STORAGE_KEYS.QUERIES);
     localStorage.removeItem('shimanzu_products_v1');
   };
 
@@ -825,6 +932,9 @@ export const DataProvider = ({ children }) => {
     categories: dynamicCategories,
     rawCategories: categories,
     crops,
+    isCropsLoading,
+    cropsError,
+    refreshCrops: loadDatabaseCrops,
     products,
     isSupabaseLoading,
     supabaseError,
@@ -846,6 +956,9 @@ export const DataProvider = ({ children }) => {
     updateProduct,
     deleteProduct,
     queries,
+    isQueriesLoading,
+    queriesError,
+    refreshQueries: loadDatabaseQueries,
     addQuery,
     updateQueryStatus,
     deleteQuery,

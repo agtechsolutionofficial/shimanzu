@@ -12,7 +12,7 @@ import { useDataContext } from '../context/DataContext';
 import './Crops.css';
 
 const Crops = () => {
-  const { crops: CROPS, products: PRODUCTS, categories: CATEGORIES } = useDataContext();
+  const { crops: CROPS, products: PRODUCTS, categories: CATEGORIES, isCropsLoading } = useDataContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const cropParam = searchParams.get('crop');
 
@@ -200,7 +200,11 @@ const Crops = () => {
                 </p>
               </div>
 
-              {filteredCropsList.length > 0 ? (
+              {isCropsLoading && CROPS.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '60px 20px', color: '#10B981' }}>
+                  <div style={{ fontSize: '18px', fontWeight: 600 }}>Loading crops directory from MongoDB Atlas...</div>
+                </div>
+              ) : filteredCropsList.length > 0 ? (
                 <div className="crop-cards-grid">
                   {filteredCropsList.map((crop, index) => {
                     const count = getProductCountForCrop(crop);

@@ -121,6 +121,41 @@ export const normalizeCategory = (row) => {
   };
 };
 
+export const normalizeCrop = (row) => {
+  if (!row) return null;
+  const id = String(row.id || row._id || '').trim();
+  const name = String(row.name || '').trim();
+  if (!id && !name) return null;
+
+  return {
+    id: id || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    _id: id || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    name: name || id,
+    cropKey: String(row.cropKey || row.crop_key || name || '').trim(),
+    image: String(row.image || row.image_url || row.imgSrc || '').trim(),
+    description: String(row.description || '').trim(),
+    createdAt: row.created_at || row.createdAt || null
+  };
+};
+
+export const normalizeQuery = (row) => {
+  if (!row) return null;
+  const id = String(row.id || row._id || '').trim();
+  return {
+    id: id || ('query-' + Date.now()),
+    _id: id || ('query-' + Date.now()),
+    name: String(row.name || 'Anonymous User').trim(),
+    email: String(row.email || '').trim(),
+    phone: String(row.phone || 'Not specified').trim(),
+    location: String(row.location || 'Website Lead').trim(),
+    productInterest: String(row.productInterest || row.product_interest || 'General Inquiry').trim(),
+    subject: String(row.subject || 'Contact Inquiry').trim(),
+    message: String(row.message || '').trim(),
+    date: row.date || row.created_at || new Date().toISOString(),
+    status: String(row.status || 'new').toLowerCase().trim()
+  };
+};
+
 export const mongoApi = {
   // Fetch all products from MongoDB Atlas
   async getProducts() {
@@ -279,6 +314,127 @@ export const mongoApi = {
     } catch (err) {
       console.warn('Cloudinary upload error, using raw image:', err.message);
       return { url: imageData, error: err.message };
+    }
+  },
+
+  // -----------------------------------------------------------
+  // Crops API Endpoints (MongoDB Atlas)
+  // -----------------------------------------------------------
+  async getCrops() {
+    try {
+      const res = await fetch(`${API_BASE}/crops`);
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const json = await res.json();
+      const rows = json.data || [];
+      const normalized = Array.isArray(rows) ? rows.map(normalizeCrop).filter(Boolean) : [];
+      return { data: normalized, error: null, count: normalized.length };
+    } catch (err) {
+      console.warn('MongoDB API getCrops error:', err.message);
+      return { data: null, error: err.message, count: 0 };
+    }
+  },
+
+  async addCrop(crop) {
+    try {
+      const res = await fetch(`${API_BASE}/crops`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(crop)
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to add crop');
+      return { data: normalizeCrop(json.data), error: null };
+    } catch (err) {
+      return { data: null, error: err.message };
+    }
+  },
+
+  async updateCrop(id, updatedFields) {
+    try {
+      const res = await fetch(`${API_BASE}/crops/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFields)
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to update crop');
+      return { data: normalizeCrop(json.data), error: null };
+    } catch (err) {
+      return { data: null, error: err.message };
+    }
+  },
+
+  async deleteCrop(id) {
+    try {
+      const res = await fetch(`${API_BASE}/crops/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to delete crop');
+      return { error: null };
+    } catch (err) {
+      return { error: err.message };
+    }
+  },
+
+  // -----------------------------------------------------------
+  // Customer Queries API Endpoints (MongoDB Atlas)
+  // -----------------------------------------------------------
+  async getQueries() {
+    try {
+      const res = await fetch(`${API_BASE}/queries`);
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const json = await res.json();
+      const rows = json.data || [];
+      const normalized = Array.isArray(rows) ? rows.map(normalizeQuery).filter(Boolean) : [];
+      return { data: normalized, error: null, count: normalized.length };
+    } catch (err) {
+      console.warn('MongoDB API getQueries error:', err.message);
+      return { data: null, error: err.message, count: 0 };
+    }
+  },
+
+  async addQuery(query) {
+    try {
+      const res = await fetch(`${API_BASE}/queries`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(query)
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to submit inquiry');
+      return { data: normalizeQuery(json.data), error: null };
+    } catch (err) {
+      console.warn('MongoDB API addQuery error:', err.message);
+      return { data: null, error: err.message };
+    }
+  },
+
+  async updateQuery(id, updatedFields) {
+    try {
+      const res = await fetch(`${API_BASE}/queries/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFields)
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to update inquiry');
+      return { data: normalizeQuery(json.data), error: null };
+    } catch (err) {
+      return { data: null, error: err.message };
+    }
+  },
+
+  async deleteQuery(id) {
+    try {
+      const res = await fetch(`${API_BASE}/queries/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to delete inquiry');
+      return { error: null };
+    } catch (err) {
+      return { error: err.message };
     }
   }
 };

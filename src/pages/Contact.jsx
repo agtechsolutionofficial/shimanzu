@@ -14,23 +14,31 @@ const Contact = () => {
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim()) return;
+    if (!formData.name.trim() || !formData.email.trim() || isSubmitting) return;
 
-    addQuery({
-      name: formData.name.trim(),
-      email: formData.email.trim(),
-      phone: formData.phone.trim() || 'Not specified',
-      location: 'Website Lead',
-      productInterest: formData.subject.trim() || 'General Inquiry',
-      subject: formData.subject.trim() || 'Contact Form Submission',
-      message: formData.message.trim() || 'Customer requested assistance via contact page.'
-    });
+    setIsSubmitting(true);
+    try {
+      await addQuery({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || 'Not specified',
+        location: 'Website Lead',
+        productInterest: formData.subject.trim() || 'General Inquiry',
+        subject: formData.subject.trim() || 'Contact Form Submission',
+        message: formData.message.trim() || 'Customer requested assistance via contact page.'
+      });
 
-    setSubmitted(true);
-    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+      setSubmitted(true);
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    } catch (err) {
+      console.error('Error submitting inquiry:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -156,9 +164,11 @@ const Contact = () => {
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
+                  disabled={isSubmitting}
                   className="submit-btn"
+                  style={{ opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'wait' : 'pointer' }}
                 >
-                  <Send size={18} /> SEND INQUIRY &rarr;
+                  <Send size={18} /> {isSubmitting ? 'SENDING...' : 'SEND INQUIRY →'}
                 </motion.button>
               </form>
             )}

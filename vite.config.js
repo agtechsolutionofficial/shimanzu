@@ -9,7 +9,7 @@ export default defineConfig({
     {
       name: 'api-server-middleware',
       configureServer(server) {
-        server.middlewares.use(apiApp);
+        server.middlewares.use('/api', apiApp);
       }
     }
   ],
