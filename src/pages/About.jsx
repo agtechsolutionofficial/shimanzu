@@ -10,7 +10,12 @@ import {
   Award,
   Globe,
   Leaf,
-  ArrowRight
+  ArrowRight,
+  Shield,
+  Eye,
+  Activity,
+  HeartHandshake,
+  CheckCircle
 } from 'lucide-react';
 import './About.css';
 
@@ -139,88 +144,134 @@ const About = () => {
             viewport={vp}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <span className="section-pill-badge" style={{ marginBottom: '14px', display: 'inline-block', background: '#E8F5E9', color: '#174D32', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1.5px', padding: '4px 14px', borderRadius: '9999px', border: '1px solid #2E7D32' }}>OUR HERITAGE</span>
-            <h2 className="h3" style={{ color: '#081B10', marginBottom: '20px' }}>Our Legacy of Quality & Precision</h2>
+            <span className="section-pill-badge" style={{ marginBottom: '14px', display: 'inline-block', background: '#E8F5E9', color: '#174D32', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1.5px', padding: '4px 14px', borderRadius: '9999px', border: '1px solid #2E7D32' }}>ABOUT US</span>
+            <h2 className="h3" style={{ color: '#081B10', marginBottom: '20px' }}>Growing Agriculture. Empowering Farmers. Building a Better Future.</h2>
             <p className="text-secondary" style={{ marginBottom: '16px', lineHeight: '1.8' }}>
-              Shimanzu Chemicals Private Limited is committed to bringing the pinnacle of Japanese agricultural technology to farmers across India and the globe. By establishing state-of-the-art manufacturing plants, we ensure that every formulation meets the highest standards of purity, efficacy, and environmental safety.
+              Shimanzu Chemicals Private Limited is a professionally managed agricultural solutions company committed to delivering innovative, reliable, and quality-driven solutions for modern farming. Our objective is to support farmers with effective agricultural products that help protect crops, improve plant health, enhance productivity, and contribute to better farm outcomes.
+            </p>
+            <p className="text-secondary" style={{ lineHeight: '1.8', marginBottom: '16px' }}>
+              We understand that agriculture is more than just a profession—it is the foundation of our society and economy. With this belief, we work towards developing and delivering solutions that address the changing requirements of farmers and modern agricultural practices.
             </p>
             <p className="text-secondary" style={{ lineHeight: '1.8', marginBottom: '28px' }}>
-              Our mission is to enhance crop productivity, maximize farm income, and champion sustainable agriculture through our robust nationwide network of dealers, distributors, and certified agronomists.
+              At Shimanzu Chemicals, quality, innovation, farmer satisfaction, and integrity are at the core of our business. We continuously focus on product development, quality standards, technical knowledge, and market understanding to provide dependable solutions to the agricultural community.
             </p>
+          </motion.div>
+        </div>
+      </div>
 
-            {/* Mission & Vision cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '24px' }}>
-              <div style={{ background: 'rgba(27,94,32,0.15)', borderRadius: '12px', padding: '16px', borderLeft: '3px solid #66BB6A' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#66BB6A', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Our Mission</div>
-                <p style={{ fontSize: '0.82rem', color: '#90A4AE', lineHeight: '1.6' }}>To empower every farmer with scientifically advanced, safe, and effective agrochemical solutions that maximize yield and promote sustainable land stewardship.</p>
-               </div>
-              <div style={{ background: 'rgba(27,94,32,0.15)', borderRadius: '12px', padding: '16px', borderLeft: '3px solid #66BB6A' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#66BB6A', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Our Vision</div>
-                <p style={{ fontSize: '0.82rem', color: '#90A4AE', lineHeight: '1.6' }}>To be the most trusted agricultural chemical company in Asia, recognized for Japanese precision, product integrity, and farmer-first innovation.</p>
-               </div>
+      {/* Vision & Mission Section styled like reference image */}
+      <section className="vision-mission-section" style={{ padding: '80px 0', background: '#F8FAF8' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#E8F5E9', color: '#10B981', padding: '8px 20px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '16px' }}>
+              <Shield size={16} /> OUR PURPOSE
+            </span>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#081B10' }}>Vision & Mission</h2>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', alignItems: 'stretch' }}>
+            {/* Vision Card */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={vp}
+              transition={{ duration: 0.5 }}
+              style={{ background: '#10B981', borderRadius: '32px', padding: '48px', color: '#fff', boxShadow: '0 20px 40px rgba(16, 185, 129, 0.15)' }}
+            >
+              <div style={{ width: '64px', height: '64px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px' }}>
+                <Eye size={32} color="#fff" />
+              </div>
+              <h3 style={{ fontSize: '2.3rem', fontWeight: 700, marginBottom: '24px' }}>Our Vision</h3>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.8', opacity: 0.95 }}>
+                To become a trusted and recognized name in the agricultural industry by delivering innovative, effective, and quality-driven solutions that contribute to healthier crops, better productivity, and a prosperous farming community.
+              </p>
+            </motion.div>
+
+            {/* Mission Card */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={vp}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              style={{ background: '#10B981', borderRadius: '32px', padding: '48px', color: '#fff', boxShadow: '0 20px 40px rgba(16, 185, 129, 0.15)' }}
+            >
+              <div style={{ width: '64px', height: '64px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px' }}>
+                <Activity size={32} color="#fff" />
+              </div>
+              <h3 style={{ fontSize: '2.3rem', fontWeight: 700, marginBottom: '24px' }}>Our Mission</h3>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.8', opacity: 0.95 }}>
+                Our mission is to provide farmers with reliable agricultural solutions that combine quality, innovation, technology, and value. We strive to continuously improve our products and services while building strong and long-lasting relationships with farmers, dealers, distributors, and agricultural partners.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Values / Approach Section */}
+      <div className="container" style={{ padding: '80px 0' }}>
+        <div className="grid grid-cols-3 gap-8" style={{ marginBottom: '60px' }}>
+          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} className="pillar-card">
+            <div className="pillar-icon">
+              <Award size={36} />
             </div>
+            <h3 className="pillar-title">Our Commitment to Quality</h3>
+            <p className="pillar-desc" style={{ marginBottom: '16px' }}>Quality is an integral part of everything we do. We believe that agricultural products must meet high standards of performance, consistency, and reliability. Our approach focuses on maintaining quality throughout the product journey—from product development and sourcing to manufacturing, packaging, and delivery.</p>
+            <p className="pillar-desc">We are committed to continuous improvement and responsible business practices so that our customers can place their trust in Shimanzu Chemicals.</p>
+          </motion.div>
+          
+          <motion.div variants={fadeUp} custom={1} initial="hidden" whileInView="visible" viewport={vp} className="pillar-card">
+            <div className="pillar-icon">
+              <FlaskConical size={36} />
+            </div>
+            <h3 className="pillar-title">Innovation for Modern Agriculture</h3>
+            <p className="pillar-desc" style={{ marginBottom: '16px' }}>Agriculture is continuously evolving, and so are the challenges faced by farmers. At Shimanzu Chemicals, we believe in embracing innovation and modern agricultural technologies to develop solutions that are relevant to today’s farming needs.</p>
+            <p className="pillar-desc">Our focus is to provide practical and effective solutions that can help farmers manage crop challenges efficiently and move towards more productive and sustainable farming practices.</p>
+          </motion.div>
+          
+          <motion.div variants={fadeUp} custom={2} initial="hidden" whileInView="visible" viewport={vp} className="pillar-card">
+            <div className="pillar-icon">
+              <HeartHandshake size={36} />
+            </div>
+            <h3 className="pillar-title">Farmer-Centric Approach</h3>
+            <p className="pillar-desc" style={{ marginBottom: '16px' }}>Farmers are at the heart of our business. We believe that understanding their real-world challenges is essential to creating meaningful agricultural solutions.</p>
+            <p className="pillar-desc">We work with a farmer-first approach, focusing on product quality, performance, accessibility, technical support, and customer satisfaction. Our aim is not simply to provide products, but to build lasting relationships and contribute to the success of the farming community.</p>
+          </motion.div>
+        </div>
 
-            {/* Highlights */}
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {/* Why Choose & Promise */}
+        <div className="grid grid-cols-2 gap-12 items-center" style={{ marginTop: '80px' }}>
+          <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={vp} transition={{ duration: 0.6 }}>
+            <h2 className="h3" style={{ color: '#081B10', marginBottom: '24px' }}>Why Choose Shimanzu Chemicals?</h2>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {[
-                { icon: <FlaskConical size={15} />, text: 'Advanced GLC, HPLC & UV molecular testing' },
-                { icon: <Award size={15} />, text: 'ISO 9001:2015 & 14001:2015 certified manufacturing' },
-                { icon: <Globe size={15} />, text: 'Exporting to 157+ countries worldwide' },
-                { icon: <CheckCircle2 size={15} />, text: 'Complex formulations: EC, SC, WG standards' },
-              ].map((h, i) => (
-                <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#CBD5E1', fontWeight: 500 }}>
-                  <span style={{ color: '#66BB6A', flexShrink: 0 }}>{h.icon}</span>
-                  {h.text}
+                'Quality-Focused Products',
+                'Innovation & Technology',
+                'Farmer-Centric Approach',
+                'Reliable Agricultural Solutions',
+                'Strong Industry Commitment',
+                'Continuous Product Improvement',
+                'Long-Term Customer Relationships'
+              ].map((text, i) => (
+                <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.05rem', color: '#455A64', fontWeight: 500 }}>
+                  <CheckCircle size={20} color="#10B981" style={{ flexShrink: 0 }} />
+                  {text}
                 </li>
               ))}
             </ul>
           </motion.div>
-        </div>
 
-        {/* 3 Pillars */}
-        <div className="grid grid-cols-3 gap-8 text-center" style={{ marginBottom: '90px' }}>
-          <motion.div 
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={vp}
-            className="pillar-card"
-          >
-            <div className="pillar-icon">
-              <FlaskConical size={36} />
+          <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={vp} transition={{ duration: 0.6 }} style={{ background: '#E8F5E9', padding: '40px', borderRadius: '24px', border: '1px solid #C8E6C9' }}>
+            <h2 className="h3" style={{ color: '#081B10', marginBottom: '20px' }}>Our Promise</h2>
+            <p className="text-secondary" style={{ marginBottom: '16px', lineHeight: '1.8', color: '#2E7D32' }}>
+              At Shimanzu Chemicals Private Limited, our promise is to continuously work towards delivering quality agricultural solutions with integrity, responsibility, and innovation.
+            </p>
+            <p className="text-secondary" style={{ marginBottom: '24px', lineHeight: '1.8', color: '#2E7D32' }}>
+              We envision a future where farmers have access to dependable solutions that help them cultivate healthier crops, improve productivity, and create greater value from their farming efforts.
+            </p>
+            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1B5E20', borderTop: '1px solid rgba(46, 125, 50, 0.2)', paddingTop: '20px' }}>
+              Shimanzu Chemicals Private Limited —<br/>
+              Growing with Farmers, Growing with Agriculture.
             </div>
-            <h3 className="pillar-title">R&D Infrastructure</h3>
-            <p className="pillar-desc">Equipped with advanced GLC, HPLC, and UV testing capabilities ensuring 100% molecular purity and formulation stability.</p>
-          </motion.div>
-          
-          <motion.div 
-            variants={fadeUp}
-            custom={1}
-            initial="hidden"
-            whileInView="visible"
-            viewport={vp}
-            className="pillar-card"
-          >
-            <div className="pillar-icon">
-              <Award size={36} />
-            </div>
-            <h3 className="pillar-title">Certified Manufacturing</h3>
-            <p className="pillar-desc">ISO 9001:2015 & 14001:2015 certified plants capable of producing complex formulations meeting EC, SC, and WG standards under strict Japanese supervision.</p>
-          </motion.div>
-          
-          <motion.div 
-            variants={fadeUp}
-            custom={2}
-            initial="hidden"
-            whileInView="visible"
-            viewport={vp}
-            className="pillar-card"
-          >
-            <div className="pillar-icon">
-              <Globe size={36} />
-            </div>
-            <h3 className="pillar-title">Global Supply Chain</h3>
-            <p className="pillar-desc">Exporting high-efficacy agrochemicals and rutile-grade pigments to over 157 countries worldwide with guaranteed lot traceability.</p>
           </motion.div>
         </div>
       </div>

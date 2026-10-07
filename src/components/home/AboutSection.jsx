@@ -12,10 +12,10 @@ const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: (i = 0) => ({ opacity: 
 const vp = { once: true, margin: '-60px' };
 
 const highlights = [
-  { icon: <FlaskConical size={18} />, text: 'Advanced GLC, HPLC & UV molecular testing' },
-  { icon: <Leaf size={18} />, text: 'ISO 9001:2015 & 14001:2015 certified manufacturing' },
-  { icon: <Globe size={18} />, text: 'Exporting to 157+ countries worldwide' },
-  { icon: <CheckCircle2 size={18} />, text: 'Complex formulations: EC, SC, WG standards' },
+  { icon: <CheckCircle2 size={18} />, text: 'Quality-Focused Products & Reliable Solutions' },
+  { icon: <CheckCircle2 size={18} />, text: 'Innovation & Technology Driven' },
+  { icon: <CheckCircle2 size={18} />, text: 'Farmer-Centric Approach' },
+  { icon: <CheckCircle2 size={18} />, text: 'Continuous Product Improvement' },
 ];
 
 const AboutSection = () => (
@@ -53,23 +53,23 @@ const AboutSection = () => (
         {/* Right: Content */}
         <motion.div variants={fadeRight} initial="hidden" whileInView="visible" viewport={vp} className="about-content-col">
           <h2 className="about-home-heading">
-            Pioneering Japanese Agricultural Science for Indian Farmers
+            Growing Agriculture. Empowering Farmers. Building a Better Future.
           </h2>
           <p className="about-home-para">
-            Shimanzu Chemicals Private Limited is committed to bringing the pinnacle of Japanese agricultural technology to farmers across India and the globe. By establishing state-of-the-art manufacturing plants, we ensure that every formulation meets the highest standards of purity, efficacy, and environmental safety.
+            Shimanzu Chemicals Private Limited is a professionally managed agricultural solutions company committed to delivering innovative, reliable, and quality-driven solutions for modern farming.
           </p>
           <p className="about-home-para">
-            Our mission is to enhance crop productivity, maximize farm income, and champion sustainable agriculture through our robust nationwide network of dealers, distributors, and certified agronomists.
+            We understand that agriculture is more than just a profession—it is the foundation of our society and economy. At Shimanzu Chemicals, quality, innovation, farmer satisfaction, and integrity are at the core of our business.
           </p>
 
           <div className="about-mission-vision">
             <div className="mv-card">
-              <h4 className="mv-title">Our Mission</h4>
-              <p className="mv-text">To empower every farmer with scientifically advanced, safe, and effective agrochemical solutions that maximize yield and promote sustainable land stewardship.</p>
+              <h4 className="mv-title">Our Vision</h4>
+              <p className="mv-text">To become a trusted and recognized name in the agricultural industry by delivering innovative, effective, and quality-driven solutions that contribute to healthier crops, better productivity, and a prosperous farming community.</p>
             </div>
             <div className="mv-card">
-              <h4 className="mv-title">Our Vision</h4>
-              <p className="mv-text">To be the most trusted agricultural chemical company in Asia, recognized for Japanese precision, product integrity, and farmer-first innovation.</p>
+              <h4 className="mv-title">Our Mission</h4>
+              <p className="mv-text">To provide farmers with reliable agricultural solutions that combine quality, innovation, technology, and value. We strive to build strong and long-lasting relationships with farmers, dealers, and agricultural partners.</p>
             </div>
           </div>
 
