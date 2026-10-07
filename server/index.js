@@ -67,6 +67,8 @@ async function getDb() {
     // Background ensure collections
     ensureCropsCollection(db).catch(e => console.warn('Auto-seed crops warning:', e.message));
     ensureQueriesCollection(db).catch(e => console.warn('Auto-seed queries warning:', e.message));
+    ensureGalleryCollection(db).catch(e => console.warn('Auto-seed gallery warning:', e.message));
+    ensureBlogsCollection(db).catch(e => console.warn('Auto-seed blogs warning:', e.message));
     return db;
   } catch (err) {
     console.error('MongoDB connection error:', err.message);
@@ -778,6 +780,421 @@ router.delete('/queries/:id', async (req, res) => {
     res.json({ success: true, message: 'Query deleted' });
   } catch (err) {
     console.error('Error deleting query:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// -------------------------------------------------------------
+// Gallery Endpoints (MongoDB Atlas & Cloudinary)
+// -------------------------------------------------------------
+
+const INITIAL_GALLERY_DATA = [
+  // Field & Crops
+  { id: 'gal-1',  cat: 'field',    title: 'Precision Spraying',       tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/2132250/pexels-photo-2132250.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-2',  cat: 'field',    title: 'Green Crop Fields',        tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-3',  cat: 'field',    title: 'Rice Plantation',          tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/1595104/pexels-photo-1595104.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-4',  cat: 'field',    title: 'Tractor Operations',       tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/2933243/pexels-photo-2933243.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-5',  cat: 'field',    title: 'Seedling Growth',          tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/1084540/pexels-photo-1084540.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-6',  cat: 'field',    title: 'Wheat Harvest',            tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/326082/pexels-photo-326082.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-7',  cat: 'field',    title: 'Drone Agri Technology',    tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/3943716/pexels-photo-3943716.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-8',  cat: 'field',    title: 'Irrigation Systems',       tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/440731/pexels-photo-440731.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-9',  cat: 'field',    title: 'Sustainable Farming',      tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/1382102/pexels-photo-1382102.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-10', cat: 'field',    title: 'Crop Monitoring',          tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/2165688/pexels-photo-2165688.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-11', cat: 'field',    title: 'Vegetable Farming',        tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/1656663/pexels-photo-1656663.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-12', cat: 'field',    title: 'Modern Agriculture',       tag: 'Field & Crops',  src: 'https://images.pexels.com/photos/2886937/pexels-photo-2886937.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  // Lab & Research
+  { id: 'gal-13', cat: 'lab',      title: 'Laboratory Testing',       tag: 'Lab & Research', src: 'https://images.pexels.com/photos/954583/pexels-photo-954583.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-14', cat: 'lab',      title: 'Chemical Analysis',        tag: 'Lab & Research', src: 'https://images.pexels.com/photos/3735218/pexels-photo-3735218.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-15', cat: 'lab',      title: 'Quality Control',          tag: 'Lab & Research', src: 'https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-16', cat: 'lab',      title: 'Molecular Research',       tag: 'Lab & Research', src: 'https://images.pexels.com/photos/3825527/pexels-photo-3825527.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-17', cat: 'lab',      title: 'Formulation Development',  tag: 'Lab & Research', src: 'https://images.pexels.com/photos/1366942/pexels-photo-1366942.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-18', cat: 'lab',      title: 'HPLC Analysis',            tag: 'Lab & Research', src: 'https://images.pexels.com/photos/2280549/pexels-photo-2280549.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  // Products
+  { id: 'gal-19', cat: 'products', title: 'Agrochemical Solutions',   tag: 'Products',       src: 'https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-20', cat: 'products', title: 'Crop Protection Range',    tag: 'Products',       src: 'https://images.pexels.com/photos/4503273/pexels-photo-4503273.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-21', cat: 'products', title: 'Herbicide Formulations',   tag: 'Products',       src: 'https://images.pexels.com/photos/4503267/pexels-photo-4503267.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-22', cat: 'products', title: 'Fungicide Series',         tag: 'Products',       src: 'https://images.pexels.com/photos/4503734/pexels-photo-4503734.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-23', cat: 'products', title: 'Insecticide Range',        tag: 'Products',       src: 'https://images.pexels.com/photos/4503271/pexels-photo-4503271.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  { id: 'gal-24', cat: 'products', title: 'Bio-Stimulants',           tag: 'Products',       src: 'https://images.pexels.com/photos/4503269/pexels-photo-4503269.jpeg?auto=compress&cs=tinysrgb&w=800' }
+];
+
+let isGallerySeeded = false;
+async function ensureGalleryCollection(database) {
+  if (isGallerySeeded) return;
+  try {
+    const collection = database.collection('gallery');
+    const count = await collection.countDocuments();
+    if (count === 0) {
+      console.log('📷 Seeding gallery collection into MongoDB Atlas...');
+      for (const item of INITIAL_GALLERY_DATA) {
+        let finalSrc = item.src;
+        // Optionally upload to Cloudinary if not already on Cloudinary
+        if (finalSrc && !finalSrc.includes('res.cloudinary.com')) {
+          try {
+            const uploadedUrl = await uploadToCloudinary(finalSrc, 'shimanzu_gallery', `gal_${item.id}`);
+            if (uploadedUrl && uploadedUrl.startsWith('http')) {
+              finalSrc = uploadedUrl;
+            }
+          } catch (e) {
+            console.warn('Initial gallery upload warning:', e.message);
+          }
+        }
+        await collection.updateOne(
+          { $or: [{ id: item.id }, { _id: item.id }] },
+          {
+            $set: {
+              ...item,
+              _id: item.id,
+              src: finalSrc,
+              created_at: new Date().toISOString()
+            }
+          },
+          { upsert: true }
+        );
+      }
+      console.log(`✓ Seeded ${INITIAL_GALLERY_DATA.length} gallery images into MongoDB Atlas!`);
+    }
+    isGallerySeeded = true;
+  } catch (err) {
+    console.warn('ensureGalleryCollection error:', err.message);
+  }
+}
+
+// GET all gallery items
+router.get('/gallery', async (req, res) => {
+  try {
+    const database = await getDb();
+    await ensureGalleryCollection(database);
+    const gallery = await database.collection('gallery').find({}).toArray();
+    // Default sort by id or created_at
+    gallery.sort((a, b) => {
+      const numA = parseInt((a.id || '').replace(/\D/g, ''), 10) || 0;
+      const numB = parseInt((b.id || '').replace(/\D/g, ''), 10) || 0;
+      return numA - numB;
+    });
+    res.json({ success: true, data: gallery, count: gallery.length });
+  } catch (err) {
+    console.error('Error fetching gallery:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET single gallery item
+router.get('/gallery/:id', async (req, res) => {
+  try {
+    const database = await getDb();
+    const id = req.params.id;
+    const item = await database.collection('gallery').findOne({
+      $or: [{ id: id }, { _id: id }]
+    });
+    if (!item) {
+      return res.status(404).json({ success: false, error: 'Gallery photo not found' });
+    }
+    res.json({ success: true, data: item });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST add gallery item
+router.post('/gallery', async (req, res) => {
+  try {
+    const database = await getDb();
+    const item = req.body;
+    const id = item.id || 'gal-' + Date.now();
+    let finalSrc = (item.src || '').trim();
+
+    // If image is base64 data URI or needs Cloudinary upload
+    if (finalSrc && (finalSrc.startsWith('data:') || finalSrc.startsWith('blob:'))) {
+      finalSrc = await uploadToCloudinary(finalSrc, 'shimanzu_gallery', `gal_${id}_${Date.now()}`);
+    }
+
+    const newGalleryItem = {
+      ...item,
+      id,
+      _id: id,
+      title: (item.title || 'Untitled Photo').trim(),
+      cat: (item.cat || 'field').trim().toLowerCase(),
+      tag: (item.tag || 'Field & Crops').trim(),
+      src: finalSrc,
+      description: item.description || '',
+      created_at: item.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    await database.collection('gallery').updateOne(
+      { $or: [{ id: id }, { _id: id }] },
+      { $set: newGalleryItem },
+      { upsert: true }
+    );
+
+    console.log(`✓ Added gallery photo: ${newGalleryItem.title} (${newGalleryItem.cat})`);
+    res.status(201).json({ success: true, data: newGalleryItem });
+  } catch (err) {
+    console.error('Error adding gallery photo:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PUT update gallery item
+router.put('/gallery/:id', async (req, res) => {
+  try {
+    const database = await getDb();
+    const id = req.params.id;
+    const updateFields = { ...req.body, updated_at: new Date().toISOString() };
+    delete updateFields._id;
+
+    if (updateFields.src && (updateFields.src.startsWith('data:') || updateFields.src.startsWith('blob:'))) {
+      updateFields.src = await uploadToCloudinary(updateFields.src, 'shimanzu_gallery', `gal_${id}_${Date.now()}`);
+    }
+
+    await database.collection('gallery').updateOne(
+      { $or: [{ id: id }, { _id: id }] },
+      { $set: updateFields }
+    );
+    const updated = await database.collection('gallery').findOne({
+      $or: [{ id: id }, { _id: id }]
+    });
+
+    res.json({ success: true, data: updated || updateFields });
+  } catch (err) {
+    console.error('Error updating gallery photo:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE gallery item
+router.delete('/gallery/:id', async (req, res) => {
+  try {
+    const database = await getDb();
+    const id = req.params.id;
+    await database.collection('gallery').deleteOne({
+      $or: [{ id: id }, { _id: id }]
+    });
+    res.json({ success: true, message: 'Gallery photo deleted' });
+  } catch (err) {
+    console.error('Error deleting gallery photo:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// -------------------------------------------------------------
+// Blogs Endpoints (MongoDB Atlas & Cloudinary)
+// -------------------------------------------------------------
+
+const INITIAL_BLOGS_DATA = [
+  {
+    id: 'blog-1',
+    title: 'The Role of Agrochemicals in Modern Agriculture',
+    desc: 'Discover how agrochemicals help increase crop yield, protect plants, and support sustainable farming practices for a better tomorrow.',
+    content: "In today's rapidly evolving agricultural landscape, farmers face numerous challenges, including climate change, resource scarcity, and pest pressures. To address these challenges and achieve sustainable agricultural practices, farmers are increasingly turning to advanced agrochemical solutions that leverage technology and innovation.\n\nBy implementing modern crop protection strategies alongside high-quality Japanese formulations, crop yields can be significantly improved while maintaining ecological balance. At Shimanzu, we remain committed to pioneering breakthrough formulations that protect harvests and support agricultural prosperity.",
+    img: 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=800',
+    category: 'Agriculture',
+    date: '12 Apr 2025',
+    author: 'Shimanzu Agrosciences'
+  },
+  {
+    id: 'blog-2',
+    title: 'Effective Ways to Control Common Pests in Crops',
+    desc: 'Integrated Pest Management (IPM) represents a comprehensive approach to pest control that combines biological and chemical tools in a way that minimizes economic risks.',
+    content: 'Integrated Pest Management (IPM) represents an ecosystem-based strategy that focuses on long-term prevention of pests or their damage through a combination of techniques such as biological control, habitat manipulation, modification of cultural practices, and use of resistant varieties.\n\nPesticides are used only after monitoring indicates that they are needed according to established guidelines, and treatments are made with the goal of removing only the target organism. Shimanzu provides precise chemistry designed to target only harmful pests without interrupting natural beneficial predators.',
+    img: 'https://images.unsplash.com/photo-1560493676-04071c5f467b?w=800',
+    category: 'Pesticides',
+    date: '08 Apr 2025',
+    author: 'Shimanzu Agrosciences'
+  },
+  {
+    id: 'blog-3',
+    title: 'Best Practices for Healthy and High-Yield Crops',
+    desc: 'The quality of agrochemical products directly impacts crop yield. Discover best practices for maintaining optimal plant health.',
+    content: 'Optimal crop nutrition, timely scouting, balanced water management, and preventative fungicidal and insecticidal treatments form the cornerstone of record-breaking agricultural yields.\n\nFarmers must pay close attention to critical vegetative and flowering stages. Utilizing adjuvant-assisted formulations ensures superior droplet spread and long-lasting canopy protection even during unexpected rain events.',
+    img: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=800',
+    category: 'Agriculture',
+    date: '02 Apr 2025',
+    author: 'Shimanzu Agrosciences'
+  },
+  {
+    id: 'blog-4',
+    title: 'Sustainable Agriculture: Small Steps, Big Impact',
+    desc: 'Learn about the latest innovations that balance crop productivity with environmental sustainability for future generations.',
+    content: 'Sustainable farming seeks to sustain farmers, resources, and communities by promoting farming practices and methods that are profitable, environmentally sound, and good for communities.\n\nModern low-dose, high-efficiency Japanese formulations minimize residue in the soil while providing maximum protection against invasive fungal pathogens and aggressive weed competition.',
+    img: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800',
+    category: 'Sustainable Farming',
+    date: '28 Mar 2025',
+    author: 'Shimanzu Agrosciences'
+  },
+  {
+    id: 'blog-5',
+    title: 'Innovations in Japanese Crop Protection Technologies',
+    desc: "Explore how Shimanzu's advanced Japanese formulations are setting new benchmarks in protecting crops from emerging fungal threats.",
+    content: "Japanese agricultural chemistry is globally celebrated for meticulous molecular precision and environmental harmony. Through state-of-the-art suspension concentrates (SC) and water-dispersible granules (WG), Shimanzu sets new benchmarks.\n\nThese cutting-edge formulations offer superior rainfastness, broad-spectrum target activity, and extended residual control, ensuring farmers secure the greatest possible return on investment across every acre.",
+    img: path.resolve(__dirname, '../src/assets/images/slide_15.jpg'),
+    category: 'Crop Protection',
+    date: '20 Mar 2025',
+    author: 'Shimanzu Agrosciences'
+  },
+  {
+    id: 'blog-6',
+    title: 'The Future of Farming: Leveraging Technology for Growth',
+    desc: 'From precision farming to AI-driven crop monitoring, technology is reshaping the agricultural landscape. Find out what the future holds.',
+    content: 'From autonomous tractor steering and drone spraying to satellite imagery tracking vegetative health indices (NDVI), technology continues to empower growers around the globe.\n\nPairing digital diagnostics with precision-targeted agrochemical formulations enables localized spot treatments, cutting costs dramatically while boosting aggregate farm productivity.',
+    img: 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=800',
+    category: 'Farming Tech',
+    date: '15 Mar 2025',
+    author: 'Shimanzu Agrosciences'
+  }
+];
+
+let isBlogsSeeded = false;
+async function ensureBlogsCollection(database) {
+  if (isBlogsSeeded) return;
+  try {
+    const collection = database.collection('blogs');
+    const count = await collection.countDocuments();
+    if (count === 0) {
+      console.log('📝 Seeding blogs collection into MongoDB Atlas...');
+      for (const blog of INITIAL_BLOGS_DATA) {
+        let finalImg = blog.img;
+        if (finalImg && !finalImg.includes('res.cloudinary.com')) {
+          try {
+            const uploadedUrl = await uploadToCloudinary(finalImg, 'shimanzu_blogs', `blog_${blog.id}`);
+            if (uploadedUrl && uploadedUrl.startsWith('http')) {
+              finalImg = uploadedUrl;
+            }
+          } catch (e) {
+            console.warn('Initial blog upload warning:', e.message);
+          }
+        }
+        await collection.updateOne(
+          { $or: [{ id: blog.id }, { _id: blog.id }] },
+          {
+            $set: {
+              ...blog,
+              _id: blog.id,
+              img: finalImg,
+              created_at: new Date().toISOString()
+            }
+          },
+          { upsert: true }
+        );
+      }
+      console.log(`✓ Seeded ${INITIAL_BLOGS_DATA.length} blogs into MongoDB Atlas!`);
+    }
+    isBlogsSeeded = true;
+  } catch (err) {
+    console.warn('ensureBlogsCollection error:', err.message);
+  }
+}
+
+// GET all blogs
+router.get('/blogs', async (req, res) => {
+  try {
+    const database = await getDb();
+    await ensureBlogsCollection(database);
+    const blogs = await database.collection('blogs').find({}).sort({ created_at: -1 }).toArray();
+    res.json({ success: true, data: blogs, count: blogs.length });
+  } catch (err) {
+    console.error('Error fetching blogs:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET single blog
+router.get('/blogs/:id', async (req, res) => {
+  try {
+    const database = await getDb();
+    const id = req.params.id;
+    const blog = await database.collection('blogs').findOne({
+      $or: [{ id: id }, { _id: id }]
+    });
+    if (!blog) {
+      return res.status(404).json({ success: false, error: 'Blog not found' });
+    }
+    res.json({ success: true, data: blog });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST add blog
+router.post('/blogs', async (req, res) => {
+  try {
+    const database = await getDb();
+    const blog = req.body;
+    const id = blog.id || 'blog-' + Date.now();
+    let finalImg = (blog.img || '').trim();
+
+    if (finalImg && (finalImg.startsWith('data:') || finalImg.startsWith('blob:'))) {
+      finalImg = await uploadToCloudinary(finalImg, 'shimanzu_blogs', `blog_${id}_${Date.now()}`);
+    }
+
+    const newBlog = {
+      ...blog,
+      id,
+      _id: id,
+      title: (blog.title || 'Untitled Post').trim(),
+      desc: (blog.desc || '').trim(),
+      content: (blog.content || blog.desc || '').trim(),
+      img: finalImg,
+      category: (blog.category || 'Agriculture').trim(),
+      date: blog.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      author: (blog.author || 'Shimanzu Agrosciences').trim(),
+      created_at: blog.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    await database.collection('blogs').updateOne(
+      { $or: [{ id: id }, { _id: id }] },
+      { $set: newBlog },
+      { upsert: true }
+    );
+
+    console.log(`✓ Added blog post: ${newBlog.title}`);
+    res.status(201).json({ success: true, data: newBlog });
+  } catch (err) {
+    console.error('Error adding blog post:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PUT update blog
+router.put('/blogs/:id', async (req, res) => {
+  try {
+    const database = await getDb();
+    const id = req.params.id;
+    const updateFields = { ...req.body, updated_at: new Date().toISOString() };
+    delete updateFields._id;
+
+    if (updateFields.img && (updateFields.img.startsWith('data:') || updateFields.img.startsWith('blob:'))) {
+      updateFields.img = await uploadToCloudinary(updateFields.img, 'shimanzu_blogs', `blog_${id}_${Date.now()}`);
+    }
+
+    await database.collection('blogs').updateOne(
+      { $or: [{ id: id }, { _id: id }] },
+      { $set: updateFields }
+    );
+    const updated = await database.collection('blogs').findOne({
+      $or: [{ id: id }, { _id: id }]
+    });
+
+    res.json({ success: true, data: updated || updateFields });
+  } catch (err) {
+    console.error('Error updating blog post:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE blog
+router.delete('/blogs/:id', async (req, res) => {
+  try {
+    const database = await getDb();
+    const id = req.params.id;
+    await database.collection('blogs').deleteOne({
+      $or: [{ id: id }, { _id: id }]
+    });
+    res.json({ success: true, message: 'Blog deleted' });
+  } catch (err) {
+    console.error('Error deleting blog:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
