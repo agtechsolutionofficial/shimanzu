@@ -4,7 +4,8 @@ import {
   Layers, Sprout, Package, Plus, Trash2, Edit3,
   ExternalLink, Search, Check, X, Shield, Upload, LogOut, CheckCircle2, AlertCircle, Sparkles,
   KeyRound, Loader2, MessageSquare, Phone, Mail, MapPin, Grid, List, PlusCircle,
-  Eye, Menu, ChevronRight, Filter, Tag, CheckSquare, Clock, User, RefreshCw
+  Eye, Menu, ChevronRight, Filter, Tag, CheckSquare, Clock, User, RefreshCw,
+  Image as ImageIcon, BookOpen, FileText, Calendar
 } from 'lucide-react';
 import { useDataContext } from '../context/DataContext';
 import { compressImage } from '../utils/imageCompressor';
@@ -37,10 +38,14 @@ const Admin = () => {
     addCrop, updateCrop, deleteCrop,
     addProduct, updateProduct, deleteProduct,
     addQuery, updateQueryStatus, deleteQuery,
+    gallery = [], isGalleryLoading, galleryError, refreshGallery,
+    addGalleryItem, updateGalleryItem, deleteGalleryItem,
+    blogs = [], isBlogsLoading, blogsError, refreshBlogs,
+    addBlog, updateBlog, deleteBlog,
     logout, changeAdminPassword
   } = useDataContext();
 
-  // Navigation tab: 'all-products' | 'add-product' | 'queries' | 'crops' | 'categories'
+  // Navigation tab: 'all-products' | 'add-product' | 'queries' | 'crops' | 'categories' | 'gallery' | 'blogs'
   const [activeTab, setActiveTab] = useState('all-products');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,18 +100,18 @@ const Admin = () => {
   // Dedicated Product Form state (used for both Add Product tab and Edit Modal)
   const defaultProductState = {
     name: '',
-    brand: 'SHIMANZU',
+    brand: '',
     chemical: '',
-    category: categories[0]?.id || 'fungicides',
-    categoryLabel: categories[0]?.name || 'FUNGICIDES',
-    formulation: 'SC',
-    group: 'GROUP 1',
-    inStock: true,
-    packSizes: '250ml, 500ml, 1L',
-    crops: 'Paddy, Cotton, Wheat',
-    targets: 'Blast, Sheath Blight, Sucking Pests',
-    dosage: '400 ml / acre in 200 L water',
-    description: 'High-efficacy Japanese formulation designed for maximum crop protection and yield.',
+    category: '',
+    categoryLabel: '',
+    formulation: '',
+    group: '',
+    inStock: false,
+    packSizes: '',
+    crops: '',
+    targets: '',
+    dosage: '',
+    description: '',
     imgSrc: ''
   };
 
@@ -132,6 +137,33 @@ const Admin = () => {
     image: '',
     description: ''
   });
+
+  // Gallery Form
+  const defaultGalleryState = {
+    title: '',
+    cat: '',
+    tag: '',
+    src: '',
+    description: ''
+  };
+  const [galleryForm, setGalleryForm] = useState(defaultGalleryState);
+  const [isGallerySaving, setIsGallerySaving] = useState(false);
+  const [galleryCategoryFilter, setGalleryCategoryFilter] = useState('all');
+
+  // Blog Form
+  const defaultBlogState = {
+    title: '',
+    category: '',
+    date: '',
+    author: '',
+    img: '',
+    desc: '',
+    content: ''
+  };
+  const [blogForm, setBlogForm] = useState(defaultBlogState);
+  const [isBlogSaving, setIsBlogSaving] = useState(false);
+  const [blogCategoryFilter, setBlogCategoryFilter] = useState('all');
+  const [selectedBlogPreview, setSelectedBlogPreview] = useState(null);
 
   // Auto-compress image to compact WebP
   const handleImageUpload = async (file, setField) => {
@@ -176,11 +208,7 @@ const Admin = () => {
 
   // Switch to Add Product tab & reset form
   const navigateToAddProduct = () => {
-    setProductForm({
-      ...defaultProductState,
-      category: categories[0]?.id || 'fungicides',
-      categoryLabel: categories[0]?.name || 'FUNGICIDES'
-    });
+    setProductForm(defaultProductState);
     setActiveTab('add-product');
     setSearchQuery('');
   };
@@ -200,6 +228,7 @@ const Admin = () => {
   const handleProductSubmit = async (e) => {
     e.preventDefault();
     if (!productForm.name.trim()) return alert('Product Name is required');
+    if (!productForm.category) return alert('Please select a Category from the dropdown.');
     if (isProductSaving) return;
 
     setIsProductSaving(true);
@@ -348,6 +377,146 @@ const Admin = () => {
     setModalMode(null);
   };
 
+  // Gallery CRUD Handlers
+  const openAddGalleryModal = () => {
+    setGalleryForm({
+      title: '',
+      cat: '',
+      tag: '',
+      src: '',
+      description: ''
+    });
+    setEditingItem(null);
+    setModalMode('add-gallery');
+  };
+
+  const openEditGalleryModal = (item) => {
+    setGalleryForm({
+      title: item.title || '',
+      cat: item.cat || '',
+      tag: item.tag || '',
+      src: item.src || '',
+      description: item.description || ''
+    });
+    setEditingItem(item);
+    setModalMode('edit-gallery');
+  };
+
+  const handleGallerySubmit = async (e) => {
+    e.preventDefault();
+    if (!galleryForm.title.trim()) return alert('Photo title is required');
+    if (!galleryForm.cat) return alert('Please select a Category');
+    if (!galleryForm.src.trim()) return alert('Photo image is required');
+    if (isGallerySaving) return;
+
+    setIsGallerySaving(true);
+    try {
+      const sanitized = {
+        ...galleryForm,
+        title: galleryForm.title.trim(),
+        cat: galleryForm.cat.trim().toLowerCase(),
+        tag: galleryForm.tag.trim() || (galleryForm.cat === 'lab' ? 'Lab & Research' : galleryForm.cat === 'products' ? 'Products' : 'Field & Crops'),
+        src: galleryForm.src.trim(),
+        description: (galleryForm.description || '').trim()
+      };
+
+      if (modalMode === 'add-gallery') {
+        const res = await addGalleryItem(sanitized);
+        if (res && res.success === false) {
+          showToast({ type: 'error', text: `Failed to add photo: ${res.error || 'Upload error'}` });
+        } else {
+          showToast({ type: 'success', text: `Photo "${sanitized.title}" uploaded to Cloudinary & saved to MongoDB!` });
+        }
+      } else if (modalMode === 'edit-gallery' && editingItem) {
+        const res = await updateGalleryItem(editingItem.id, sanitized);
+        if (res && res.success === false) {
+          showToast({ type: 'error', text: `Failed to update photo: ${res.error || 'Database error'}` });
+        } else {
+          showToast({ type: 'success', text: `Photo "${sanitized.title}" updated successfully!` });
+        }
+      }
+      setModalMode(null);
+    } catch (err) {
+      console.error('Error saving gallery item:', err);
+      showToast({ type: 'error', text: `Error: ${err.message}` });
+    } finally {
+      setIsGallerySaving(false);
+    }
+  };
+
+  // Blog CRUD Handlers
+  const openAddBlogModal = () => {
+    setBlogForm({
+      title: '',
+      category: '',
+      date: '',
+      author: '',
+      img: '',
+      desc: '',
+      content: ''
+    });
+    setEditingItem(null);
+    setModalMode('add-blog');
+  };
+
+  const openEditBlogModal = (blog) => {
+    setBlogForm({
+      title: blog.title || '',
+      category: blog.category || '',
+      date: blog.date || '',
+      author: blog.author || '',
+      img: blog.img || '',
+      desc: blog.desc || '',
+      content: blog.content || blog.desc || ''
+    });
+    setEditingItem(blog);
+    setModalMode('edit-blog');
+  };
+
+  const handleBlogSubmit = async (e) => {
+    e.preventDefault();
+    if (!blogForm.title.trim()) return alert('Blog title is required');
+    if (!blogForm.category) return alert('Please select a Category');
+    if (!blogForm.img.trim()) return alert('Cover image is required');
+    if (isBlogSaving) return;
+
+    setIsBlogSaving(true);
+    try {
+      const sanitized = {
+        ...blogForm,
+        title: blogForm.title.trim(),
+        category: (blogForm.category || 'Agriculture').trim(),
+        author: (blogForm.author || 'Shimanzu Agrosciences').trim(),
+        date: (blogForm.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })).trim(),
+        img: blogForm.img.trim(),
+        desc: blogForm.desc.trim(),
+        content: (blogForm.content || blogForm.desc).trim()
+      };
+
+      if (modalMode === 'add-blog') {
+        const res = await addBlog(sanitized);
+        if (res && res.success === false) {
+          showToast({ type: 'error', text: `Failed to create blog: ${res.error || 'Upload error'}` });
+        } else {
+          showToast({ type: 'success', text: `Blog "${sanitized.title}" published with Cloudinary image & saved to MongoDB!` });
+        }
+      } else if (modalMode === 'edit-blog' && editingItem) {
+        const res = await updateBlog(editingItem.id, sanitized);
+        if (res && res.success === false) {
+          showToast({ type: 'error', text: `Failed to update blog: ${res.error || 'Database error'}` });
+        } else {
+          showToast({ type: 'success', text: `Blog "${sanitized.title}" updated successfully!` });
+        }
+      }
+      setModalMode(null);
+    } catch (err) {
+      console.error('Error saving blog:', err);
+      showToast({ type: 'error', text: `Error: ${err.message}` });
+    } finally {
+      setIsBlogSaving(false);
+    }
+  };
+
   // Safe delete handler with confirmation modal
   const confirmDeleteItem = (type, item) => {
     setDeleteConfirmItem({ type, item });
@@ -374,6 +543,12 @@ const Admin = () => {
     } else if (type === 'query') {
       await deleteQuery(item.id);
       showToast({ type: 'success', text: `Customer query from ${item.name} removed from MongoDB.` });
+    } else if (type === 'gallery') {
+      await deleteGalleryItem(item.id);
+      showToast({ type: 'success', text: `Gallery photo "${item.title}" deleted from database.` });
+    } else if (type === 'blog') {
+      await deleteBlog(item.id);
+      showToast({ type: 'success', text: `Blog post "${item.title}" deleted from database.` });
     }
 
     setModalMode(null);
@@ -427,6 +602,29 @@ const Admin = () => {
     );
   }, [categories, searchQuery]);
 
+  const filteredGallery = useMemo(() => {
+    return gallery.filter(item => {
+      const matchSearch =
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.tag && item.tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchCategory = galleryCategoryFilter === 'all' || (item.cat || '').toLowerCase() === galleryCategoryFilter.toLowerCase();
+      return matchSearch && matchCategory;
+    });
+  }, [gallery, searchQuery, galleryCategoryFilter]);
+
+  const filteredAdminBlogs = useMemo(() => {
+    return blogs.filter(b => {
+      const matchSearch =
+        b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (b.desc && b.desc.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (b.category && b.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (b.author && b.author.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchCategory = blogCategoryFilter === 'all' || (b.category || '').toLowerCase() === blogCategoryFilter.toLowerCase();
+      return matchSearch && matchCategory;
+    });
+  }, [blogs, searchQuery, blogCategoryFilter]);
+
   // Statistics counters
   const inStockCount = useMemo(() => products.filter(p => p.inStock !== false).length, [products]);
   const newQueriesCount = useMemo(() => queries.filter(q => q.status === 'new').length, [queries]);
@@ -436,16 +634,16 @@ const Admin = () => {
     const activeCat = categories.find(c => c.id === productForm.category);
     return {
       id: 'preview',
-      name: productForm.name || 'Sample Product Name',
-      brand: productForm.brand || 'SHIMANZU',
-      chemical: productForm.chemical || 'Active Ingredient 00% Formulation Standard',
-      category: productForm.category || 'fungicides',
-      categoryLabel: activeCat?.name || 'FUNGICIDES',
-      group: productForm.group || `${productForm.formulation} FORMULATION`,
-      formulation: productForm.formulation || 'SC',
-      inStock: productForm.inStock !== false,
-      packSizes: productForm.packSizes ? productForm.packSizes.split(',').map(s => s.trim()) : ['1 L'],
-      crops: productForm.crops ? productForm.crops.split(',').map(s => s.trim()) : ['Field Crops'],
+      name: productForm.name ? productForm.name.trim() : '',
+      brand: productForm.brand ? productForm.brand.trim() : '',
+      chemical: productForm.chemical ? productForm.chemical.trim() : '',
+      category: productForm.category || '',
+      categoryLabel: activeCat ? activeCat.name : '',
+      group: productForm.group ? productForm.group.trim() : (productForm.formulation ? `${productForm.formulation} FORMULATION` : ''),
+      formulation: productForm.formulation || '',
+      inStock: Boolean(productForm.inStock),
+      packSizes: productForm.packSizes ? productForm.packSizes.split(',').map(s => s.trim()).filter(Boolean) : [],
+      crops: productForm.crops ? productForm.crops.split(',').map(s => s.trim()).filter(Boolean) : [],
       imgSrc: productForm.imgSrc ? productForm.imgSrc.trim() : ''
     };
   }, [productForm, categories]);
@@ -458,12 +656,6 @@ const Admin = () => {
         <div className="admin-sidebar-header">
           <Link to="/" className="admin-sidebar-brand" title="View Public Website">
             <img src={logoImg} alt="Shimanzu Japan" className="admin-sidebar-logo-img" />
-            <div className="admin-console-chip">
-              <span className="admin-chip-pulse"></span>
-              <span>ADMIN CONSOLE</span>
-              <span className="admin-chip-sep">&bull;</span>
-              <span className="admin-chip-ver">v2.5</span>
-            </div>
           </Link>
           <button
             className="admin-sidebar-close-btn"
@@ -472,18 +664,6 @@ const Admin = () => {
           >
             <X size={20} />
           </button>
-        </div>
-
-        {/* Admin Quick Profile */}
-        <div className="admin-sidebar-profile">
-          <div className="admin-profile-avatar">
-            <span>SA</span>
-            <span className="admin-online-indicator"></span>
-          </div>
-          <div className="admin-profile-info">
-            <span className="admin-profile-name">Super Administrator</span>
-            <span className="admin-profile-role">Agrochemical Director</span>
-          </div>
         </div>
 
         {/* Sidebar Nav Items */}
@@ -553,6 +733,30 @@ const Admin = () => {
             </div>
             <span className="admin-nav-badge">{categories.length}</span>
           </button>
+
+          {/* 6. Gallery */}
+          <button
+            className={`admin-nav-item ${activeTab === 'gallery' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('gallery'); setSearchQuery(''); setSidebarOpen(false); }}
+          >
+            <div className="admin-nav-item-left">
+              <ImageIcon size={19} className="admin-nav-icon accent-emerald" />
+              <span className="admin-nav-label">Gallery</span>
+            </div>
+            <span className="admin-nav-badge">{gallery.length}</span>
+          </button>
+
+          {/* 7. Blogs */}
+          <button
+            className={`admin-nav-item ${activeTab === 'blogs' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('blogs'); setSearchQuery(''); setSidebarOpen(false); }}
+          >
+            <div className="admin-nav-item-left">
+              <BookOpen size={19} className="admin-nav-icon accent-purple" />
+              <span className="admin-nav-label">Blogs</span>
+            </div>
+            <span className="admin-nav-badge">{blogs.length}</span>
+          </button>
         </nav>
 
         {/* Sidebar Footer Controls */}
@@ -607,6 +811,8 @@ const Admin = () => {
                 {activeTab === 'queries' && 'Customer Inquiries & Leads'}
                 {activeTab === 'crops' && 'Agricultural Crops Directory'}
                 {activeTab === 'categories' && 'Agrochemical Categories'}
+                {activeTab === 'gallery' && 'Visual Gallery Showcase'}
+                {activeTab === 'blogs' && 'Blog Articles & Editorial'}
               </h1>
               <span className="admin-page-subtitle">
                 {activeTab === 'all-products' && `Managing ${products.length} registered agrochemicals & industrial pigments`}
@@ -614,6 +820,8 @@ const Admin = () => {
                 {activeTab === 'queries' && `${queries.length} total customer inquiries (${newQueriesCount} require follow-up)`}
                 {activeTab === 'crops' && `${crops.length} supported agricultural crops & horticultural species`}
                 {activeTab === 'categories' && `${categories.length} active agrochemical market segments`}
+                {activeTab === 'gallery' && `${gallery.length} dynamic showcase photos in MongoDB Atlas & Cloudinary`}
+                {activeTab === 'blogs' && `${blogs.length} published blog articles in MongoDB Atlas & Cloudinary`}
               </span>
             </div>
           </div>
@@ -627,9 +835,11 @@ const Admin = () => {
                   type="text"
                   placeholder={
                     activeTab === 'all-products' ? 'Search by name, chemical active, category...' :
-                    activeTab === 'queries' ? 'Search queries by name, phone, product...' :
-                    activeTab === 'crops' ? 'Search crops by name or keyword...' :
-                    'Search categories...'
+                      activeTab === 'queries' ? 'Search queries by name, phone, product...' :
+                        activeTab === 'crops' ? 'Search crops by name or keyword...' :
+                          activeTab === 'categories' ? 'Search categories...' :
+                            activeTab === 'gallery' ? 'Search gallery by title, tag...' :
+                              'Search blogs by title, author...'
                   }
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -700,6 +910,46 @@ const Admin = () => {
                 <button className="admin-action-btn-primary" onClick={openAddCategoryModal}>
                   <Plus size={16} />
                   <span>Add Category</span>
+                </button>
+              </div>
+            )}
+
+            {activeTab === 'gallery' && (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  className="admin-action-btn-secondary"
+                  onClick={async () => {
+                    await refreshGallery();
+                    showToast({ type: 'success', text: 'Gallery synced from MongoDB Atlas!' });
+                  }}
+                  title="Refresh gallery from database"
+                >
+                  <RefreshCw size={15} className={isGalleryLoading ? 'animate-spin' : ''} />
+                  <span>Sync DB</span>
+                </button>
+                <button className="admin-action-btn-primary" onClick={openAddGalleryModal}>
+                  <Plus size={16} />
+                  <span>Add Photo</span>
+                </button>
+              </div>
+            )}
+
+            {activeTab === 'blogs' && (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  className="admin-action-btn-secondary"
+                  onClick={async () => {
+                    await refreshBlogs();
+                    showToast({ type: 'success', text: 'Blogs synced from MongoDB Atlas!' });
+                  }}
+                  title="Refresh blogs from database"
+                >
+                  <RefreshCw size={15} className={isBlogsLoading ? 'animate-spin' : ''} />
+                  <span>Sync DB</span>
+                </button>
+                <button className="admin-action-btn-primary" onClick={openAddBlogModal}>
+                  <Plus size={16} />
+                  <span>Create Blog</span>
                 </button>
               </div>
             )}
@@ -810,6 +1060,40 @@ const Admin = () => {
               <span className="admin-stat-subtext">Chemicals, Fungicides, Herbicides...</span>
             </div>
           </div>
+
+          {/* Card 5: Gallery */}
+          <div
+            className={`admin-stat-card ${activeTab === 'gallery' ? 'selected' : ''}`}
+            onClick={() => setActiveTab('gallery')}
+          >
+            <div className="admin-stat-top">
+              <span className="admin-stat-label">Gallery Photos</span>
+              <div className="admin-stat-icon-wrap bg-emerald">
+                <ImageIcon size={20} />
+              </div>
+            </div>
+            <div className="admin-stat-value">{gallery.length}</div>
+            <div className="admin-stat-footer">
+              <span className="admin-stat-subtext">Field operations, labs, products</span>
+            </div>
+          </div>
+
+          {/* Card 6: Blogs */}
+          <div
+            className={`admin-stat-card ${activeTab === 'blogs' ? 'selected' : ''}`}
+            onClick={() => setActiveTab('blogs')}
+          >
+            <div className="admin-stat-top">
+              <span className="admin-stat-label">Blog Articles</span>
+              <div className="admin-stat-icon-wrap bg-purple">
+                <BookOpen size={20} />
+              </div>
+            </div>
+            <div className="admin-stat-value">{blogs.length}</div>
+            <div className="admin-stat-footer">
+              <span className="admin-stat-subtext">Published insights & agro tips</span>
+            </div>
+          </div>
         </div>
 
         {/* ===================== TAB 1: ALL PRODUCTS ===================== */}
@@ -910,7 +1194,7 @@ const Admin = () => {
                             }}
                           />
                         ) : null}
-                        <div 
+                        <div
                           className="admin-prod-no-img"
                           style={{ display: prod.imgSrc ? 'none' : 'flex' }}
                         >
@@ -1039,7 +1323,7 @@ const Admin = () => {
                                 }}
                               />
                             ) : null}
-                            <div 
+                            <div
                               className="admin-table-no-img"
                               style={{ display: prod.imgSrc ? 'none' : 'inline-flex' }}
                             >
@@ -1174,16 +1458,18 @@ const Admin = () => {
                         <label className="admin-form-label">Category *</label>
                         <select
                           className="admin-form-select"
+                          required
                           value={productForm.category}
                           onChange={e => {
                             const cat = categories.find(c => c.id === e.target.value);
                             setProductForm({
                               ...productForm,
                               category: e.target.value,
-                              categoryLabel: cat?.name || e.target.value.toUpperCase()
+                              categoryLabel: cat?.name || ''
                             });
                           }}
                         >
+                          <option value="">Select Category</option>
                           {categories.map(c => (
                             <option key={c.id} value={c.id}>{c.name}</option>
                           ))}
@@ -1197,6 +1483,7 @@ const Admin = () => {
                           value={productForm.formulation}
                           onChange={e => setProductForm({ ...productForm, formulation: e.target.value })}
                         >
+                          <option value="">Select Formulation Type</option>
                           {FORMULATION_OPTIONS.map(f => (
                             <option key={f} value={f}>{f}</option>
                           ))}
@@ -1396,16 +1683,16 @@ const Admin = () => {
                 <div className="admin-preview-meta-info">
                   <div className="admin-meta-row">
                     <span className="meta-label">Selected Category:</span>
-                    <span className="meta-value">{livePreviewProduct.categoryLabel}</span>
+                    <span className="meta-value">{livePreviewProduct.categoryLabel || '-'}</span>
                   </div>
                   <div className="admin-meta-row">
                     <span className="meta-label">Formulation Type:</span>
-                    <span className="meta-value">{livePreviewProduct.formulation}</span>
+                    <span className="meta-value">{livePreviewProduct.formulation || '-'}</span>
                   </div>
                   <div className="admin-meta-row">
                     <span className="meta-label">Stock Status:</span>
                     <span className={`meta-value ${livePreviewProduct.inStock ? 'green' : 'amber'}`}>
-                      {livePreviewProduct.inStock ? 'Ready in Stock' : 'Available on Request'}
+                      {livePreviewProduct.inStock ? 'Ready in Stock' : 'Not In Stock'}
                     </span>
                   </div>
                   <div className="admin-meta-row">
@@ -1615,59 +1902,6 @@ const Admin = () => {
         {/* ===================== TAB 5: CATEGORIES ===================== */}
         {activeTab === 'categories' && (
           <div className="admin-section-wrap animate-fade-in">
-            {/* Database Sync Status Banner */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: categoriesError ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)',
-              border: `1px solid ${categoriesError ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.25)'}`,
-              borderRadius: '10px',
-              padding: '12px 18px',
-              marginBottom: '20px',
-              fontSize: '13px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  backgroundColor: categoriesError ? '#ef4444' : '#10b981',
-                  boxShadow: categoriesError ? '0 0 8px #ef4444' : '0 0 8px #10b981'
-                }} />
-                <div>
-                  <strong>{categoriesError ? 'MongoDB Connection Error' : 'MongoDB Atlas & Cloudinary Connected'}</strong>
-                  <span style={{ marginLeft: '8px', color: '#64748b' }}>
-                    {categoriesError 
-                      ? categoriesError 
-                      : `${categories.length} dynamic categories active in MongoDB Atlas. Images stored in Cloudinary.`}
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={async () => {
-                  await refreshCategories();
-                  showToast({ type: 'success', text: 'Categories synced from MongoDB Atlas!' });
-                }}
-                style={{
-                  background: 'none',
-                  border: '1px solid #10b981',
-                  color: '#10b981',
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <RefreshCw size={14} className={isCategoriesLoading ? 'animate-spin' : ''} /> Refresh Categories
-              </button>
-            </div>
-
             <div className="admin-categories-grid">
               {filteredCategories.length > 0 ? (
                 filteredCategories.map(cat => {
@@ -1716,6 +1950,221 @@ const Admin = () => {
                   <Layers size={48} className="admin-empty-icon" />
                   <h3>No categories found</h3>
                   <p>Search didn't match any active categories.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ===================== TAB 6: GALLERY MANAGEMENT ===================== */}
+        {activeTab === 'gallery' && (
+          <div className="admin-section-wrap animate-fade-in">
+            {/* Gallery Toolbar & Category Pills */}
+            <div className="admin-toolbar">
+              <div className="admin-category-pills">
+                <button
+                  className={`admin-filter-pill ${galleryCategoryFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setGalleryCategoryFilter('all')}
+                >
+                  All Photos ({gallery.length})
+                </button>
+                <button
+                  className={`admin-filter-pill ${galleryCategoryFilter === 'field' ? 'active' : ''}`}
+                  onClick={() => setGalleryCategoryFilter('field')}
+                >
+                  <span className="admin-pill-dot" style={{ backgroundColor: '#10B981' }} />
+                  Field & Crops ({gallery.filter(i => (i.cat || '').toLowerCase() === 'field').length})
+                </button>
+                <button
+                  className={`admin-filter-pill ${galleryCategoryFilter === 'lab' ? 'active' : ''}`}
+                  onClick={() => setGalleryCategoryFilter('lab')}
+                >
+                  <span className="admin-pill-dot" style={{ backgroundColor: '#38BDF8' }} />
+                  Lab & Research ({gallery.filter(i => (i.cat || '').toLowerCase() === 'lab').length})
+                </button>
+                <button
+                  className={`admin-filter-pill ${galleryCategoryFilter === 'products' ? 'active' : ''}`}
+                  onClick={() => setGalleryCategoryFilter('products')}
+                >
+                  <span className="admin-pill-dot" style={{ backgroundColor: '#A855F7' }} />
+                  Products ({gallery.filter(i => (i.cat || '').toLowerCase() === 'products').length})
+                </button>
+              </div>
+
+              <button className="admin-action-btn-primary" onClick={openAddGalleryModal}>
+                <Plus size={16} />
+                <span>Upload Photo</span>
+              </button>
+            </div>
+
+            {/* Counter */}
+            <div className="admin-results-bar">
+              <span>Showing <strong>{filteredGallery.length}</strong> of <strong>{gallery.length}</strong> gallery photos</span>
+              {searchQuery && (
+                <span className="admin-search-indicator">
+                  Filter: "{searchQuery}" <button onClick={() => setSearchQuery('')}>Clear</button>
+                </span>
+              )}
+            </div>
+
+            {/* Gallery Grid */}
+            <div className="admin-gallery-grid">
+              {filteredGallery.length > 0 ? (
+                filteredGallery.map(img => (
+                  <div key={img.id || img._id} className="admin-gallery-card">
+                    <div className="admin-gallery-img-wrap">
+                      <img
+                        src={img.src}
+                        alt={img.title}
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.pexels.com/photos/2132250/pexels-photo-2132250.jpeg?auto=compress&cs=tinysrgb&w=800';
+                        }}
+                      />
+                      <span className="admin-gallery-tag-chip">
+                        {img.tag || img.cat}
+                      </span>
+                    </div>
+
+                    <div className="admin-gallery-card-body">
+                      <h3 className="admin-gallery-card-title">{img.title}</h3>
+                      {img.description && (
+                        <p className="admin-gallery-card-desc">{img.description}</p>
+                      )}
+                      <div className="admin-gallery-card-meta">
+                        <span className="admin-gallery-cat-text">Category: <strong>{img.cat}</strong></span>
+                      </div>
+                      <div className="admin-gallery-card-footer">
+                        <button
+                          className="admin-mini-btn edit"
+                          onClick={() => openEditGalleryModal(img)}
+                        >
+                          <Edit3 size={14} /> Edit
+                        </button>
+                        <button
+                          className="admin-mini-btn delete"
+                          onClick={() => confirmDeleteItem('gallery', img)}
+                        >
+                          <Trash2 size={14} /> Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="admin-empty-state" style={{ gridColumn: '1 / -1' }}>
+                  <ImageIcon size={48} className="admin-empty-icon" />
+                  <h3>No gallery photos found</h3>
+                  <p>Try resetting filters or click "Upload Photo" to add your first dynamic photo.</p>
+                  <button className="admin-action-btn-primary" onClick={openAddGalleryModal} style={{ marginTop: '12px' }}>
+                    <Plus size={16} /> Upload New Photo
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ===================== TAB 7: BLOGS MANAGEMENT ===================== */}
+        {activeTab === 'blogs' && (
+          <div className="admin-section-wrap animate-fade-in">
+            {/* Blogs Toolbar */}
+            <div className="admin-toolbar">
+              <div className="admin-category-pills">
+                <button
+                  className={`admin-filter-pill ${blogCategoryFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setBlogCategoryFilter('all')}
+                >
+                  All Blogs ({blogs.length})
+                </button>
+                {['Agriculture', 'Crop Protection', 'Pesticides', 'Sustainable Farming', 'Farming Tech'].map(c => {
+                  const count = blogs.filter(b => (b.category || '').toLowerCase() === c.toLowerCase()).length;
+                  return (
+                    <button
+                      key={c}
+                      className={`admin-filter-pill ${blogCategoryFilter.toLowerCase() === c.toLowerCase() ? 'active' : ''}`}
+                      onClick={() => setBlogCategoryFilter(c)}
+                    >
+                      <span className="admin-pill-dot" style={{ backgroundColor: '#10B981' }} />
+                      {c} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button className="admin-action-btn-primary" onClick={openAddBlogModal}>
+                <Plus size={16} />
+                <span>Create New Blog</span>
+              </button>
+            </div>
+
+            {/* Results counter */}
+            <div className="admin-results-bar">
+              <span>Showing <strong>{filteredAdminBlogs.length}</strong> of <strong>{blogs.length}</strong> blog articles</span>
+              {searchQuery && (
+                <span className="admin-search-indicator">
+                  Filter: "{searchQuery}" <button onClick={() => setSearchQuery('')}>Clear</button>
+                </span>
+              )}
+            </div>
+
+            {/* Blogs Grid */}
+            <div className="admin-blogs-grid">
+              {filteredAdminBlogs.length > 0 ? (
+                filteredAdminBlogs.map(blog => (
+                  <div key={blog.id || blog._id} className="admin-blog-card">
+                    <div className="admin-blog-img-wrap">
+                      <img
+                        src={blog.img}
+                        alt={blog.title}
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=800';
+                        }}
+                      />
+                      <span className="admin-blog-cat-badge">
+                        {blog.category}
+                      </span>
+                    </div>
+
+                    <div className="admin-blog-card-body">
+                      <div className="admin-blog-meta-row">
+                        <span><Calendar size={13} /> {blog.date}</span>
+                        <span><User size={13} /> {blog.author}</span>
+                      </div>
+                      <h3 className="admin-blog-card-title">{blog.title}</h3>
+                      <p className="admin-blog-card-desc">{blog.desc}</p>
+
+                      <div className="admin-blog-card-footer">
+                        <button
+                          className="admin-mini-btn preview"
+                          onClick={() => setSelectedBlogPreview(blog)}
+                          title="Read full article preview"
+                        >
+                          <Eye size={14} /> Read
+                        </button>
+                        <button
+                          className="admin-mini-btn edit"
+                          onClick={() => openEditBlogModal(blog)}
+                        >
+                          <Edit3 size={14} /> Edit
+                        </button>
+                        <button
+                          className="admin-mini-btn delete"
+                          onClick={() => confirmDeleteItem('blog', blog)}
+                        >
+                          <Trash2 size={14} /> Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="admin-empty-state" style={{ gridColumn: '1 / -1' }}>
+                  <BookOpen size={48} className="admin-empty-icon" />
+                  <h3>No blogs found</h3>
+                  <p>Try resetting filters or click "Create New Blog" to write an article.</p>
+                  <button className="admin-action-btn-primary" onClick={openAddBlogModal} style={{ marginTop: '12px' }}>
+                    <Plus size={16} /> Write New Article
+                  </button>
                 </div>
               )}
             </div>
@@ -1772,16 +2221,18 @@ const Admin = () => {
                   <label className="admin-form-label">Category *</label>
                   <select
                     className="admin-form-select"
+                    required
                     value={productForm.category}
                     onChange={e => {
                       const cat = categories.find(c => c.id === e.target.value);
                       setProductForm({
                         ...productForm,
                         category: e.target.value,
-                        categoryLabel: cat?.name || e.target.value.toUpperCase()
+                        categoryLabel: cat?.name || ''
                       });
                     }}
                   >
+                    <option value="">Select Category</option>
                     {categories.map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
@@ -1795,6 +2246,7 @@ const Admin = () => {
                     value={productForm.formulation}
                     onChange={e => setProductForm({ ...productForm, formulation: e.target.value })}
                   >
+                    <option value="">Select Formulation Type</option>
                     {FORMULATION_OPTIONS.map(f => (
                       <option key={f} value={f}>{f}</option>
                     ))}
@@ -2156,6 +2608,471 @@ const Admin = () => {
         </div>
       )}
 
+      {/* ===================== MODAL: ADD / EDIT GALLERY PHOTO ===================== */}
+      {(modalMode === 'add-gallery' || modalMode === 'edit-gallery') && (
+        <div className="admin-modal-overlay" onClick={() => setModalMode(null)}>
+          <div className="admin-modal-content animate-scale-up" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h2>
+                <ImageIcon size={20} color="#10B981" />
+                {modalMode === 'add-gallery' ? 'Upload Gallery Photo' : 'Edit Gallery Photo'}
+              </h2>
+              <button className="admin-modal-close" onClick={() => setModalMode(null)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleGallerySubmit}>
+              <div className="admin-form-group">
+                <label className="admin-form-label">Photo Title *</label>
+                <input
+                  type="text"
+                  required
+                  className="admin-form-input"
+                  placeholder="e.g. Precision Spraying"
+                  value={galleryForm.title}
+                  onChange={e => setGalleryForm({ ...galleryForm, title: e.target.value })}
+                />
+              </div>
+
+              <div className="admin-form-row">
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Category *</label>
+                  <select
+                    className="admin-form-select"
+                    required
+                    value={galleryForm.cat}
+                    onChange={e => {
+                      const c = e.target.value;
+                      let tag = '';
+                      if (c === 'field') tag = 'Field & Crops';
+                      else if (c === 'lab') tag = 'Lab & Research';
+                      else if (c === 'products') tag = 'Products';
+                      setGalleryForm({ ...galleryForm, cat: c, tag: tag });
+                    }}
+                  >
+                    <option value="">Select Category</option>
+                    <option value="field">Field & Crops</option>
+                    <option value="lab">Lab & Research</option>
+                    <option value="products">Products</option>
+                  </select>
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Badge Tag</label>
+                  <input
+                    type="text"
+                    className="admin-form-input"
+                    placeholder="e.g. Field & Crops"
+                    value={galleryForm.tag}
+                    onChange={e => setGalleryForm({ ...galleryForm, tag: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Photo Upload & Preview */}
+              <div className="admin-form-group">
+                <label className="admin-form-label">Photo Image * (Upload or Image URL)</label>
+                <div style={{
+                  border: '1px dashed rgba(255, 255, 255, 0.2)',
+                  borderRadius: '10px',
+                  padding: '14px',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}>
+                  {galleryForm.src ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{
+                        width: '80px',
+                        height: '80px',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        background: '#070d18',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        flexShrink: 0
+                      }}>
+                        <img
+                          src={galleryForm.src}
+                          alt="Gallery Preview"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div style={{ flexGrow: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          {galleryForm.src.includes('cloudinary.com') ? (
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: 'rgba(16, 185, 129, 0.15)',
+                              color: '#10b981',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              fontWeight: 600
+                            }}>
+                              <CheckCircle2 size={12} /> Stored on Cloudinary
+                            </span>
+                          ) : (
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: 'rgba(56, 189, 248, 0.15)',
+                              color: '#38bdf8',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              fontWeight: 600
+                            }}>
+                              Ready for Cloudinary
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setGalleryForm({ ...galleryForm, src: '' })}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#ef4444',
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            padding: 0,
+                            fontWeight: 600
+                          }}
+                        >
+                          Remove Photo
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <label className="admin-action-btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
+                      <Upload size={14} /> Upload Local Photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={e => handleImageUpload(e.target.files[0], (val) => setGalleryForm({ ...galleryForm, src: val }))}
+                      />
+                    </label>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>
+                      PNG, JPG, WebP &bull; Auto-uploads to Cloudinary
+                    </span>
+                  </div>
+
+                  <input
+                    type="text"
+                    className="admin-form-input"
+                    placeholder="Or paste external image URL (https://...)"
+                    value={galleryForm.src}
+                    onChange={e => setGalleryForm({ ...galleryForm, src: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-group">
+                <label className="admin-form-label">Description (Optional)</label>
+                <textarea
+                  className="admin-form-textarea"
+                  rows={2}
+                  placeholder="Additional context about this photograph..."
+                  value={galleryForm.description}
+                  onChange={e => setGalleryForm({ ...galleryForm, description: e.target.value })}
+                />
+              </div>
+
+              <div className="admin-modal-actions">
+                <button type="button" className="admin-modal-cancel-btn" onClick={() => setModalMode(null)}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={isGallerySaving} className="admin-action-btn-primary">
+                  {isGallerySaving ? (
+                    <>
+                      <Loader2 size={16} className="admin-spin" />
+                      <span>Uploading to Cloudinary & Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check size={16} />
+                      <span>Save Photo</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== MODAL: ADD / EDIT BLOG ===================== */}
+      {(modalMode === 'add-blog' || modalMode === 'edit-blog') && (
+        <div className="admin-modal-overlay" onClick={() => setModalMode(null)}>
+          <div className="admin-modal-content wide animate-scale-up" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h2>
+                <BookOpen size={20} color="#a855f7" />
+                {modalMode === 'add-blog' ? 'Create New Blog Post' : 'Edit Blog Article'}
+              </h2>
+              <button className="admin-modal-close" onClick={() => setModalMode(null)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleBlogSubmit}>
+              <div className="admin-form-grid">
+                <div className="admin-form-group full">
+                  <label className="admin-form-label">Article Title *</label>
+                  <input
+                    type="text"
+                    required
+                    className="admin-form-input"
+                    placeholder="e.g. Modern Crop Protection Techniques in Japanese Agrosciences"
+                    value={blogForm.title}
+                    onChange={e => setBlogForm({ ...blogForm, title: e.target.value })}
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Category *</label>
+                  <select
+                    className="admin-form-select"
+                    required
+                    value={blogForm.category}
+                    onChange={e => setBlogForm({ ...blogForm, category: e.target.value })}
+                  >
+                    <option value="">Select Category</option>
+                    <option value="Agriculture">Agriculture</option>
+                    <option value="Crop Protection">Crop Protection</option>
+                    <option value="Pesticides">Pesticides</option>
+                    <option value="Sustainable Farming">Sustainable Farming</option>
+                    <option value="Farming Tech">Farming Tech</option>
+                  </select>
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Author</label>
+                  <input
+                    type="text"
+                    className="admin-form-input"
+                    placeholder="e.g. Shimanzu Agrosciences"
+                    value={blogForm.author}
+                    onChange={e => setBlogForm({ ...blogForm, author: e.target.value })}
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Publication Date</label>
+                  <input
+                    type="text"
+                    className="admin-form-input"
+                    placeholder="e.g. 12 Apr 2025"
+                    value={blogForm.date}
+                    onChange={e => setBlogForm({ ...blogForm, date: e.target.value })}
+                  />
+                </div>
+
+                {/* Cover Image Upload & Preview */}
+                <div className="admin-form-group full">
+                  <label className="admin-form-label">Cover Image * (Upload or URL)</label>
+                  <div style={{
+                    border: '1px dashed rgba(255, 255, 255, 0.2)',
+                    borderRadius: '10px',
+                    padding: '14px',
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                  }}>
+                    {blogForm.img ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <div style={{
+                          width: '100px',
+                          height: '70px',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          background: '#070d18',
+                          border: '1px solid rgba(255, 255, 255, 0.15)',
+                          flexShrink: 0
+                        }}>
+                          <img
+                            src={blogForm.img}
+                            alt="Cover Preview"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        </div>
+                        <div style={{ flexGrow: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                            {blogForm.img.includes('cloudinary.com') ? (
+                              <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: 'rgba(16, 185, 129, 0.15)',
+                                color: '#10b981',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                fontWeight: 600
+                              }}>
+                                <CheckCircle2 size={12} /> Stored on Cloudinary
+                              </span>
+                            ) : (
+                              <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: 'rgba(56, 189, 248, 0.15)',
+                                color: '#38bdf8',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                fontWeight: 600
+                              }}>
+                                Ready for Cloudinary
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setBlogForm({ ...blogForm, img: '' })}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#ef4444',
+                              fontSize: '12px',
+                              cursor: 'pointer',
+                              padding: 0,
+                              fontWeight: 600
+                            }}
+                          >
+                            Remove Image
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <label className="admin-action-btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
+                        <Upload size={14} /> Upload Local Cover
+                        <input
+                          type="file"
+                          accept="image/*"
+                          style={{ display: 'none' }}
+                          onChange={e => handleImageUpload(e.target.files[0], (val) => setBlogForm({ ...blogForm, img: val }))}
+                        />
+                      </label>
+                      <span style={{ fontSize: '11px', color: '#64748b' }}>
+                        PNG, JPG, WebP &bull; Auto-uploads to Cloudinary
+                      </span>
+                    </div>
+
+                    <input
+                      type="text"
+                      className="admin-form-input"
+                      placeholder="Or paste external image URL (https://...)"
+                      value={blogForm.img}
+                      onChange={e => setBlogForm({ ...blogForm, img: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-form-group full">
+                  <label className="admin-form-label">Short Summary / Excerpt *</label>
+                  <textarea
+                    className="admin-form-textarea"
+                    rows={2}
+                    required
+                    placeholder="Brief 1-2 sentence overview for the blog cards..."
+                    value={blogForm.desc}
+                    onChange={e => setBlogForm({ ...blogForm, desc: e.target.value })}
+                  />
+                </div>
+
+                <div className="admin-form-group full">
+                  <label className="admin-form-label">Full Article Content (Paragraphs)</label>
+                  <textarea
+                    className="admin-form-textarea"
+                    rows={6}
+                    placeholder="Full article body. Separate paragraphs with an empty line..."
+                    value={blogForm.content}
+                    onChange={e => setBlogForm({ ...blogForm, content: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="admin-modal-actions">
+                <button type="button" className="admin-modal-cancel-btn" onClick={() => setModalMode(null)}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={isBlogSaving} className="admin-action-btn-primary">
+                  {isBlogSaving ? (
+                    <>
+                      <Loader2 size={16} className="admin-spin" />
+                      <span>Uploading to Cloudinary & Publishing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check size={16} />
+                      <span>Publish Blog</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== MODAL: READ BLOG PREVIEW ===================== */}
+      {selectedBlogPreview && (
+        <div className="admin-modal-overlay" onClick={() => setSelectedBlogPreview(null)}>
+          <div className="admin-modal-content wide animate-scale-up" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h2><BookOpen size={20} color="#a855f7" /> Article Preview</h2>
+              <button className="admin-modal-close" onClick={() => setSelectedBlogPreview(null)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ maxHeight: '70vh', overflowY: 'auto', paddingRight: '8px' }}>
+              {selectedBlogPreview.img && (
+                <img
+                  src={selectedBlogPreview.img}
+                  alt={selectedBlogPreview.title}
+                  style={{ width: '100%', height: '260px', objectFit: 'cover', borderRadius: '10px', marginBottom: '16px' }}
+                />
+              )}
+              <div style={{ display: 'flex', gap: '16px', color: '#94a3b8', fontSize: '13px', marginBottom: '12px' }}>
+                <span><Calendar size={14} style={{ display: 'inline', verticalAlign: 'middle' }} /> {selectedBlogPreview.date}</span>
+                <span><User size={14} style={{ display: 'inline', verticalAlign: 'middle' }} /> {selectedBlogPreview.author}</span>
+                <span style={{ color: '#10b981', fontWeight: 600 }}>{selectedBlogPreview.category}</span>
+              </div>
+              <h2 style={{ fontSize: '1.5rem', color: '#fff', marginBottom: '16px' }}>{selectedBlogPreview.title}</h2>
+              <div style={{ color: '#cbd5e1', lineHeight: '1.7', fontSize: '14px' }}>
+                {(selectedBlogPreview.content || selectedBlogPreview.desc || '').split('\n').map((p, i) => (
+                  <p key={i} style={{ marginBottom: '14px' }}>{p}</p>
+                ))}
+              </div>
+            </div>
+
+            <div className="admin-modal-actions">
+              <button
+                type="button"
+                className="admin-action-btn-primary"
+                onClick={() => setSelectedBlogPreview(null)}
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ===================== MODAL: CHANGE PASSWORD ===================== */}
       {modalMode === 'change-password' && (
         <div className="admin-modal-overlay" onClick={() => setModalMode(null)}>
@@ -2244,7 +3161,7 @@ const Admin = () => {
               </div>
               <h3>Confirm Deletion</h3>
               <p>
-                Are you sure you want to delete <strong>"{deleteConfirmItem.item.name || deleteConfirmItem.item.subject}"</strong>?
+                Are you sure you want to delete <strong>"{deleteConfirmItem.item.name || deleteConfirmItem.item.title || deleteConfirmItem.item.subject}"</strong>?
                 This action cannot be undone.
               </p>
               <div className="admin-modal-actions" style={{ justifyContent: 'center' }}>

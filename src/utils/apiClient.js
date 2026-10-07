@@ -156,6 +156,38 @@ export const normalizeQuery = (row) => {
   };
 };
 
+export const normalizeGalleryItem = (row) => {
+  if (!row) return null;
+  const id = String(row.id || row._id || '').trim();
+  return {
+    id: id || ('gal-' + Date.now()),
+    _id: id || ('gal-' + Date.now()),
+    title: String(row.title || 'Untitled Photo').trim(),
+    cat: String(row.cat || 'field').trim().toLowerCase(),
+    tag: String(row.tag || 'Field & Crops').trim(),
+    src: String(row.src || row.image || row.imageUrl || '').trim(),
+    description: String(row.description || '').trim(),
+    created_at: row.created_at || row.createdAt || null
+  };
+};
+
+export const normalizeBlog = (row) => {
+  if (!row) return null;
+  const id = String(row.id || row._id || '').trim();
+  return {
+    id: id || ('blog-' + Date.now()),
+    _id: id || ('blog-' + Date.now()),
+    title: String(row.title || 'Untitled Blog Post').trim(),
+    desc: String(row.desc || row.description || '').trim(),
+    content: String(row.content || row.desc || '').trim(),
+    img: String(row.img || row.image || row.imageUrl || '').trim(),
+    category: String(row.category || 'Agriculture').trim(),
+    date: String(row.date || 'Recent').trim(),
+    author: String(row.author || 'Shimanzu Agrosciences').trim(),
+    created_at: row.created_at || row.createdAt || null
+  };
+};
+
 export const mongoApi = {
   // Fetch all products from MongoDB Atlas
   async getProducts() {
@@ -432,6 +464,126 @@ export const mongoApi = {
       });
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.error || 'Failed to delete inquiry');
+      return { error: null };
+    } catch (err) {
+      return { error: err.message };
+    }
+  },
+
+  // -----------------------------------------------------------
+  // Gallery API Endpoints (MongoDB Atlas & Cloudinary)
+  // -----------------------------------------------------------
+  async getGallery() {
+    try {
+      const res = await fetch(`${API_BASE}/gallery`);
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const json = await res.json();
+      const rows = json.data || [];
+      const normalized = Array.isArray(rows) ? rows.map(normalizeGalleryItem).filter(Boolean) : [];
+      return { data: normalized, error: null, count: normalized.length };
+    } catch (err) {
+      console.warn('MongoDB API getGallery error:', err.message);
+      return { data: null, error: err.message, count: 0 };
+    }
+  },
+
+  async addGalleryItem(item) {
+    try {
+      const res = await fetch(`${API_BASE}/gallery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to add gallery photo');
+      return { data: normalizeGalleryItem(json.data), error: null };
+    } catch (err) {
+      return { data: null, error: err.message };
+    }
+  },
+
+  async updateGalleryItem(id, updatedFields) {
+    try {
+      const res = await fetch(`${API_BASE}/gallery/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFields)
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to update gallery photo');
+      return { data: normalizeGalleryItem(json.data), error: null };
+    } catch (err) {
+      return { data: null, error: err.message };
+    }
+  },
+
+  async deleteGalleryItem(id) {
+    try {
+      const res = await fetch(`${API_BASE}/gallery/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to delete gallery photo');
+      return { error: null };
+    } catch (err) {
+      return { error: err.message };
+    }
+  },
+
+  // -----------------------------------------------------------
+  // Blogs API Endpoints (MongoDB Atlas & Cloudinary)
+  // -----------------------------------------------------------
+  async getBlogs() {
+    try {
+      const res = await fetch(`${API_BASE}/blogs`);
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const json = await res.json();
+      const rows = json.data || [];
+      const normalized = Array.isArray(rows) ? rows.map(normalizeBlog).filter(Boolean) : [];
+      return { data: normalized, error: null, count: normalized.length };
+    } catch (err) {
+      console.warn('MongoDB API getBlogs error:', err.message);
+      return { data: null, error: err.message, count: 0 };
+    }
+  },
+
+  async addBlog(blog) {
+    try {
+      const res = await fetch(`${API_BASE}/blogs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(blog)
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to add blog');
+      return { data: normalizeBlog(json.data), error: null };
+    } catch (err) {
+      return { data: null, error: err.message };
+    }
+  },
+
+  async updateBlog(id, updatedFields) {
+    try {
+      const res = await fetch(`${API_BASE}/blogs/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFields)
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to update blog');
+      return { data: normalizeBlog(json.data), error: null };
+    } catch (err) {
+      return { data: null, error: err.message };
+    }
+  },
+
+  async deleteBlog(id) {
+    try {
+      const res = await fetch(`${API_BASE}/blogs/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to delete blog');
       return { error: null };
     } catch (err) {
       return { error: err.message };

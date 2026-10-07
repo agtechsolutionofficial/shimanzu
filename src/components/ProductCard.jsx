@@ -62,21 +62,32 @@ const ProductCard = ({ product, onViewClick }) => {
       {/* Card Body */}
       <div className="fmc-card-body">
         {/* Left vertical color strip */}
-        <div 
-          className="fmc-card-accent-bar" 
-          style={{ backgroundColor: getCategoryColor(product.category) }} 
-        />
+        {product.category ? (
+          <div 
+            className="fmc-card-accent-bar" 
+            style={{ backgroundColor: getCategoryColor(product.category) }} 
+          />
+        ) : null}
 
         {/* Category Label */}
-        <span className="fmc-card-category-label">
-          {product.categoryLabel || product.category}
-        </span>
+        {(product.categoryLabel || product.category) ? (
+          <span className="fmc-card-category-label">
+            {product.categoryLabel || product.category}
+          </span>
+        ) : null}
 
         {/* Product Title in Bold Red */}
-        <h3 className="fmc-card-title">{product.name}</h3>
+        <h3 
+          className="fmc-card-title"
+          style={!product.name ? { color: '#94a3b8', fontStyle: 'italic', fontWeight: 600 } : {}}
+        >
+          {product.name || 'Product Title'}
+        </h3>
 
         {/* Chemical active info */}
-        <p className="fmc-card-chemical">{product.chemical}</p>
+        {product.chemical ? (
+          <p className="fmc-card-chemical">{product.chemical}</p>
+        ) : null}
 
         {/* Crops tags if available */}
         {product.crops && product.crops.length > 0 && (
@@ -92,9 +103,13 @@ const ProductCard = ({ product, onViewClick }) => {
 
         {/* Footer with Group / Formulation */}
         <div className="fmc-card-footer">
-          <span className="fmc-group-badge">
-            {product.group || `${product.formulation} FORMULATION`}
-          </span>
+          {(product.group || product.formulation) ? (
+            <span className="fmc-group-badge">
+              {product.group || `${product.formulation} FORMULATION`}
+            </span>
+          ) : (
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>-</span>
+          )}
           <span className="fmc-view-link">
             Details &rarr;
           </span>

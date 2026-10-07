@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { mongoApi, normalizeProduct, normalizeCategory, normalizeCrop, normalizeQuery } from '../utils/apiClient';
+import { mongoApi, normalizeProduct, normalizeCategory, normalizeCrop, normalizeQuery, normalizeGalleryItem, normalizeBlog } from '../utils/apiClient';
 
 const DataContext = createContext(null);
 
@@ -8,6 +8,8 @@ const STORAGE_KEYS = {
   CROPS: 'shimanzu_crops_v1',
   PRODUCTS: 'shimanzu_products_v1',
   QUERIES: 'shimanzu_queries_v1',
+  GALLERY: 'shimanzu_gallery_v1',
+  BLOGS: 'shimanzu_blogs_v1',
   AUTH: 'shimanzu_admin_auth_v1',
   PASSWORD: 'shimanzu_admin_pwd_v1'
 };
@@ -230,7 +232,103 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  // 3. Products state — ONLY dynamic database products (zero static data fallback)
+  // 4. Gallery state loaded directly from MongoDB Atlas & Cloudinary
+  const [gallery, setGallery] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.GALLERY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load gallery from localStorage', e);
+    }
+    return [];
+  });
+  const [isGalleryLoading, setIsGalleryLoading] = useState(false);
+  const [galleryError, setGalleryError] = useState(null);
+
+  const loadDatabaseGallery = async () => {
+    setIsGalleryLoading(true);
+    try {
+      const { data, error } = await mongoApi.getGallery();
+      if (error) {
+        console.warn('MongoDB gallery fetch warning:', error);
+        setGalleryError(error);
+      } else if (Array.isArray(data)) {
+        setGallery(data);
+        setGalleryError(null);
+        console.info(`✓ Loaded ${data.length} gallery photos directly from MongoDB Atlas!`);
+      }
+    } catch (err) {
+      console.warn('Error loading gallery from MongoDB:', err);
+      setGalleryError(err.message);
+    } finally {
+      setIsGalleryLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDatabaseGallery();
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (Array.isArray(gallery) && gallery.length > 0) {
+        localStorage.setItem(STORAGE_KEYS.GALLERY, JSON.stringify(gallery));
+      }
+    } catch (e) {}
+  }, [gallery]);
+
+  // 5. Blogs state loaded directly from MongoDB Atlas & Cloudinary
+  const [blogs, setBlogs] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.BLOGS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load blogs from localStorage', e);
+    }
+    return [];
+  });
+  const [isBlogsLoading, setIsBlogsLoading] = useState(false);
+  const [blogsError, setBlogsError] = useState(null);
+
+  const loadDatabaseBlogs = async () => {
+    setIsBlogsLoading(true);
+    try {
+      const { data, error } = await mongoApi.getBlogs();
+      if (error) {
+        console.warn('MongoDB blogs fetch warning:', error);
+        setBlogsError(error);
+      } else if (Array.isArray(data)) {
+        setBlogs(data);
+        setBlogsError(null);
+        console.info(`✓ Loaded ${data.length} blogs directly from MongoDB Atlas!`);
+      }
+    } catch (err) {
+      console.warn('Error loading blogs from MongoDB:', err);
+      setBlogsError(err.message);
+    } finally {
+      setIsBlogsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDatabaseBlogs();
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (Array.isArray(blogs) && blogs.length > 0) {
+        localStorage.setItem(STORAGE_KEYS.BLOGS, JSON.stringify(blogs));
+      }
+    } catch (e) {}
+  }, [blogs]);
+
+  // 6. Products state — ONLY dynamic database products (zero static data fallback)
   const [products, setProducts] = useState(() => {
     const customMap = getCustomImagesMap();
     try {
@@ -691,6 +789,200 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  // GALLERY CRUD (Connected to MongoDB Atlas & Cloudinary)
+  const addGalleryItem = async (newItem) => {
+    const id = newItem.id || 'gal-' + Date.now();
+    let finalSrc = (newItem.src || '').trim();
+
+    if (finalSrc && (finalSrc.startsWith('data:') || finalSrc.startsWith('blob:'))) {
+      try {
+        const uploadRes = await mongoApi.uploadImageToCloudinary(finalSrc, 'shimanzu_gallery');
+        if (uploadRes && uploadRes.url) {
+          finalSrc = uploadRes.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Cloudinary upload gallery error:', uploadErr);
+      }
+    }
+
+    const item = {
+      ...newItem,
+      id,
+      _id: id,
+      title: (newItem.title || 'Untitled Photo').trim(),
+      cat: (newItem.cat || 'field').trim().toLowerCase(),
+      tag: (newItem.tag || 'Field & Crops').trim(),
+      src: finalSrc,
+      description: newItem.description || '',
+      created_at: new Date().toISOString()
+    };
+
+    setGallery(prev => [item, ...prev]);
+
+    try {
+      const { data, error } = await mongoApi.addGalleryItem(item);
+      if (error) {
+        console.warn('MongoDB addGalleryItem warning:', error);
+        return { success: false, error, data: item };
+      } else if (data) {
+        setGallery(prev => prev.map(g => g.id === id ? data : g));
+        return { success: true, data };
+      }
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+    return { success: true, data: item };
+  };
+
+  const updateGalleryItem = async (id, updatedFields) => {
+    let finalSrc = updatedFields.src !== undefined ? (updatedFields.src || '').trim() : undefined;
+
+    if (finalSrc && (finalSrc.startsWith('data:') || finalSrc.startsWith('blob:'))) {
+      try {
+        const uploadRes = await mongoApi.uploadImageToCloudinary(finalSrc, 'shimanzu_gallery');
+        if (uploadRes && uploadRes.url) {
+          finalSrc = uploadRes.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Cloudinary gallery update upload warning:', uploadErr);
+      }
+    }
+
+    const sanitized = {
+      ...updatedFields,
+      ...(finalSrc !== undefined ? { src: finalSrc } : {})
+    };
+    delete sanitized._id;
+
+    setGallery(prev => prev.map(g => g.id === id ? { ...g, ...sanitized } : g));
+
+    try {
+      const { data, error } = await mongoApi.updateGalleryItem(id, sanitized);
+      if (error) {
+        console.warn('MongoDB updateGalleryItem warning:', error);
+        return { success: false, error };
+      }
+      if (data) {
+        setGallery(prev => prev.map(g => g.id === id ? data : g));
+      }
+      return { success: true, data };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteGalleryItem = async (id) => {
+    setGallery(prev => prev.filter(g => g.id !== id));
+    try {
+      const { error } = await mongoApi.deleteGalleryItem(id);
+      if (error) {
+        console.warn('MongoDB deleteGalleryItem error:', error);
+        return { success: false, error };
+      }
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  // BLOGS CRUD (Connected to MongoDB Atlas & Cloudinary)
+  const addBlog = async (newBlog) => {
+    const id = newBlog.id || 'blog-' + Date.now();
+    let finalImg = (newBlog.img || '').trim();
+
+    if (finalImg && (finalImg.startsWith('data:') || finalImg.startsWith('blob:'))) {
+      try {
+        const uploadRes = await mongoApi.uploadImageToCloudinary(finalImg, 'shimanzu_blogs');
+        if (uploadRes && uploadRes.url) {
+          finalImg = uploadRes.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Cloudinary upload blog error:', uploadErr);
+      }
+    }
+
+    const blog = {
+      ...newBlog,
+      id,
+      _id: id,
+      title: (newBlog.title || 'Untitled Post').trim(),
+      desc: (newBlog.desc || '').trim(),
+      content: (newBlog.content || newBlog.desc || '').trim(),
+      img: finalImg,
+      category: (newBlog.category || 'Agriculture').trim(),
+      date: newBlog.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      author: (newBlog.author || 'Shimanzu Agrosciences').trim(),
+      created_at: new Date().toISOString()
+    };
+
+    setBlogs(prev => [blog, ...prev]);
+
+    try {
+      const { data, error } = await mongoApi.addBlog(blog);
+      if (error) {
+        console.warn('MongoDB addBlog warning:', error);
+        return { success: false, error, data: blog };
+      } else if (data) {
+        setBlogs(prev => prev.map(b => b.id === id ? data : b));
+        return { success: true, data };
+      }
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+    return { success: true, data: blog };
+  };
+
+  const updateBlog = async (id, updatedFields) => {
+    let finalImg = updatedFields.img !== undefined ? (updatedFields.img || '').trim() : undefined;
+
+    if (finalImg && (finalImg.startsWith('data:') || finalImg.startsWith('blob:'))) {
+      try {
+        const uploadRes = await mongoApi.uploadImageToCloudinary(finalImg, 'shimanzu_blogs');
+        if (uploadRes && uploadRes.url) {
+          finalImg = uploadRes.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Cloudinary blog update upload warning:', uploadErr);
+      }
+    }
+
+    const sanitized = {
+      ...updatedFields,
+      ...(finalImg !== undefined ? { img: finalImg } : {})
+    };
+    delete sanitized._id;
+
+    setBlogs(prev => prev.map(b => b.id === id ? { ...b, ...sanitized } : b));
+
+    try {
+      const { data, error } = await mongoApi.updateBlog(id, sanitized);
+      if (error) {
+        console.warn('MongoDB updateBlog warning:', error);
+        return { success: false, error };
+      }
+      if (data) {
+        setBlogs(prev => prev.map(b => b.id === id ? data : b));
+      }
+      return { success: true, data };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteBlog = async (id) => {
+    setBlogs(prev => prev.filter(b => b.id !== id));
+    try {
+      const { error } = await mongoApi.deleteBlog(id);
+      if (error) {
+        console.warn('MongoDB deleteBlog error:', error);
+        return { success: false, error };
+      }
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
   // PRODUCT CRUD (Connected to MongoDB Atlas & Cloudinary)
   const addProduct = async (newProd) => {
     const id = newProd.id || 'prod-' + Date.now();
@@ -915,10 +1207,14 @@ export const DataProvider = ({ children }) => {
     loadDatabaseCrops();
     loadDatabaseCategories();
     loadDatabaseQueries();
+    loadDatabaseGallery();
+    loadDatabaseBlogs();
     setProducts([]);
     localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
     localStorage.removeItem(STORAGE_KEYS.CROPS);
     localStorage.removeItem(STORAGE_KEYS.QUERIES);
+    localStorage.removeItem(STORAGE_KEYS.GALLERY);
+    localStorage.removeItem(STORAGE_KEYS.BLOGS);
     localStorage.removeItem('shimanzu_products_v1');
   };
 
@@ -962,6 +1258,20 @@ export const DataProvider = ({ children }) => {
     addQuery,
     updateQueryStatus,
     deleteQuery,
+    gallery,
+    isGalleryLoading,
+    galleryError,
+    refreshGallery: loadDatabaseGallery,
+    addGalleryItem,
+    updateGalleryItem,
+    deleteGalleryItem,
+    blogs,
+    isBlogsLoading,
+    blogsError,
+    refreshBlogs: loadDatabaseBlogs,
+    addBlog,
+    updateBlog,
+    deleteBlog,
     resetToDefaultData,
     isAdmin,
     adminPassword,
