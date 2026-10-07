@@ -2191,6 +2191,7 @@ const Admin = () => {
                     type="text"
                     required
                     className="admin-form-input"
+                    placeholder="e.g. TEBCIN, GHIROILKONA R-999"
                     value={productForm.name}
                     onChange={e => setProductForm({ ...productForm, name: e.target.value })}
                   />
@@ -2201,6 +2202,7 @@ const Admin = () => {
                   <input
                     type="text"
                     className="admin-form-input"
+                    placeholder="e.g. SHIMANZU JAPAN"
                     value={productForm.brand}
                     onChange={e => setProductForm({ ...productForm, brand: e.target.value })}
                   />
@@ -2212,6 +2214,7 @@ const Admin = () => {
                     type="text"
                     required
                     className="admin-form-input"
+                    placeholder="e.g. Validamycin 5% + Tebuconazole 15% SC"
                     value={productForm.chemical}
                     onChange={e => setProductForm({ ...productForm, chemical: e.target.value })}
                   />
@@ -2253,34 +2256,72 @@ const Admin = () => {
                   </select>
                 </div>
 
-                <div className="admin-form-group">
+                <div className="admin-form-group full">
                   <label className="admin-form-label">Group / Mode of Action</label>
                   <input
                     type="text"
                     className="admin-form-input"
+                    placeholder="e.g. FRAC 18 + 3; Systemic"
                     value={productForm.group}
                     onChange={e => setProductForm({ ...productForm, group: e.target.value })}
                   />
                 </div>
 
                 <div className="admin-form-group">
-                  <label className="admin-form-label">Pack Sizes (comma-separated)</label>
+                  <label className="admin-form-label">Available Pack Sizes (comma-separated)</label>
                   <input
                     type="text"
                     className="admin-form-input"
+                    placeholder="e.g. 250 ml, 500 ml, 1 L, 5 L"
                     value={productForm.packSizes}
                     onChange={e => setProductForm({ ...productForm, packSizes: e.target.value })}
                   />
                 </div>
 
-                <div className="admin-form-group full">
+                <div className="admin-form-group">
                   <label className="admin-form-label">Target Crops (comma-separated)</label>
                   <input
                     type="text"
                     className="admin-form-input"
+                    placeholder="e.g. Rice, Cotton, Soybean, Wheat"
                     value={productForm.crops}
                     onChange={e => setProductForm({ ...productForm, crops: e.target.value })}
                   />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Recommended Dosage</label>
+                  <input
+                    type="text"
+                    className="admin-form-input"
+                    placeholder="e.g. 400 ml/acre in 200 L water"
+                    value={productForm.dosage}
+                    onChange={e => setProductForm({ ...productForm, dosage: e.target.value })}
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Target Pests / Diseases</label>
+                  <input
+                    type="text"
+                    className="admin-form-input"
+                    placeholder="e.g. Sheath Blight, Blast, Leaf Folder"
+                    value={productForm.targets}
+                    onChange={e => setProductForm({ ...productForm, targets: e.target.value })}
+                  />
+                </div>
+
+                <div className="admin-form-group full">
+                  <div className="admin-form-checkbox-row" style={{ marginTop: '4px', marginBottom: '4px' }}>
+                    <label className="admin-checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={productForm.inStock}
+                        onChange={e => setProductForm({ ...productForm, inStock: e.target.checked })}
+                      />
+                      <span>Ready in Stock (Immediate Dispatch)</span>
+                    </label>
+                  </div>
                 </div>
 
                 <div className="admin-form-group full">
@@ -2295,7 +2336,7 @@ const Admin = () => {
                 </div>
 
                 <div className="admin-form-group full">
-                  <label className="admin-form-label">Update Packaging Photo</label>
+                  <label className="admin-form-label">Packaging Media & Photo</label>
                   <input
                     type="file"
                     accept="image/*"
@@ -2308,10 +2349,50 @@ const Admin = () => {
                       <span>Optimizing image...</span>
                     </div>
                   )}
+
+                  {/* Standard Packaging Presets */}
+                  <div className="admin-preset-picker" style={{ marginTop: '12px' }}>
+                    <span className="admin-preset-title">Or pick a standard packaging preset:</span>
+                    <div className="admin-preset-chips">
+                      {PRESET_PRODUCT_IMAGES.map((preset, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          className={`admin-preset-chip ${productForm.imgSrc === preset.src ? 'selected' : ''}`}
+                          onClick={() => setProductForm({ ...productForm, imgSrc: preset.src })}
+                        >
+                          <img src={preset.src} alt={preset.label} />
+                          <span>{preset.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* External Image URL */}
+                  <div style={{ marginTop: '12px' }}>
+                    <input
+                      type="text"
+                      className="admin-form-input"
+                      placeholder="Or paste external image URL (https://...)"
+                      value={productForm.imgSrc}
+                      onChange={e => setProductForm({ ...productForm, imgSrc: e.target.value })}
+                    />
+                  </div>
+
                   {productForm.imgSrc && (
-                    <div className="admin-preview-thumbnail-box">
-                      <img src={productForm.imgSrc} alt="Preview" />
-                      <span>Attached custom packaging</span>
+                    <div className="admin-preview-thumbnail-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <img src={productForm.imgSrc} alt="Preview" />
+                        <span>Attached packaging photo</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="admin-mini-btn delete"
+                        onClick={() => setProductForm({ ...productForm, imgSrc: '' })}
+                        title="Remove image"
+                      >
+                        <Trash2 size={12} /> Remove
+                      </button>
                     </div>
                   )}
                 </div>
