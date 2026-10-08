@@ -68,7 +68,7 @@ const ProductsSection = () => {
                 <div className="phc-img-wrap">
                   <img src={p.imgSrc} alt={p.name} className="phc-img" loading="lazy" />
                   <span className={`phc-category-tag ${p.category === 'chemicals' ? 'phc-tag-chem' : ''}`}>{p.categoryLabel}</span>
-                  <span className="phc-jp-tag">🇯🇵 JP</span>
+                  {/* <span className="phc-jp-tag">🇯🇵 JP</span> */}
                 </div>
                 <div className="phc-body">
                   <h3 className="phc-name">{p.name}</h3>
