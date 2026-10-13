@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Phone } from 'lucide-react';
 import './Navbar.css';
-import logoImg from '../assets/images/1712639794.png';
+import logoImg from '../assets/images/shimanzu.png';
 
 const navLinks = [
   { name: 'Home',       path: '/' },

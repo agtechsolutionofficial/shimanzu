@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import logoImg from '../assets/images/1712639794.png';
+import logoImg from '../assets/images/shimanzu.png';
 
 const LoadingScreen = () => {
   const [visible, setVisible] = useState(true);
@@ -29,7 +29,7 @@ const LoadingScreen = () => {
           transition={{ duration: 0.8, ease: 'easeInOut' }}
           style={{
             position: 'fixed', inset: 0,
-            background: 'radial-gradient(ellipse at center, #0a1a0a 0%, #000000 100%)',
+            background: '#ffffff',
             display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center',
             zIndex: 999999, overflow: 'hidden',
@@ -44,7 +44,7 @@ const LoadingScreen = () => {
                 width: i % 3 === 0 ? '6px' : '3px',
                 height: i % 3 === 0 ? '6px' : '3px',
                 borderRadius: '50%',
-                background: i % 2 === 0 ? 'rgba(139,0,0,0.6)' : 'rgba(255,215,0,0.3)',
+                background: 'rgba(139,0,0,0.4)',
                 left: `${8 + i * 7.5}%`,
                 top: `${20 + (i % 5) * 15}%`,
               }}
@@ -71,7 +71,7 @@ const LoadingScreen = () => {
               position: 'absolute',
               width: '280px', height: '280px',
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(139,0,0,0.25) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(139,0,0,0.1) 0%, transparent 70%)',
             }}
           />
 
@@ -84,7 +84,7 @@ const LoadingScreen = () => {
               position: 'absolute',
               width: '380px', height: '380px',
               borderRadius: '50%',
-              border: '1px solid rgba(139,0,0,0.2)',
+              border: '1px solid rgba(139,0,0,0.15)',
             }}
           />
 
@@ -98,8 +98,8 @@ const LoadingScreen = () => {
             <motion.img
               src={logoImg}
               alt="Shimanzu"
-              style={{ width: '180px', filter: 'brightness(0) invert(1)' }}
-              animate={{ filter: ['brightness(0) invert(1)', 'brightness(0.9) invert(1) sepia(0.3)', 'brightness(0) invert(1)'] }}
+              style={{ width: '180px' }}
+              animate={{ opacity: [1, 0.85, 1] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             />
           </motion.div>
@@ -113,7 +113,7 @@ const LoadingScreen = () => {
           >
             <div style={{
               width: '100%', height: '2px',
-              background: 'rgba(255,255,255,0.1)',
+              background: 'rgba(0,0,0,0.08)',
               borderRadius: '2px', overflow: 'hidden',
             }}>
               <motion.div
@@ -128,7 +128,7 @@ const LoadingScreen = () => {
             </div>
             <motion.p
               style={{
-                color: 'rgba(255,255,255,0.4)',
+                color: 'black',
                 fontSize: '11px',
                 letterSpacing: '3px',
                 textAlign: 'center',
