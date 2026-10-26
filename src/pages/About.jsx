@@ -344,120 +344,123 @@ const About = () => {
       {/* =========================================================================
           WAREHOUSE & GODOWN INFRASTRUCTURE SECTION
           ========================================================================= */}
-      <section className="warehouse-section">
-        <div className="container">
-          <div className="warehouse-header-wrap">
-            <div className="about-eyebrow" style={{ justifyContent: 'center' }}>
-              <span className="eyebrow-text">WAREHOUSING & INVENTORY SCALE</span>
-              <div className="eyebrow-line"></div>
-            </div>
-            <h2 className="heritage-title" style={{ textAlign: 'center' }}>
-              Our Godown & Storage Infrastructure
-            </h2>
-            <p className="heritage-desc" style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 40px' }}>
-              Real-time glimpse inside Shimanzu's massive storage facilities. With modern climate regulation, high-throughput logistics aisles, and extensive safety protocols, we maintain ample buffer inventory to serve agricultural demand year-round.
-            </p>
-          </div>
-
-          {/* Infrastructure Metrics Bar */}
-          <div className="warehouse-stats-bar">
-            <div className="wh-stat-card">
-              <div className="wh-stat-number">50,000+</div>
-              <div className="wh-stat-label">Square Feet Storage Area</div>
-            </div>
-            <div className="wh-stat-card">
-              <div className="wh-stat-number">500+ MT</div>
-              <div className="wh-stat-label">Ready Inventory Buffer</div>
-            </div>
-            <div className="wh-stat-card">
-              <div className="wh-stat-number">100%</div>
-              <div className="wh-stat-label">Batch Traceability</div>
-            </div>
-            <div className="wh-stat-card">
-              <div className="wh-stat-number">24/7</div>
-              <div className="wh-stat-label">Expedited Dispatch</div>
-            </div>
-          </div>
-
-          {/* Godown Photos 2x2 Interactive Grid */}
-          <div className="godown-photos-grid">
-            {GODOWN_GALLERY.map((item, idx) => (
-              <motion.div
-                key={item.id}
-                custom={idx}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                viewport={vp}
-                className="godown-photo-card"
-                onClick={() => setSelectedPhoto(item)}
-              >
-                <div className="godown-img-wrap">
-                  <img 
-                    src={item.img} 
-                    alt={item.title} 
-                    className="godown-img"
-                    loading="lazy"
-                  />
-                  <div className="godown-zoom-overlay">
-                    <span className="zoom-pill">
-                      <Maximize2 size={15} /> Click to Enlarge
-                    </span>
-                  </div>
-                </div>
-
-                <div className="godown-card-caption">
-                  <div className="godown-caption-top">
-                    <span className="godown-badge">{item.badge}</span>
-                    <span className="godown-capacity-tag">{item.tag}</span>
-                  </div>
-                  <h3 className="godown-title">{item.title}</h3>
-                  <p className="godown-desc">{item.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Lightbox Modal for Fullscreen Godown Inspection */}
-      <AnimatePresence>
-        {selectedPhoto && (
-          <div className="godown-modal-backdrop" onClick={() => setSelectedPhoto(null)}>
-            <motion.div 
-              className="godown-modal-box"
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ duration: 0.25 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button 
-                className="godown-modal-close" 
-                onClick={() => setSelectedPhoto(null)}
-                aria-label="Close image"
-              >
-                <X size={22} />
-              </button>
-
-              <img 
-                src={selectedPhoto.img} 
-                alt={selectedPhoto.title} 
-                className="godown-modal-img" 
-              />
-
-              <div className="godown-modal-footer">
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
-                  <span className="godown-badge">{selectedPhoto.badge}</span>
-                  <span className="godown-capacity-tag">{selectedPhoto.tag}</span>
-                </div>
-                <h3 className="godown-modal-title">{selectedPhoto.title}</h3>
-                <p className="godown-modal-desc">{selectedPhoto.desc}</p>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {
+        // Godown section temporarily hidden. Uncomment the lines below to restore.
+        //       <section className="warehouse-section">
+        //         <div className="container">
+        //           <div className="warehouse-header-wrap">
+        //             <div className="about-eyebrow" style={{ justifyContent: 'center' }}>
+        //               <span className="eyebrow-text">WAREHOUSING & INVENTORY SCALE</span>
+        //               <div className="eyebrow-line"></div>
+        //             </div>
+        //             <h2 className="heritage-title" style={{ textAlign: 'center' }}>
+        //               Our Godown & Storage Infrastructure
+        //             </h2>
+        //             <p className="heritage-desc" style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 40px' }}>
+        //               Real-time glimpse inside Shimanzu's massive storage facilities. With modern climate regulation, high-throughput logistics aisles, and extensive safety protocols, we maintain ample buffer inventory to serve agricultural demand year-round.
+        //             </p>
+        //           </div>
+        // 
+        //           {/* Infrastructure Metrics Bar */}
+        //           <div className="warehouse-stats-bar">
+        //             <div className="wh-stat-card">
+        //               <div className="wh-stat-number">50,000+</div>
+        //               <div className="wh-stat-label">Square Feet Storage Area</div>
+        //             </div>
+        //             <div className="wh-stat-card">
+        //               <div className="wh-stat-number">500+ MT</div>
+        //               <div className="wh-stat-label">Ready Inventory Buffer</div>
+        //             </div>
+        //             <div className="wh-stat-card">
+        //               <div className="wh-stat-number">100%</div>
+        //               <div className="wh-stat-label">Batch Traceability</div>
+        //             </div>
+        //             <div className="wh-stat-card">
+        //               <div className="wh-stat-number">24/7</div>
+        //               <div className="wh-stat-label">Expedited Dispatch</div>
+        //             </div>
+        //           </div>
+        // 
+        //           {/* Godown Photos 2x2 Interactive Grid */}
+        //           <div className="godown-photos-grid">
+        //             {GODOWN_GALLERY.map((item, idx) => (
+        //               <motion.div
+        //                 key={item.id}
+        //                 custom={idx}
+        //                 variants={fadeUp}
+        //                 initial="hidden"
+        //                 whileInView="visible"
+        //                 viewport={vp}
+        //                 className="godown-photo-card"
+        //                 onClick={() => setSelectedPhoto(item)}
+        //               >
+        //                 <div className="godown-img-wrap">
+        //                   <img 
+        //                     src={item.img} 
+        //                     alt={item.title} 
+        //                     className="godown-img"
+        //                     loading="lazy"
+        //                   />
+        //                   <div className="godown-zoom-overlay">
+        //                     <span className="zoom-pill">
+        //                       <Maximize2 size={15} /> Click to Enlarge
+        //                     </span>
+        //                   </div>
+        //                 </div>
+        // 
+        //                 <div className="godown-card-caption">
+        //                   <div className="godown-caption-top">
+        //                     <span className="godown-badge">{item.badge}</span>
+        //                     <span className="godown-capacity-tag">{item.tag}</span>
+        //                   </div>
+        //                   <h3 className="godown-title">{item.title}</h3>
+        //                   <p className="godown-desc">{item.desc}</p>
+        //                 </div>
+        //               </motion.div>
+        //             ))}
+        //           </div>
+        //         </div>
+        //       </section>
+        // 
+        //       {/* Lightbox Modal for Fullscreen Godown Inspection */}
+        //       <AnimatePresence>
+        //         {selectedPhoto && (
+        //           <div className="godown-modal-backdrop" onClick={() => setSelectedPhoto(null)}>
+        //             <motion.div 
+        //               className="godown-modal-box"
+        //               initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        //               animate={{ opacity: 1, scale: 1, y: 0 }}
+        //               exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        //               transition={{ duration: 0.25 }}
+        //               onClick={(e) => e.stopPropagation()}
+        //             >
+        //               <button 
+        //                 className="godown-modal-close" 
+        //                 onClick={() => setSelectedPhoto(null)}
+        //                 aria-label="Close image"
+        //               >
+        //                 <X size={22} />
+        //               </button>
+        // 
+        //               <img 
+        //                 src={selectedPhoto.img} 
+        //                 alt={selectedPhoto.title} 
+        //                 className="godown-modal-img" 
+        //               />
+        // 
+        //               <div className="godown-modal-footer">
+        //                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
+        //                   <span className="godown-badge">{selectedPhoto.badge}</span>
+        //                   <span className="godown-capacity-tag">{selectedPhoto.tag}</span>
+        //                 </div>
+        //                 <h3 className="godown-modal-title">{selectedPhoto.title}</h3>
+        //                 <p className="godown-modal-desc">{selectedPhoto.desc}</p>
+        //               </div>
+        //             </motion.div>
+        //           </div>
+        //         )}
+        //       </AnimatePresence>
+      }
     </div>
   );
 };
