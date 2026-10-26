@@ -15,12 +15,17 @@ import {
   Eye,
   Activity,
   HeartHandshake,
-  CheckCircle
+  CheckCircle,
+  Target,
+  Sprout,
+  Handshake,
+  Lightbulb,
+  TrendingUp
 } from 'lucide-react';
 import './About.css';
+import aboutSeedlingImg from '../assets/images/about-seedling-tech-technology-generated.png';
 
 const aboutMainImg = 'https://images.pexels.com/photos/2132250/pexels-photo-2132250.jpeg?auto=compress&cs=tinysrgb&w=900';
-const aboutFloatImg = 'https://images.pexels.com/photos/3735218/pexels-photo-3735218.jpeg?auto=compress&cs=tinysrgb&w=400';
 
 // Import Godown/Warehouse photos
 import godown1 from '../assets/images/godown/godown-1.jpeg';
@@ -110,105 +115,165 @@ const About = () => {
         </motion.div>
       </div>
 
-      <div className="container" style={{ marginTop: '70px', marginBottom: '80px' }}>
-        {/* Company Intro — two column */}
-        <div className="grid grid-cols-2 gap-8 items-center" style={{ marginBottom: '60px' }}>
-          <motion.div 
+      <div className="container abp-intro">
+        {/* About Shimanzu — image + story */}
+        <div className="abp-grid">
+          <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={vp}
             transition={{ duration: 0.6 }}
-            style={{ position: 'relative' }}
+            className="abp-media"
           >
-            <img 
-              src={aboutMainImg}
-              alt="Shimanzu agricultural fields" 
-              style={{ borderRadius: 'var(--radius-lg)', width: '100%', display: 'block', boxShadow: '0 15px 35px rgba(0,0,0,0.5)', height: '460px', objectFit: 'cover' }} 
-            />
-            {/* Floating lab image */}
-            <div style={{ position: 'absolute', bottom: '-24px', right: '-24px', width: '200px', background: '#fff', borderRadius: '14px', overflow: 'hidden', boxShadow: '0 12px 35px rgba(0,0,0,0.2)', border: '2px solid #E8F5E9' }}>
-              <img src={aboutFloatImg} alt="Laboratory" style={{ width: '100%', height: '110px', objectFit: 'cover', display: 'block' }} />
-              <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '1.3rem' }}>🇯🇵</span>
-                <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1B5E20' }}>Japanese Technology</div>
-                  <div style={{ fontSize: '0.7rem', color: '#66BB6A' }}>Agricultural Innovation</div>
-                </div>
+            <div className="abp-img-frame">
+              <img src={aboutSeedlingImg} alt="Seedling growing in rich soil with smart agriculture technology" className="abp-img" />
+            </div>
+            <div className="abp-stats">
+              <div className="abp-stat abp-stat--green">
+                <span className="abp-stat-num">1200+</span>
+                <span className="abp-stat-label">Distributors</span>
+              </div>
+              <div className="abp-stat abp-stat--red">
+                <span className="abp-stat-num">2800+</span>
+                <span className="abp-stat-label">Dealers</span>
+              </div>
+              <div className="abp-stat abp-stat--blue">
+                <span className="abp-stat-num">Pan India</span>
+                <span className="abp-stat-label">Network</span>
               </div>
             </div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={vp}
             transition={{ duration: 0.6, delay: 0.2 }}
+            className="abp-story"
           >
-            <span className="section-pill-badge" style={{ marginBottom: '14px', display: 'inline-block', background: '#E8F5E9', color: '#174D32', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1.5px', padding: '4px 14px', borderRadius: '9999px', border: '1px solid #2E7D32' }}>ABOUT US</span>
-            <h2 className="h3" style={{ color: '#081B10', marginBottom: '20px' }}>Growing Agriculture. Empowering Farmers. Building a Better Future.</h2>
-            <p className="text-secondary" style={{ marginBottom: '16px', lineHeight: '1.8' }}>
-              Shimanzu Chemicals Private Limited is a professionally managed agricultural solutions company committed to delivering innovative, reliable, and quality-driven solutions for modern farming. Our objective is to support farmers with effective agricultural products that help protect crops, improve plant health, enhance productivity, and contribute to better farm outcomes.
+            <span className="abp-pill">About Shimanzu</span>
+            <h2 className="abp-title">
+              Not Just a Company. <span>A Commitment.</span>
+            </h2>
+            <p className="abp-text">
+              Shimanzu Chemicals Pvt. Ltd. is not just a company. It is a commitment — a commitment to empower farmers, enrich soils, and strengthen agriculture.
             </p>
-            <p className="text-secondary" style={{ lineHeight: '1.8', marginBottom: '16px' }}>
-              We understand that agriculture is more than just a profession—it is the foundation of our society and economy. With this belief, we work towards developing and delivering solutions that address the changing requirements of farmers and modern agricultural practices.
+            <p className="abp-text">
+              Our journey begins with the soil and extends to every farm where a farmer nurtures his dreams. Guided by quality, trust, and innovation, Shimanzu today is a trusted name across India with thousands of distributors, dealers, and farmers.
             </p>
-            <p className="text-secondary" style={{ lineHeight: '1.8', marginBottom: '28px' }}>
-              At Shimanzu Chemicals, quality, innovation, farmer satisfaction, and integrity are at the core of our business. We continuously focus on product development, quality standards, technical knowledge, and market understanding to provide dependable solutions to the agricultural community.
+            <p className="abp-strength">
+              <Leaf size={16} /> Our strength lies in the farmers of India.
             </p>
           </motion.div>
         </div>
+
+        {/* MD message + highlights */}
+        <div className="abp-bottom">
+          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} className="abp-md-card">
+            <span className="abp-md-label">Message from the Managing Director</span>
+            <p className="abp-md-quote">
+              “At Shimanzu, we believe that agriculture is the backbone of our nation. For us, this is not just a business. It is a responsibility and a mission.”
+            </p>
+            <p className="abp-md-text">
+              I sincerely thank our farmers, distributors, and partners — your trust is our greatest strength.
+            </p>
+            <p className="abp-md-sign">
+              Together, let us build a tomorrow where — <strong>“Where there is Shimanzu, there is prosperity.”</strong>
+            </p>
+          </motion.div>
+
+          <div className="abp-highlights">
+            {[
+              { icon: <FlaskConical size={18} />, title: 'Research-Driven Solutions', text: 'Creating innovative formulations', color: '#1565C0' },
+              { icon: <Leaf size={18} />, title: 'Soil-Health & Sustainability', text: 'Focused fertilizers for long-term farm health', color: '#2E7D32' },
+              { icon: <HeartHandshake size={18} />, title: 'A Strong Network', text: '1200+ distributors and 2800+ dealers across India', color: '#D32F2F' },
+            ].map((h, i) => (
+              <motion.div key={h.title} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} className="abp-hl" style={{ '--hl': h.color }}>
+                <span className="abp-hl-icon">{h.icon}</span>
+                <div>
+                  <div className="abp-hl-title">{h.title}</div>
+                  <div className="abp-hl-text">{h.text}</div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Vision & Mission Section styled like reference image */}
-      <section className="vision-mission-section" style={{ padding: '80px 0', background: '#F8FAF8' }}>
+      {/* Vision & Mission */}
+      <section className="vm-section">
         <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#E8F5E9', color: '#10B981', padding: '8px 20px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '16px' }}>
-              <Shield size={16} /> OUR PURPOSE
-            </span>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#081B10' }}>Vision & Mission</h2>
+          <div className="vm-header">
+            <span className="vm-pill"><Shield size={14} /> Our Purpose</span>
+            <h2 className="vm-heading">Vision <span>&amp;</span> Mission</h2>
+            <p className="vm-sub">What drives us every day — for our farmers, our soil and our future.</p>
           </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', alignItems: 'stretch' }}>
-            {/* Vision Card */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+
+          <div className="vm-grid">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={vp}
-              transition={{ duration: 0.5 }}
-              style={{ background: '#10B981', borderRadius: '32px', padding: '48px', color: '#fff', boxShadow: '0 20px 40px rgba(16, 185, 129, 0.15)' }}
+              transition={{ duration: 0.6 }}
+              className="vm-card vm-card--vision"
             >
-              <div style={{ width: '64px', height: '64px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px' }}>
-                <Eye size={32} color="#fff" />
-              </div>
-              <h3 style={{ fontSize: '2.3rem', fontWeight: 700, marginBottom: '24px' }}>Our Vision</h3>
-              <p style={{ fontSize: '1.05rem', lineHeight: '1.8', opacity: 0.95 }}>
-                To become a trusted and recognized name in the agricultural industry by delivering innovative, effective, and quality-driven solutions that contribute to healthier crops, better productivity, and a prosperous farming community.
+              <Eye className="vm-watermark" size={180} strokeWidth={1} />
+              <div className="vm-icon"><Eye size={26} /></div>
+              <span className="vm-label">Our Vision</span>
+              <p className="vm-statement">
+                To make farming with <em>trust</em>, <em>simple ideas</em>, and <em>care for nature</em>.
               </p>
+              <div className="vm-tags">
+                <span>Trust</span><span>Simplicity</span><span>Nature</span>
+              </div>
             </motion.div>
 
-            {/* Mission Card */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+            <div className="vm-center" aria-hidden="true">
+              <Sprout size={28} />
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={vp}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              style={{ background: '#10B981', borderRadius: '32px', padding: '48px', color: '#fff', boxShadow: '0 20px 40px rgba(16, 185, 129, 0.15)' }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="vm-card vm-card--mission"
             >
-              <div style={{ width: '64px', height: '64px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px' }}>
-                <Activity size={32} color="#fff" />
-              </div>
-              <h3 style={{ fontSize: '2.3rem', fontWeight: 700, marginBottom: '24px' }}>Our Mission</h3>
-              <p style={{ fontSize: '1.05rem', lineHeight: '1.8', opacity: 0.95 }}>
-                Our mission is to provide farmers with reliable agricultural solutions that combine quality, innovation, technology, and value. We strive to continuously improve our products and services while building strong and long-lasting relationships with farmers, dealers, distributors, and agricultural partners.
+              <Target className="vm-watermark" size={180} strokeWidth={1} />
+              <div className="vm-icon"><Target size={26} /></div>
+              <span className="vm-label">Our Mission</span>
+              <p className="vm-statement">
+                To give farmers the <em>right products</em> that protect crops, improve soil, and support their growth.
               </p>
+              <div className="vm-tags">
+                <span>Protect Crops</span><span>Improve Soil</span><span>Support Growth</span>
+              </div>
             </motion.div>
+          </div>
+
+          <div className="vm-values">
+            <div className="vm-values-title">Our Core Values</div>
+            <div className="vm-values-grid">
+              {[
+                { icon: <Award size={22} />, title: 'Quality', text: 'Good and reliable products', color: '#2E7D32' },
+                { icon: <Leaf size={22} />, title: 'Sustainability', text: 'Care for nature and farming future', color: '#00897B' },
+                { icon: <Handshake size={22} />, title: 'Trust', text: 'Faith and honesty in every relation', color: '#1565C0' },
+                { icon: <Lightbulb size={22} />, title: 'Innovation', text: 'New and better ideas', color: '#F57C00' },
+                { icon: <TrendingUp size={22} />, title: 'Growth', text: 'Progress every day', color: '#D32F2F' },
+              ].map((v, i) => (
+                <motion.div key={v.title} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} className="vm-value" style={{ '--vc': v.color }}>
+                  <span className="vm-value-icon">{v.icon}</span>
+                  <div className="vm-value-name">{v.title}</div>
+                  <div className="vm-value-text">{v.text}</div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Core Values / Approach Section */}
-      <div className="container" style={{ padding: '80px 0' }}>
+      <div className="container" style={{ paddingTop: '80px', paddingBottom: '80px' }}>
         <div className="grid grid-cols-3 gap-8" style={{ marginBottom: '60px' }}>
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={vp} className="pillar-card">
             <div className="pillar-icon">

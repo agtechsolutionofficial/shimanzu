@@ -2,10 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FlaskConical, Microscope, ShieldCheck, TestTube, Sprout, Leaf, ArrowRight } from 'lucide-react';
 import './ResearchSection.css';
-import img1 from '../../assets/images/1694428044.webp';
-import img2 from '../../assets/images/1694428114.webp';
-import img3 from '../../assets/images/1694428214.webp';
-import img4 from '../../assets/images/1694428268.webp';
+import img1 from '../../assets/images/product-testing.png';
+import img2 from '../../assets/images/laboratory-analysis.jpeg';
+import img3 from '../../assets/images/quality-control.png';
+import img4 from '../../assets/images/safety-evaluation.png';
 import img5 from '../../assets/images/1713003063.webp';
 
 const fadeUp = { hidden: { opacity: 0, y: 35 }, visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.55, delay: i * 0.1, ease: 'easeOut' } }) };

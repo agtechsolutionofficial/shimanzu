@@ -126,11 +126,14 @@ const HeroSection = () => {
 
         <div className="container hero-container">
           <div className="hero-content">
-            <h1 className="hero-title" key={`title-${cur}`}>
-              {timeline[cur].title1}<br />
-              {timeline[cur].title2}<br />
-              <span className="hero-title-accent">{timeline[cur].titleAccent}</span>
+            <span className="hero-eyebrow-pill">Shimanzu Japan</span>
+            <h1 className="hero-tagline">
+              Growing with <span>Trust</span>
             </h1>
+            <h2 className="hero-title" key={`title-${cur}`}>
+              {timeline[cur].title1} {timeline[cur].title2}{' '}
+              <span className="hero-title-accent">{timeline[cur].titleAccent}</span>
+            </h2>
             <p className="hero-desc">
               Shimanzu Japan develops and provides premium agricultural chemical and crop-care solutions — combining Japanese scientific precision with deep understanding of farmer needs for sustainable, high-yield agriculture.
             </p>
