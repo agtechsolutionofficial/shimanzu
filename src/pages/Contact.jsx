@@ -230,8 +230,8 @@ const Contact = () => {
               </div>
               <div className="info-content">
                 <h3 className="info-title">Visit HQ</h3>
-                <p className="info-text-primary">Plot No. 271, Village Nawada</p>
-                <p className="info-text-secondary">Uttam Nagar, New Delhi - 110059</p>
+                <p className="info-text-primary">IGC PHASE III SIDCO</p>
+                <p className="info-text-secondary">Samba Goran Road, Samba ADDA Sub Post Office, District: Samba, Jammu and Kashmir - 184121</p>
               </div>
               <div className="info-card-line"></div>
               <Leaf size={80} className="info-card-watermark" />

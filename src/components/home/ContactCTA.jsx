@@ -40,7 +40,7 @@ const ContactCTA = () => {
                 <div className="cic-icon"><MapPin size={20} /></div>
                 <div>
                   <div className="cic-label">Our Address</div>
-                  <div className="cic-value">Plot No. 271, Village Nawada, Uttam Nagar, New Delhi - 110059</div>
+                  <div className="cic-value">IGC PHASE III SIDCO, Samba Goran Road, Samba ADDA Sub Post Office, District: Samba, Jammu and Kashmir - 184121</div>
                 </div>
               </div>
               <div className="cic-item">
