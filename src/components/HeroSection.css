@@ -194,7 +194,7 @@
 
 .hero-tagline {
   font-family: var(--font-sans, system-ui, sans-serif);
-  font-size: clamp(2.1rem, 3.6vw, 3.2rem);
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -1px;
@@ -209,7 +209,7 @@
 
 .hero-title {
   font-family: var(--font-sans, system-ui, sans-serif);
-  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+  font-size: clamp(0.9rem, 1.1vw, 1rem);
   color: #fff;
   line-height: 1.4;
   margin: 0 0 12px;
@@ -226,7 +226,7 @@
 }
 
 .hero-desc {
-  font-size: clamp(0.85rem, 0.9vw, 0.875rem);
+  font-size: 0.8125rem;
   color: #fff;
   line-height: 1.65;
   margin-bottom: 24px;
@@ -464,15 +464,15 @@
   }
 
   .hero-tagline {
-    font-size: 1.9rem;
+    font-size: 1.7rem;
   }
 
   .hero-title {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .hero-desc {
-    font-size: 0.85rem;
+    font-size: 0.8125rem;
   }
 
   .hero-stats {
