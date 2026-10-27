@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail } from 'lucide-react';
-import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn, FaWhatsapp } from 'react-icons/fa';
 import './Footer.css';
 import logoImg from '../assets/images/shimanzu.png';
 
@@ -80,7 +80,7 @@ const Footer = () => (
             <span>18003093053 (Toll-Free)</span>
           </div>
           <div className="contact-item">
-            <Phone size={18} className="contact-icon" />
+            <FaWhatsapp size={18} className="contact-icon" />
             <span>WhatsApp: 7286800800</span>
           </div>
           <div className="contact-item">

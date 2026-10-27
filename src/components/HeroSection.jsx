@@ -14,7 +14,7 @@ const timeline = [
   { 
     type: 'video', src: seedlingVideo, duration: 7000,
     title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow",
-    scale: 1.28
+    scale: 1.32
   },
   
   { 
@@ -23,11 +23,13 @@ const timeline = [
   },
   { 
     type: 'video', src: slide3, duration: 16000,
-    title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow"
+    title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow",
+    scale: 1.30
   },
   { 
     type: 'video', src: dioxideVideo, duration: 6000,
-    title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth"
+    title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth",
+    scale: 1.30
   },
   { 
     type: 'video', src: slide4, duration: 8000,

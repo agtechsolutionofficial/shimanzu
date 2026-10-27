@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Send } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 import './ContactCTA.css';
 import contactImg from '../../assets/images/video_slides/slide_1.jpeg';
 
@@ -65,7 +66,7 @@ const ContactCTA = () => {
                 </div>
               </div>
               <div className="cic-item">
-                <div className="cic-icon"><Phone size={20} /></div>
+                <div className="cic-icon"><FaWhatsapp size={20} /></div>
                 <div>
                   <div className="cic-label">WhatsApp</div>
                   <div className="cic-value">7286800800</div>
