@@ -65,11 +65,23 @@ const Footer = () => (
           <h4 className="footer-title">Reach Us</h4>
           <div className="contact-item">
             <MapPin size={18} className="contact-icon" />
-            <span>IGC PHASE III SIDCO, Samba Goran Road, Samba ADDA Sub Post Office, District: Samba, Jammu and Kashmir - 184121</span>
+            <span><strong>Corporate Office:</strong> Shimanzu Tower, 271 Uttam Nagar, New Delhi, India - 110059</span>
+          </div>
+          <div className="contact-item">
+            <MapPin size={18} className="contact-icon" />
+            <span><strong>Manufacturing Unit I:</strong> VPO Nagla Megha, Gharaunda Road, Karnal, Haryana - 132001</span>
+          </div>
+          <div className="contact-item">
+            <MapPin size={18} className="contact-icon" />
+            <span><strong>Manufacturing Unit II:</strong> I-IGC Phase III SIDCO, Samba Goran Road, Samba ADDA Sub Post Office, District: Samba, Jammu and Kashmir - 184121</span>
           </div>
           <div className="contact-item">
             <Phone size={18} className="contact-icon" />
-            <span>1800 309 3053 (Toll-Free)</span>
+            <span>18003093053 (Toll-Free)</span>
+          </div>
+          <div className="contact-item">
+            <Phone size={18} className="contact-icon" />
+            <span>WhatsApp: 7286800800</span>
           </div>
           <div className="contact-item">
             <Mail size={18} className="contact-icon" />

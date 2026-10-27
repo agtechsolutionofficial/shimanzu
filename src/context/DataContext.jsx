@@ -1015,7 +1015,8 @@ export const DataProvider = ({ children }) => {
       targets: newProd.targets || '',
       dosage: newProd.dosage || '',
       description: newProd.description || '',
-      imgSrc: finalImg
+      imgSrc: finalImg,
+      division: newProd.division === 'food' ? 'food' : newProd.division === 'chemical' ? 'chemical' : ''
     };
 
     if (product.imgSrc && (product.imgSrc.startsWith('data:') || product.imgSrc.startsWith('blob:'))) {

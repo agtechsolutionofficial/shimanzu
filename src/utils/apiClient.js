@@ -30,7 +30,7 @@ export const normalizeProduct = (row) => {
   ).trim();
 
   const rawCat = String(row.category || row.category_key || '').toLowerCase().trim();
-  let category = 'chemicals';
+  let category = 'uncategorized';
   if (rawCat.includes('fungicide')) category = 'fungicides';
   else if (rawCat.includes('herbicide')) category = 'herbicides';
   else if (rawCat.includes('insecticide') || rawCat.includes('miticide')) category = 'insecticides';
@@ -79,6 +79,16 @@ export const normalizeProduct = (row) => {
   const dosage = String(row.dosage || row.recommendedDosage || '').trim();
   const description = String(row.description || row.productOverviewAndEfficacy || '').trim();
   const imgSrc = String(row.imgSrc || row.img_src || row.image || row.imageUrl || '').trim();
+  const rawDivision = String(row.division || row.productDivision || '').toLowerCase().trim();
+  const division = rawDivision === 'food'
+    ? 'food'
+    : rawDivision === 'chemical' && category === 'chemicals'
+      ? 'chemical'
+      : category === 'chemicals'
+        ? 'chemical'
+        : category === 'food'
+          ? 'food'
+          : '';
 
   return {
     id: String(row.id || row._id || ('prod-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-'))),
@@ -97,6 +107,7 @@ export const normalizeProduct = (row) => {
     dosage,
     description,
     imgSrc,
+    division,
     createdAt: row.created_at || row.createdAt || null
   };
 };

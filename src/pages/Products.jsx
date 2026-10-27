@@ -8,10 +8,36 @@ import QuickViewModal from '../components/QuickViewModal';
 import { useDataContext } from '../context/DataContext';
 import './Products.css';
 
-const Products = () => {
+const Products = ({ division = null }) => {
   const { categories: CATEGORIES, products: PRODUCTS, isSupabaseLoading } = useDataContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get('category');
+  const divisionProducts = useMemo(
+    () => {
+      if (!division) return PRODUCTS;
+      if (division === 'chemical') {
+        return PRODUCTS.filter(product => product.category === 'chemicals');
+      }
+      if (division === 'food') {
+        return PRODUCTS.filter(product => (
+          product.division === 'food' || product.category === 'food'
+        ));
+      }
+      return PRODUCTS.filter(product => product.division === division);
+    },
+    [PRODUCTS, division]
+  );
+  // The Chemicals category is represented by the dedicated Chemical Division page.
+  // Keep it available within that division while omitting it from the all-products view.
+  const visibleCategories = useMemo(
+    () => {
+      const categories = division
+        ? CATEGORIES.filter(category => divisionProducts.some(product => product.category === category.id))
+        : CATEGORIES.filter(category => category.id !== 'chemicals');
+      return categories;
+    },
+    [CATEGORIES, division, divisionProducts]
+  );
 
   // Active Category (default 'all' shows all products)
   const [selectedCategory, setSelectedCategory] = useState(categoryParam || 'all');
@@ -19,17 +45,17 @@ const Products = () => {
   const [selectedCrops, setSelectedCrops] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showCategoryCards, setShowCategoryCards] = useState(!categoryParam);
+  const [showCategoryCards, setShowCategoryCards] = useState(!categoryParam && !division);
 
   // Sync state with URL params
   useEffect(() => {
     if (categoryParam) {
-      const exists = CATEGORIES.some(c => c.id === categoryParam);
+      const exists = visibleCategories.some(c => c.id === categoryParam);
       setSelectedCategory(exists ? categoryParam : 'all');
     } else {
       setSelectedCategory('all');
     }
-  }, [categoryParam, CATEGORIES]);
+  }, [categoryParam, visibleCategories]);
 
   const handleSelectCategory = (catId) => {
     setSelectedCategory(catId);
@@ -49,8 +75,8 @@ const Products = () => {
 
   const activeCategoryData = useMemo(() => {
     if (selectedCategory === 'all') return null;
-    return CATEGORIES.find(c => c.id === selectedCategory) || null;
-  }, [selectedCategory, CATEGORIES]);
+    return visibleCategories.find(c => c.id === selectedCategory) || null;
+  }, [selectedCategory, visibleCategories]);
 
   const toggleFormulation = (form) => {
     setSelectedFormulations(prev => 
@@ -72,24 +98,24 @@ const Products = () => {
 
   // Available formulations for current scope
   const availableFormulations = useMemo(() => {
-    const list = PRODUCTS
+    const list = divisionProducts
       .filter(p => selectedCategory === 'all' || p.category === selectedCategory)
       .map(p => p.formulation);
     return Array.from(new Set(list)).filter(Boolean).sort();
-  }, [PRODUCTS, selectedCategory]);
+  }, [divisionProducts, selectedCategory]);
 
   // Available crops
   const availableCrops = useMemo(() => {
     const set = new Set();
-    PRODUCTS
+    divisionProducts
       .filter(p => selectedCategory === 'all' || p.category === selectedCategory)
       .forEach(p => (p.crops || []).forEach(c => set.add(c)));
     return Array.from(set).sort();
-  }, [PRODUCTS, selectedCategory]);
+  }, [divisionProducts, selectedCategory]);
 
   // Filtered products list (matches category, formulation, crops, and search query)
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter(product => {
+    return divisionProducts.filter(product => {
       // Category match
       const matchCat = selectedCategory === 'all' || product.category === selectedCategory;
 
@@ -112,7 +138,7 @@ const Products = () => {
 
       return matchCat && matchForm && matchCrop && matchSearch;
     });
-  }, [PRODUCTS, selectedCategory, selectedFormulations, selectedCrops, searchQuery]);
+  }, [divisionProducts, selectedCategory, selectedFormulations, selectedCrops, searchQuery]);
 
   const hasActiveFilters = selectedFormulations.length > 0 || selectedCrops.length > 0 || !!searchQuery.trim();
 
@@ -124,7 +150,7 @@ const Products = () => {
           <div className="fmc-type-nav-bar">
             <div className="fmc-product-type-label-wrap">
               <span className="fmc-product-type-label">
-                {selectedCategory === 'all' ? 'PRODUCT PORTFOLIO' : 'PRODUCT TYPE'}
+            {division ? `${division.toUpperCase()} DIVISION` : (selectedCategory === 'all' ? 'PRODUCT PORTFOLIO' : 'PRODUCT TYPE')}
               </span>
               <div className="fmc-product-type-line" />
             </div>
@@ -138,7 +164,7 @@ const Products = () => {
                 >
                   <ArrowLeft size={14} /> All Products
                 </button>
-              ) : (
+              ) : !division ? (
                 <button
                   type="button"
                   className={`fmc-category-toggle-btn ${showCategoryCards ? 'active' : ''}`}
@@ -146,17 +172,17 @@ const Products = () => {
                 >
                   {showCategoryCards ? '✕ Hide Category Cards' : '▦ Explore Category Cards'}
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
 
           <h1 className="fmc-type-title">
-            {activeCategoryData ? (activeCategoryData.shortName || activeCategoryData.name) : 'All Products'}
+            {activeCategoryData ? (activeCategoryData.shortName || activeCategoryData.name) : (division === 'food' ? 'Food Division' : division === 'chemical' ? 'Chemical Division' : 'All Products')}
           </h1>
           <p className="fmc-type-subtitle">
             {activeCategoryData 
               ? activeCategoryData.description 
-              : 'Explore our complete portfolio of advanced crop protection, specialty chemical formulations, and high-performance agricultural solutions.'}
+              : division === 'food' ? 'Explore our food division products and formulations.' : division === 'chemical' ? 'Explore our complete portfolio of advanced crop protection and specialty chemical formulations.' : 'Explore our complete portfolio of advanced crop protection, specialty chemical formulations, and high-performance agricultural solutions.'}
           </p>
         </div>
       </section>
@@ -165,6 +191,7 @@ const Products = () => {
       {selectedCategory === 'all' && showCategoryCards && (
         <section className="fmc-expanded-categories">
           <ProductCategoriesGrid 
+            categories={visibleCategories}
             selectedCategoryId={selectedCategory} 
             onSelectCategory={(catId) => {
               handleSelectCategory(catId);
@@ -179,46 +206,50 @@ const Products = () => {
         <section className="fmc-main-layout">
           <div className="container">
           <div className="fmc-layout-columns">
-            {/* Left Filter Sidebar */}
-            <FilterSidebar 
-              categories={CATEGORIES}
-              selectedCategory={selectedCategory}
-              onSelectCategory={handleSelectCategory}
-              formulations={availableFormulations}
-              selectedFormulations={selectedFormulations}
-              onToggleFormulation={toggleFormulation}
-              crops={availableCrops}
-              selectedCrops={selectedCrops}
-              onToggleCrop={toggleCrop}
-              onResetFilters={resetFilters}
-              hasActiveFilters={hasActiveFilters}
-            />
+            {/* Keep division pages focused on their products without the catalog filter panel. */}
+            {!division && (
+              <FilterSidebar 
+                categories={visibleCategories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={handleSelectCategory}
+                formulations={availableFormulations}
+                selectedFormulations={selectedFormulations}
+                onToggleFormulation={toggleFormulation}
+                crops={availableCrops}
+                selectedCrops={selectedCrops}
+                onToggleCrop={toggleCrop}
+                onResetFilters={resetFilters}
+                hasActiveFilters={hasActiveFilters}
+              />
+            )}
 
             {/* Right Results Area */}
             <div className="fmc-results-area">
-              {/* Category Pills Quick Selector */}
-              <div className="fmc-category-pills-bar">
-                <button 
-                  type="button"
-                  className={`fmc-cat-pill ${selectedCategory === 'all' ? 'active' : ''}`}
-                  onClick={() => handleSelectCategory('all')}
-                >
-                  All Types ({PRODUCTS.length})
-                </button>
-                {CATEGORIES.map(cat => {
-                  const count = PRODUCTS.filter(p => p.category === cat.id).length;
-                  return (
-                    <button 
-                      key={cat.id}
-                      type="button"
-                      className={`fmc-cat-pill ${selectedCategory === cat.id ? 'active' : ''}`}
-                      onClick={() => handleSelectCategory(cat.id)}
-                    >
-                      {cat.shortName || cat.name} ({count})
-                    </button>
-                  );
-                })}
-              </div>
+              {/* Category pills are only needed on the all-products catalog. */}
+              {!division && (
+                <div className="fmc-category-pills-bar">
+                  <button 
+                    type="button"
+                    className={`fmc-cat-pill ${selectedCategory === 'all' ? 'active' : ''}`}
+                    onClick={() => handleSelectCategory('all')}
+                  >
+                    All Types
+                  </button>
+                  {visibleCategories.map(cat => {
+                    const count = divisionProducts.filter(p => p.category === cat.id).length;
+                    return (
+                      <button 
+                        key={cat.id}
+                        type="button"
+                        className={`fmc-cat-pill ${selectedCategory === cat.id ? 'active' : ''}`}
+                        onClick={() => handleSelectCategory(cat.id)}
+                      >
+                        {cat.shortName || cat.name} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Results Counter & Search Input */}
               <div className="fmc-results-meta-bar">

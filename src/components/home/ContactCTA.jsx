@@ -39,15 +39,36 @@ const ContactCTA = () => {
               <div className="cic-item">
                 <div className="cic-icon"><MapPin size={20} /></div>
                 <div>
-                  <div className="cic-label">Our Address</div>
-                  <div className="cic-value">IGC PHASE III SIDCO, Samba Goran Road, Samba ADDA Sub Post Office, District: Samba, Jammu and Kashmir - 184121</div>
+                  <div className="cic-label">Corporate Office</div>
+                  <div className="cic-value">Shimanzu Tower, 271 Uttam Nagar, New Delhi, India - 110059</div>
+                </div>
+              </div>
+              <div className="cic-item">
+                <div className="cic-icon"><MapPin size={20} /></div>
+                <div>
+                  <div className="cic-label">Manufacturing Unit I</div>
+                  <div className="cic-value">VPO Nagla Megha, Gharaunda Road, Karnal, Haryana - 132001</div>
+                </div>
+              </div>
+              <div className="cic-item">
+                <div className="cic-icon"><MapPin size={20} /></div>
+                <div>
+                  <div className="cic-label">Manufacturing Unit II</div>
+                  <div className="cic-value">I-IGC Phase III SIDCO, Samba Goran Road, Samba ADDA Sub Post Office, District: Samba, Jammu and Kashmir - 184121</div>
                 </div>
               </div>
               <div className="cic-item">
                 <div className="cic-icon"><Phone size={20} /></div>
                 <div>
                   <div className="cic-label">Phone</div>
-                  <div className="cic-value">1800 309 3053 (Toll-Free)</div>
+                  <div className="cic-value">18003093053 (Toll-Free)</div>
+                </div>
+              </div>
+              <div className="cic-item">
+                <div className="cic-icon"><Phone size={20} /></div>
+                <div>
+                  <div className="cic-label">WhatsApp</div>
+                  <div className="cic-value">7286800800</div>
                 </div>
               </div>
               <div className="cic-item">

@@ -187,8 +187,15 @@ router.post('/products', async (req, res) => {
     const database = await getDb();
     const prod = req.body;
     const id = prod.id || 'prod-' + Date.now();
+    const productCategory = String(prod.category || '').toLowerCase().trim();
+    const division = prod.division === 'food'
+      ? 'food'
+      : productCategory === 'chemicals'
+        ? 'chemical'
+        : '';
     const newProduct = {
       ...prod,
+      division,
       id,
       _id: id,
       created_at: prod.created_at || new Date().toISOString(),
@@ -214,6 +221,14 @@ router.put('/products/:id', async (req, res) => {
     const database = await getDb();
     const id = req.params.id;
     const updateFields = { ...req.body, updated_at: new Date().toISOString() };
+    if (Object.prototype.hasOwnProperty.call(updateFields, 'category') || Object.prototype.hasOwnProperty.call(updateFields, 'division')) {
+      const productCategory = String(updateFields.category || '').toLowerCase().trim();
+      updateFields.division = updateFields.division === 'food'
+        ? 'food'
+        : productCategory === 'chemicals'
+          ? 'chemical'
+          : '';
+    }
     delete updateFields._id; // prevent immutable _id update error
 
     await database.collection('products').updateOne(

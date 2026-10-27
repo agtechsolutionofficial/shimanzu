@@ -2588,3 +2588,136 @@
     gap: 8px;
   }
 }
+
+/* ========================================================================== 
+   Shimanzu public-site light theme
+   ========================================================================== */
+.admin-dashboard-layout {
+  background: #f4f8f4;
+  color: #183b27;
+}
+.admin-sidebar { background: #ffffff; border-right: 1px solid #dce9de; }
+.admin-sidebar-header, .admin-sidebar-footer { border-color: #e4eee5; }
+.admin-sidebar-logo-img { filter: none; height: 68px; max-width: 205px; }
+.admin-console-chip { background: #eaf6ed; border-color: #b8dec0; color: #16723b; }
+.admin-chip-pulse { background: #1bb653; box-shadow: 0 0 8px rgba(27, 182, 83, 0.45); }
+.admin-chip-sep { color: #a9c0ae; }
+.admin-chip-ver { color: #6d8874; }
+.admin-sidebar-profile { background: #f7fbf7; border-color: #e0ece1; }
+.admin-profile-avatar { background: #e7f5e9; border-color: #c8e3cc; color: #16723b; }
+.admin-online-indicator { border-color: #fff; }
+.admin-profile-name { color: #214932; }
+.admin-profile-role, .admin-nav-section-title { color: #78917d; }
+.admin-nav-item, .admin-nav-link { color: #4f6b56; }
+.admin-nav-item:hover, .admin-nav-link:hover { background: #eef8ef; color: #174d2b; }
+.admin-nav-item.active { background: #e8f5ea; border-color: #b8dfbf; color: #126b35; box-shadow: inset 3px 0 0 #16833f; }
+.admin-nav-item.active .admin-nav-icon, .admin-nav-item:hover .admin-nav-icon, .admin-nav-link:hover svg { color: #16833f; }
+.admin-nav-icon, .admin-nav-arrow { color: #77927d; }
+.admin-nav-badge { background: #edf3ee; color: #58715e; }
+.admin-nav-badge-new { background: #159447; box-shadow: 0 4px 12px rgba(21, 148, 71, 0.2); }
+.admin-sidebar-action-btn { background: #f4f8f4; color: #48634e; border-color: #e0ebe1; }
+.admin-sidebar-action-btn:hover { background: #e8f5ea; color: #126b35; }
+.admin-sidebar-logout-btn { background: #fff4f3; border-color: #f2c8c4; color: #c7443e; }
+.admin-sidebar-logout-btn:hover { background: #d94b43; color: #fff; border-color: #d94b43; }
+.admin-main { background: #f4f8f4; }
+.admin-topbar { border-color: #dce9de; }
+.admin-page-title-box h1 { color: #183b27; }
+.admin-page-subtitle { color: #6b8570; }
+.admin-topbar-search input { background: #fff; border-color: #cfe0d1; color: #183b27; }
+.admin-topbar-search input::placeholder { color: #8aa18e; }
+.admin-topbar-search input:focus { border-color: #2b9b50; box-shadow: 0 0 0 3px rgba(43, 155, 80, 0.12); }
+.admin-stat-card { background: #fff; border-color: #dce9de; box-shadow: 0 8px 24px rgba(39, 87, 49, 0.06); }
+.admin-stat-card:hover { border-color: #a9d2af; box-shadow: 0 12px 28px rgba(39, 87, 49, 0.1); }
+.admin-stat-card.selected { border-color: #2a9b4f; background: #f2fbf3; }
+.admin-stat-label { color: #6c8771; }
+.admin-stat-value { color: #183b27; }
+.admin-stat-subtext { color: #718a76; }
+.admin-section-wrap, .admin-toolbar, .admin-results-bar { color: #355a3d; }
+.admin-filter-pill { background: #fff; border-color: #cfe0d1; color: #55705b; }
+.admin-filter-pill:hover, .admin-filter-pill.active { background: #e8f5ea; border-color: #8cc798; color: #146c35; }
+.admin-compact-select, .admin-form-input, .admin-form-textarea, .admin-form-select { background: #fff; border-color: #cfe0d1; color: #244b2f; }
+.admin-prod-card { background: #fff; border-color: #dce9de; box-shadow: 0 8px 22px rgba(39, 87, 49, 0.07); }
+.admin-prod-card:hover { border-color: #9dcea5; box-shadow: 0 14px 30px rgba(39, 87, 49, 0.12); }
+.admin-prod-card-media { background: linear-gradient(135deg, #f1f8f1 0%, #e8f3e9 100%); }
+.admin-prod-formulation-tag { background: #fff; border-color: #c8dfcc; color: #16833f; }
+.admin-prod-card-title { color: #193b26; }
+.admin-prod-card-chemical { color: #6a826e; }
+.admin-prod-category-badge { color: #14823e; }
+.admin-prod-tag { background: #f1f7f1; border-color: #d7e6d9; color: #55705b; }
+.admin-prod-tag-more { background: #e5f1e7; color: #55705b; }
+.admin-prod-card-footer { border-color: #e0ebe1; }
+.admin-prod-pack-info { color: #6c8571; }
+.admin-action-btn-primary { background: linear-gradient(135deg, #159447 0%, #0d7e39 100%); box-shadow: 0 6px 16px rgba(21, 148, 71, 0.18); }
+.admin-action-btn-secondary { background: #fff; border-color: #a9d2af; color: #16723b; }
+.admin-action-btn-secondary:hover { background: #eaf6ed; border-color: #70b57d; color: #126b35; }
+/* Light theme continuation for inquiries and data tables */
+.admin-query-card { background: #fff; border-color: #dce9de; box-shadow: 0 8px 22px rgba(39, 87, 49, 0.07); }
+.admin-query-card:hover { border-color: #9dcea5; box-shadow: 0 14px 28px rgba(39, 87, 49, 0.11); }
+.admin-query-avatar { background: #edf7ee; border-color: #cfe4d2; color: #16833f; }
+.admin-query-author-meta h4, .admin-query-subject { color: #193b26; }
+.admin-query-location, .admin-query-date { color: #718a76; }
+.admin-status-dropdown { background: #f7fbf7; border-color: #cfe0d1; }
+.admin-status-dropdown option { background: #fff; color: #244b2f; }
+.admin-query-product-tag { background: #f2f8f2; border-color: #d8e7da; color: #55705b; }
+.admin-query-product-tag strong { color: #159447; }
+.admin-query-message { color: #647d6a; background: #f6faf6; }
+.admin-query-card-footer { border-color: #e0ebe1; }
+.admin-table-card { background: #fff; border-color: #dce9de; }
+.admin-data-table thead tr { background: #f4f8f4; border-color: #dce9de; }
+.admin-data-table th { color: #6c8771; }
+.admin-data-table tbody tr { border-color: #e7efe7; }
+.admin-data-table tbody tr:hover { background: #f4faf4; }
+.admin-data-table td { color: #355a3d; }
+.admin-table-img { background: #f4f8f4; }
+.admin-table-no-img { background: #f4f8f4; border-color: #cfe0d1; color: #77927d; }
+.admin-table-prod-name { color: #193b26; }
+.admin-table-prod-brand, .admin-table-chemical, .admin-table-packs { color: #718a76; }
+.admin-table-badge.cat { background: #e8f5ea; color: #16833f; }
+.admin-table-badge.form { background: #edf5ef; color: #55705b; }
+.admin-icon-btn { background: #f1f7f1; border-color: #d5e5d7; color: #55705b; }
+/* Light theme for category, gallery, blog, forms, and modal surfaces */
+.admin-form-section { background: #fff; border-color: #dce9de; }
+.admin-section-step { color: #159447; }
+.admin-form-label { color: #55705b; }
+.admin-form-input, .admin-form-select, .admin-form-textarea { background: #fff; border-color: #cfe0d1; color: #244b2f; }
+.admin-form-input::placeholder, .admin-form-textarea::placeholder { color: #9aafa0; }
+.admin-form-select option { background: #fff; color: #244b2f; }
+.admin-workspace-header h2 { color: #193b26; }
+.admin-workspace-header p { color: #6b8570; }
+.admin-category-card, .admin-gallery-card, .admin-blog-card { background: #fff; border-color: #dce9de; box-shadow: 0 8px 22px rgba(39, 87, 49, 0.07); }
+.admin-category-card:hover, .admin-gallery-card:hover, .admin-blog-card:hover { border-color: #9dcea5; box-shadow: 0 14px 28px rgba(39, 87, 49, 0.1); }
+.admin-cat-card-header { background: #f4f8f4; border-color: #e0ebe1; }
+.admin-cat-img-box { background: #edf6ee; }
+.admin-cat-title-box h3, .admin-gallery-card-title, .admin-blog-card-title { color: #193b26; }
+.admin-cat-short-tag, .admin-cat-desc, .admin-gallery-card-desc, .admin-blog-card-desc, .admin-blog-meta-row, .admin-gallery-cat-text { color: #718a76; }
+.admin-cat-product-counter { background: #e8f5ea; color: #55705b; }
+.admin-gallery-img-wrap, .admin-blog-img-wrap { background: #edf6ee; }
+.admin-gallery-tag-chip { background: rgba(21, 148, 71, 0.92); border-color: #159447; color: #fff; }
+.admin-gallery-cat-text strong { color: #159447; }
+.admin-blog-cat-badge { background: #159447; }
+.admin-modal-overlay { background: rgba(28, 59, 39, 0.32); }
+.admin-modal-content { background: #fff; border-color: #dce9de; box-shadow: 0 25px 60px rgba(39, 87, 49, 0.2); }
+.admin-modal-header { border-color: #e0ebe1; }
+.admin-modal-header h2 { color: #193b26; }
+.admin-modal-close { color: #77927d; }
+.admin-modal-close:hover { color: #126b35; background: #e8f5ea; }
+.admin-preview-thumbnail-box { background: #f4f8f4; }
+.admin-preview-thumbnail-box span { color: #159447; }
+.admin-modal-actions { border-color: #e0ebe1; }
+.admin-modal-cancel-btn { background: #f4f8f4; border-color: #cfe0d1; color: #55705b; }
+.admin-modal-cancel-btn:hover { background: #e8f5ea; color: #126b35; }
+.admin-empty-state { color: #55705b; }
+.admin-empty-state h3 { color: #193b26; }
+.admin-empty-state p { color: #718a76; }
+.admin-workspace-form-card, .admin-workspace-preview-card { background: #fff; border-color: #dce9de; box-shadow: 0 8px 22px rgba(39, 87, 49, 0.07); }
+.admin-preview-header { border-color: #e0ebe1; }
+.admin-preview-badge { background: #e8f5ea; border-color: #b8dfbf; color: #159447; }
+.admin-preview-hint, .meta-label { color: #718a76; }
+.admin-preview-meta-info { background: #f4f8f4; border-color: #dce9de; }
+.meta-value { color: #355a3d; }
+.meta-value.green { color: #159447; }
+.admin-view-site-btn { background: #fff; border-color: #b8dfbf; color: #16723b; }
+.admin-view-site-btn:hover { background: #e8f5ea; border-color: #70b57d; color: #126b35; }
+.admin-products-grid-scoped { grid-template-columns: repeat(auto-fill, minmax(320px, 420px)); }
+.admin-results-bar { color: #355a3d; }
+.admin-results-bar strong { color: #183b27; font-weight: 800; }

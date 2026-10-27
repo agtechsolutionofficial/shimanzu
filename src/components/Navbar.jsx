@@ -8,6 +8,8 @@ const navLinks = [
   { name: 'Home',       path: '/' },
   { name: 'About',      path: '/about' },
   { name: 'Products',   path: '/products' },
+  { name: 'Chemical Division', path: '/chemical-division' },
+  { name: 'Food Division', path: '/food-division' },
   { name: 'Crops',      path: '/crops' },
   { name: 'Gallery',    path: '/gallery' },
   { name: 'Blog',       path: '/blog' },
@@ -20,7 +22,7 @@ const Navbar = () => {
   const location = useLocation();
 
   // Pages with light background — navbar should always show scrolled (dark text) style
-  const lightBgPages = ['/products', '/about', '/contact', '/crops', '/gallery', '/blog'];
+  const lightBgPages = ['/products', '/chemical-division', '/food-division', '/about', '/contact', '/crops', '/gallery', '/blog'];
   const isLightPage = lightBgPages.some(p => location.pathname.startsWith(p));
 
   useEffect(() => {

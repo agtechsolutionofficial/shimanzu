@@ -190,8 +190,9 @@ const Contact = () => {
               </div>
               <div className="info-content">
                 <h3 className="info-title">Call Us</h3>
-                <p className="info-text-primary">1800 309 3053</p>
+                <p className="info-text-primary">18003093053</p>
                 <p className="info-text-secondary">Toll-Free, 24/7 Support</p>
+                <p className="info-text-secondary">WhatsApp: 7286800800</p>
               </div>
               <div className="info-card-line"></div>
               <Leaf size={80} className="info-card-watermark" />
@@ -229,9 +230,15 @@ const Contact = () => {
                 <MapPin size={28} />
               </div>
               <div className="info-content">
-                <h3 className="info-title">Visit HQ</h3>
-                <p className="info-text-primary">IGC PHASE III SIDCO</p>
-                <p className="info-text-secondary">Samba Goran Road, Samba ADDA Sub Post Office, District: Samba, Jammu and Kashmir - 184121</p>
+                <h3 className="info-title">Our Addresses</h3>
+                <p className="info-text-primary">Corporate Office</p>
+                <p className="info-text-secondary">Shimanzu Tower, 271 Uttam Nagar, New Delhi, India - 110059</p>
+                <br />
+                <p className="info-text-primary">Manufacturing Unit I</p>
+                <p className="info-text-secondary">VPO Nagla Megha, Gharaunda Road, Karnal, Haryana - 132001</p>
+                <br />
+                <p className="info-text-primary">Manufacturing Unit II</p>
+                <p className="info-text-secondary">I-IGC Phase III SIDCO, Samba Goran Road, Samba ADDA Sub Post Office, District: Samba, Jammu and Kashmir - 184121</p>
               </div>
               <div className="info-card-line"></div>
               <Leaf size={80} className="info-card-watermark" />

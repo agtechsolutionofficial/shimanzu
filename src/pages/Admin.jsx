@@ -10,7 +10,7 @@ import {
 import { useDataContext } from '../context/DataContext';
 import { compressImage } from '../utils/imageCompressor';
 import ProductCard from '../components/ProductCard';
-import logoImg from '../assets/images/1712639794.png';
+import logoImg from '../assets/images/shimanzu.png';
 import './Admin.css';
 
 import prod1 from '../assets/images/1713003050.webp';
@@ -22,6 +22,16 @@ const PRESET_PRODUCT_IMAGES = [
   { label: 'Bottle 2 (Pack & Seal)', src: prod2 },
   { label: 'Bottle 3 (Formulation)', src: prod3 },
 ];
+
+// Division is determined by the product's explicit category. Missing division
+// metadata must not make every product appear as Chemical.
+const getProductDivision = (product) => {
+  const category = String(product?.category || '').toLowerCase().trim();
+  if (category === 'chemicals') return 'chemical';
+  if (category === 'food' || product?.division === 'food') return 'food';
+  if (category) return '';
+  return String(product?.division || '').toLowerCase().trim();
+};
 
 const FORMULATION_OPTIONS = [
   'SC', 'EC', 'SL', 'WG', 'CS', 'FS', 'SE', 'PW', 'Suspension', 'Granules'
@@ -45,13 +55,14 @@ const Admin = () => {
     logout, changeAdminPassword
   } = useDataContext();
 
-  // Navigation tab: 'all-products' | 'add-product' | 'queries' | 'crops' | 'categories' | 'gallery' | 'blogs'
+  // Navigation tab: catalog views, product form, and management sections.
   const [activeTab, setActiveTab] = useState('all-products');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Products filtering & view
   const [productCategoryFilter, setProductCategoryFilter] = useState('all');
+  const [productDivisionFilter, setProductDivisionFilter] = useState('all');
   const [productStockFilter, setProductStockFilter] = useState('all'); // 'all' | 'in-stock' | 'out-of-stock'
   const [productViewMode, setProductViewMode] = useState('grid'); // 'grid' | 'table'
 
@@ -99,6 +110,7 @@ const Admin = () => {
 
   // Dedicated Product Form state (used for both Add Product tab and Edit Modal)
   const defaultProductState = {
+    division: '',
     name: '',
     brand: '',
     chemical: '',
@@ -187,6 +199,7 @@ const Admin = () => {
   // Open Edit Product Modal
   const openEditProductModal = (prod) => {
     setProductForm({
+      division: prod.division === 'food' ? 'food' : 'chemical',
       name: prod.name,
       brand: prod.brand || 'SHIMANZU',
       chemical: prod.chemical || '',
@@ -207,8 +220,8 @@ const Admin = () => {
   };
 
   // Switch to Add Product tab & reset form
-  const navigateToAddProduct = () => {
-    setProductForm(defaultProductState);
+  const navigateToAddProduct = (division = '') => {
+    setProductForm({ ...defaultProductState, division });
     setActiveTab('add-product');
     setSearchQuery('');
   };
@@ -236,6 +249,7 @@ const Admin = () => {
       const selectedCat = categories.find(c => c.id === productForm.category);
       const sanitizedProduct = {
         ...productForm,
+        division: productForm.division === 'food' ? 'food' : productForm.division === 'chemical' ? 'chemical' : '',
         name: productForm.name.trim(),
         chemical: productForm.chemical.trim() || 'Japanese Formulation Standard',
         categoryLabel: selectedCat?.name || productForm.category.toUpperCase(),
@@ -564,15 +578,18 @@ const Admin = () => {
         (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchCategory = productCategoryFilter === 'all' || p.category === productCategoryFilter;
+      const matchDivision = productDivisionFilter === 'all'
+        || (productDivisionFilter === 'other' && !['chemical', 'food'].includes(getProductDivision(p)))
+        || getProductDivision(p) === productDivisionFilter;
 
       const matchStock =
         productStockFilter === 'all' ||
         (productStockFilter === 'in-stock' && p.inStock) ||
         (productStockFilter === 'out-of-stock' && !p.inStock);
 
-      return matchSearch && matchCategory && matchStock;
+      return matchSearch && matchCategory && matchStock && matchDivision;
     });
-  }, [products, searchQuery, productCategoryFilter, productStockFilter]);
+  }, [products, searchQuery, productCategoryFilter, productStockFilter, productDivisionFilter]);
 
   const filteredQueries = useMemo(() => {
     return queries.filter(q => {
@@ -641,6 +658,7 @@ const Admin = () => {
       categoryLabel: activeCat ? activeCat.name : '',
       group: productForm.group ? productForm.group.trim() : (productForm.formulation ? `${productForm.formulation} FORMULATION` : ''),
       formulation: productForm.formulation || '',
+      division: productForm.division === 'food' ? 'food' : productForm.division === 'chemical' ? 'chemical' : '',
       inStock: Boolean(productForm.inStock),
       packSizes: productForm.packSizes ? productForm.packSizes.split(',').map(s => s.trim()).filter(Boolean) : [],
       crops: productForm.crops ? productForm.crops.split(',').map(s => s.trim()).filter(Boolean) : [],
@@ -664,6 +682,7 @@ const Admin = () => {
           >
             <X size={20} />
           </button>
+
         </div>
 
         {/* Sidebar Nav Items */}
@@ -673,7 +692,7 @@ const Admin = () => {
           {/* 1. All Products */}
           <button
             className={`admin-nav-item ${activeTab === 'all-products' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('all-products'); setSearchQuery(''); setSidebarOpen(false); }}
+            onClick={() => { setActiveTab('all-products'); setProductDivisionFilter('all'); setSearchQuery(''); setSidebarOpen(false); }}
           >
             <div className="admin-nav-item-left">
               <Package size={19} className="admin-nav-icon" />
@@ -692,6 +711,19 @@ const Admin = () => {
               <span className="admin-nav-label">Add Product</span>
             </div>
             <span className="admin-nav-badge-new">NEW</span>
+          </button>
+
+          <button className="admin-nav-item" onClick={() => { setActiveTab('chemical-products'); setProductDivisionFilter('chemical'); setProductCategoryFilter('all'); setSearchQuery(''); setSidebarOpen(false); }}>
+            <div className="admin-nav-item-left"><Layers size={19} className="admin-nav-icon accent-blue" /><span className="admin-nav-label">Chemical Division</span></div>
+            <span className="admin-nav-badge">{products.filter(p => getProductDivision(p) === 'chemical').length}</span>
+          </button>
+          <button className="admin-nav-item" onClick={() => { setActiveTab('food-products'); setProductDivisionFilter('food'); setProductCategoryFilter('all'); setSearchQuery(''); setSidebarOpen(false); }}>
+            <div className="admin-nav-item-left"><Layers size={19} className="admin-nav-icon accent-amber" /><span className="admin-nav-label">Food Division</span></div>
+            <span className="admin-nav-badge">{products.filter(p => getProductDivision(p) === 'food').length}</span>
+          </button>
+          <button className="admin-nav-item" onClick={() => { setActiveTab('other-products'); setProductDivisionFilter('other'); setProductCategoryFilter('all'); setSearchQuery(''); setSidebarOpen(false); }}>
+            <div className="admin-nav-item-left"><Package size={19} className="admin-nav-icon accent-purple" /><span className="admin-nav-label">Other Products</span></div>
+            <span className="admin-nav-badge">{products.filter(p => !['chemical', 'food'].includes(getProductDivision(p))).length}</span>
           </button>
 
           {/* 3. Query / Leads */}
@@ -807,6 +839,9 @@ const Admin = () => {
             <div className="admin-page-title-box">
               <h1>
                 {activeTab === 'all-products' && 'All Products Catalog'}
+                {activeTab === 'chemical-products' && 'Chemical Products'}
+                {activeTab === 'food-products' && 'Food Products'}
+                {activeTab === 'other-products' && 'Other Products'}
                 {activeTab === 'add-product' && 'Add New Formulation'}
                 {activeTab === 'queries' && 'Customer Inquiries & Leads'}
                 {activeTab === 'crops' && 'Agricultural Crops Directory'}
@@ -815,7 +850,10 @@ const Admin = () => {
                 {activeTab === 'blogs' && 'Blog Articles & Editorial'}
               </h1>
               <span className="admin-page-subtitle">
-                {activeTab === 'all-products' && `Managing ${products.length} registered agrochemicals & industrial pigments`}
+                {activeTab === 'all-products' && `Managing ${products.length} registered products`}
+                {activeTab === 'chemical-products' && 'Showing only products in the Chemicals category'}
+                {activeTab === 'food-products' && 'Showing only food division products'}
+                {activeTab === 'other-products' && 'Showing products outside Chemical and Food divisions'}
                 {activeTab === 'add-product' && 'Create a new product with live real-time packaging preview'}
                 {activeTab === 'queries' && `${queries.length} total customer inquiries (${newQueriesCount} require follow-up)`}
                 {activeTab === 'crops' && `${crops.length} supported agricultural crops & horticultural species`}
@@ -834,7 +872,7 @@ const Admin = () => {
                 <input
                   type="text"
                   placeholder={
-                    activeTab === 'all-products' ? 'Search by name, chemical active, category...' :
+                    ['all-products', 'chemical-products', 'food-products', 'other-products'].includes(activeTab) ? 'Search by name, chemical active, category...' :
                       activeTab === 'queries' ? 'Search queries by name, phone, product...' :
                         activeTab === 'crops' ? 'Search crops by name or keyword...' :
                           activeTab === 'categories' ? 'Search categories...' :
@@ -850,14 +888,6 @@ const Admin = () => {
                   </button>
                 )}
               </div>
-            )}
-
-            {/* Quick action button depending on tab */}
-            {activeTab === 'all-products' && (
-              <button className="admin-action-btn-primary" onClick={navigateToAddProduct}>
-                <Plus size={16} />
-                <span>Add Product</span>
-              </button>
             )}
 
             {activeTab === 'crops' && (
@@ -983,7 +1013,8 @@ const Admin = () => {
           </div>
         )}
 
-        {/* Executive KPI Stats Bar */}
+        {/* Executive KPI Stats Bar (shown only on All Products) */}
+        {activeTab === 'all-products' && (
         <div className="admin-stats-container">
           {/* Card 1: Total Products */}
           <div
@@ -1095,13 +1126,32 @@ const Admin = () => {
             </div>
           </div>
         </div>
+        )}
 
-        {/* ===================== TAB 1: ALL PRODUCTS ===================== */}
-        {activeTab === 'all-products' && (
+        {/* ===================== PRODUCT CATALOG TABS ===================== */}
+        {['all-products', 'chemical-products', 'food-products', 'other-products'].includes(activeTab) && (
           <div className="admin-section-wrap animate-fade-in">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+              <button
+                className="admin-action-btn-primary"
+                onClick={() => navigateToAddProduct(activeTab === 'food-products' ? 'food' : activeTab === 'other-products' ? 'other' : 'chemical')}
+              >
+                <Plus size={16} />
+                {activeTab === 'food-products' ? 'Add Food Product' : activeTab === 'other-products' ? 'Add Other Product' : 'Add Chemical Product'}
+              </button>
+            </div>
             {/* Filter Bar */}
-            <div className="admin-toolbar">
+            {activeTab === 'all-products' && <div className="admin-toolbar">
               <div className="admin-category-pills">
+                <button className={`admin-filter-pill ${productDivisionFilter === 'all' ? 'active' : ''}`} onClick={() => setProductDivisionFilter('all')}>
+                  All Divisions ({products.length})
+                </button>
+                <button className={`admin-filter-pill ${productDivisionFilter === 'chemical' ? 'active' : ''}`} onClick={() => setProductDivisionFilter('chemical')}>
+                  Chemical ({products.filter(p => getProductDivision(p) === 'chemical').length})
+                </button>
+                <button className={`admin-filter-pill ${productDivisionFilter === 'food' ? 'active' : ''}`} onClick={() => setProductDivisionFilter('food')}>
+                  Food ({products.filter(p => getProductDivision(p) === 'food').length})
+                </button>
                 <button
                   className={`admin-filter-pill ${productCategoryFilter === 'all' ? 'active' : ''}`}
                   onClick={() => setProductCategoryFilter('all')}
@@ -1156,11 +1206,13 @@ const Admin = () => {
                   </button>
                 </div>
               </div>
-            </div>
+            </div>}
 
             {/* Results Counter */}
             <div className="admin-results-bar">
-              <span>Showing <strong>{filteredProducts.length}</strong> of <strong>{products.length}</strong> products</span>
+              <span>
+                Showing <strong>{filteredProducts.length}</strong> of <strong>{activeTab === 'all-products' ? products.length : filteredProducts.length}</strong> products
+              </span>
               {searchQuery && (
                 <span className="admin-search-indicator">
                   Filter: "{searchQuery}" <button onClick={() => setSearchQuery('')}>Clear</button>
@@ -1170,7 +1222,7 @@ const Admin = () => {
 
             {/* View Mode: Grid */}
             {productViewMode === 'grid' && (
-              <div className="admin-products-grid">
+              <div className={`admin-products-grid ${activeTab !== 'all-products' ? 'admin-products-grid-scoped' : ''}`}>
                 {isSupabaseLoading && products.length === 0 ? (
                   <div className="admin-empty-state" style={{ gridColumn: '1 / -1', padding: '60px 20px' }}>
                     <Loader2 size={40} className="admin-spin" style={{ color: '#10B981', margin: '0 auto' }} />
@@ -1413,6 +1465,20 @@ const Admin = () => {
                   {/* Step 1: Identity */}
                   <div className="admin-form-section">
                     <span className="admin-section-step">01. PRODUCT IDENTITY</span>
+                    <div className="admin-form-group" style={{ marginBottom: '16px' }}>
+                      <label className="admin-form-label">Division</label>
+                      <select
+                        className="admin-form-select"
+                        value={productForm.division}
+                        onChange={e => setProductForm({ ...productForm, division: e.target.value })}
+                        required
+                      >
+                        <option value="">Select Division</option>
+                        <option value="chemical">Chemical Division</option>
+                        <option value="food">Food Division</option>
+                        <option value="other">Other Product</option>
+                      </select>
+                    </div>
                     <div className="admin-form-row">
                       <div className="admin-form-group">
                         <label className="admin-form-label">Product Name *</label>

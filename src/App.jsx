@@ -50,6 +50,8 @@ function AnimatedRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/chemical-division" element={<Products division="chemical" />} />
+          <Route path="/food-division" element={<Products division="food" />} />
           <Route path="/crops" element={<Crops />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/blog" element={<Blog />} />
@@ -82,7 +84,7 @@ function App() {
     document.title = 'Shimanzu Japan';
     const link = document.querySelector("link[rel*='icon']");
     if (link) {
-      link.href = `/favicon.svg?v=${Date.now()}`;
+      link.href = `/shimanzu-icon.jpeg?v=20261027`;
     }
   }, []);
 
