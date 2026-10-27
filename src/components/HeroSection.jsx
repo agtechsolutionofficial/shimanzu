@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Users, Globe, Leaf } from 'lucide-react';
 import './HeroSection.css';
 
-import seedlingVideo from '../assets/images/Seedling_growing_from_soil-clip-1_20260925110529.mp4';
-import slide2 from '../assets/images/slide2.mp4';
+import seedlingVideo from '../assets/images/paddy_video.mp4';
+import slide2 from '../assets/images/Seedling_growing_from_soil-clip-1_20260925110529.mp4';
 import slide3 from '../assets/images/slide3.mp4';
 import slide4 from '../assets/images/video_20261006_125028.mp4';
 import dioxideVideo from '../assets/images/DIOXIDE VIDEO.mp4';
@@ -12,8 +12,9 @@ import slide6 from '../assets/images/slide_6.mp4';
 
 const timeline = [
   { 
-    type: 'video', src: seedlingVideo, duration: 5000,
-    title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow"
+    type: 'video', src: seedlingVideo, duration: 7000,
+    title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow",
+    scale: 1.28
   },
   
   { 
@@ -116,7 +117,11 @@ const HeroSection = () => {
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  backfaceVisibility: 'hidden'
+                  backfaceVisibility: 'hidden',
+                  ...(item.scale ? {
+                    transform: `scale(${item.scale})`,
+                    transformOrigin: item.transformOrigin || 'center center'
+                  } : {})
                 }}
               />
               <div className="hero-overlay" />
@@ -190,7 +195,7 @@ const HeroSection = () => {
 
         {/* Progress bar */}
         <div className="hero-progress">
-          <div className="hero-progress-bar" style={{ animationDuration: '49s' }} />
+          <div className="hero-progress-bar" style={{ animationDuration: '51s' }} />
         </div>
       </div>
     </section>

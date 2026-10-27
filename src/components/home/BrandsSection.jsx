@@ -19,16 +19,16 @@ const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: (i=0) => ({ opacity: 1,
 const vp = { once: true, margin: '-50px' };
 
 const BRANDS = [
-  { name: 'Black Label',  sub: 'Herbicide',          color: '#15803D', img: t1  },
-  { name: 'Khufia',       sub: 'Insecticide',         color: '#7C3AED', img: t2  },
-  { name: 'Forodon',      sub: 'Soil Protection',     color: '#B45309', img: t3  },
-  { name: 'M-45',         sub: 'Fungicide',           color: '#0F766E', img: t4  },
-  { name: 'Hanako',       sub: 'Growth Promoter',     color: '#1D4ED8', img: t5  },
-  { name: 'Volvo',        sub: 'Systemic Fungicide',  color: '#0F766E', img: t6  },
-  { name: 'Altacor',      sub: 'Insect Control',      color: '#7C3AED', img: t8  },
-  { name: 'Beleaf',       sub: 'Sucking Pest Control',color: '#15803D', img: t9  },
-  { name: 'Azoxy-Top',    sub: 'Duo Fungicide',       color: '#0F766E', img: t10 },
-  { name: 'Gibber-Max',   sub: 'Plant Growth Reg.',   color: '#1D4ED8', img: t11 },
+  { name: 'Tebcin',  sub: 'Fungicide',          color: '#15803D', img: t1  },
+  { name: 'Mango Bar',       sub: 'Plant Growth Regulator',         color: '#7C3AED', img: t2  },
+  { name: 'Mafia GOld',      sub: 'Fertilizer',     color: '#B45309', img: t3  },
+  { name: 'Pyrox',         sub: 'Herbicide',           color: '#0F766E', img: t4  },
+  { name: 'Marko',       sub: 'Herbicide',     color: '#1D4ED8', img: t5  },
+  { name: 'Penox',        sub: 'Herbicide',  color: '#0F766E', img: t6  },
+  { name: 'Tamron Ultra',      sub: 'Fungicide',      color: '#7C3AED', img: t8  },
+  { name: 'Haitor',       sub: 'Herbicide',color: '#15803D', img: t9  },
+  { name: 'Shimanzu 11:11:8',    sub: 'Fertilizer',       color: '#0F766E', img: t10 },
+  { name: 'Marko 30',   sub: 'Herbicide',   color: '#1D4ED8', img: t11 },
 ];
 
 const BrandsSection = () => (
