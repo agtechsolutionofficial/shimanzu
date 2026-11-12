@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Phone } from 'lucide-react';
 import './Navbar.css';
-import logoImg from '../assets/images/shimanzu.png';
+import logoImg from '../assets/images/shimanzu-logo_page-0001.png';
 
 const navLinks = [
   { name: 'Home',       path: '/' },
   { name: 'About',      path: '/about' },
-  { name: 'Products',   path: '/products' },
+  { name: 'Agrochemicals',   path: '/products' },
   { name: 'Chemical Division', path: '/chemical-division' },
-  { name: 'Food Division', path: '/food-division' },
+  // { name: 'Food Division', path: '/food-division' },
   { name: 'Crops',      path: '/crops' },
   { name: 'Gallery',    path: '/gallery' },
   { name: 'Blog',       path: '/blog' },

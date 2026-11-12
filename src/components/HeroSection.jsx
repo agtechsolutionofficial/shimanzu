@@ -3,16 +3,16 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Users, Globe, Leaf } from 'lucide-react';
 import './HeroSection.css';
 
-import seedlingVideo from '../assets/images/paddy_video.mp4';
+import seedlingVideo from '../assets/images/paddy.png';
 import slide2 from '../assets/images/Seedling_growing_from_soil-clip-1_20260925110529.mp4';
-import slide3 from '../assets/images/slide3.mp4';
+import slide3 from '../assets/images/Video-Project.mp4';
 import slide4 from '../assets/images/video_20261006_125028.mp4';
 import dioxideVideo from '../assets/images/DIOXIDE VIDEO.mp4';
 import slide6 from '../assets/images/slide_6.mp4';
 
 const timeline = [
   { 
-    type: 'video', src: seedlingVideo, duration: 7000,
+    type: 'image', src: seedlingVideo, duration: 4000,
     title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow",
     scale: 1.32
   },
@@ -22,7 +22,7 @@ const timeline = [
     title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth"
   },
   { 
-    type: 'video', src: slide3, duration: 16000,
+    type: 'video', src: slide3, duration: 5000,
     title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow",
     scale: 1.30
   },
@@ -47,24 +47,27 @@ const HeroSection = () => {
   const timerRef = useRef(null);
 
   useEffect(() => {
+    const nextIdx = (cur + 1) % timeline.length;
+
     // 1. Ensure active video is playing
-    const activeVideo = videoRefs.current[cur];
-    if (activeVideo && activeVideo.paused) {
-      activeVideo.play().catch(() => {});
+    if (timeline[cur].type === 'video') {
+      const activeVideo = videoRefs.current[cur];
+      if (activeVideo && activeVideo.paused) activeVideo.play().catch(() => {});
     }
 
-    // 2. Pre-warm and start next video so frames are ready before cross-fade starts
-    const nextIdx = (cur + 1) % timeline.length;
-    const nextVideo = videoRefs.current[nextIdx];
-    if (nextVideo) {
-      nextVideo.currentTime = 0;
-      nextVideo.play().catch(() => {});
+    // 2. Pre-warm next video
+    if (timeline[nextIdx].type === 'video') {
+      const nextVideo = videoRefs.current[nextIdx];
+      if (nextVideo) {
+        nextVideo.currentTime = 0;
+        nextVideo.play().catch(() => {});
+      }
     }
 
     // 3. Pause other videos after crossfade completes (1.4s) to conserve CPU
     const pauseTimeout = setTimeout(() => {
       videoRefs.current.forEach((v, i) => {
-        if (i !== cur && i !== nextIdx && v && !v.paused) {
+        if (i !== cur && i !== nextIdx && v && !v.paused && timeline[i].type === 'video') {
           v.pause();
         }
       });
@@ -107,25 +110,42 @@ const HeroSection = () => {
                 pointerEvents: 'none'
               }}
             >
-              <video
-                ref={el => (videoRefs.current[index] = el)}
-                src={item.src}
-                muted
-                loop
-                playsInline
-                preload="auto"
-                className="hero-gif"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  backfaceVisibility: 'hidden',
-                  ...(item.scale ? {
-                    transform: `scale(${item.scale})`,
-                    transformOrigin: item.transformOrigin || 'center center'
-                  } : {})
-                }}
-              />
+              {item.type === 'image' ? (
+                <img
+                  src={item.src}
+                  alt=""
+                  className="hero-gif"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    ...(item.scale ? {
+                      transform: `scale(${item.scale})`,
+                      transformOrigin: item.transformOrigin || 'center center'
+                    } : {})
+                  }}
+                />
+              ) : (
+                <video
+                  ref={el => (videoRefs.current[index] = el)}
+                  src={item.src}
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  className="hero-gif"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    backfaceVisibility: 'hidden',
+                    ...(item.scale ? {
+                      transform: `scale(${item.scale})`,
+                      transformOrigin: item.transformOrigin || 'center center'
+                    } : {})
+                  }}
+                />
+              )}
               <div className="hero-overlay" />
             </div>
           );
@@ -197,7 +217,7 @@ const HeroSection = () => {
 
         {/* Progress bar */}
         <div className="hero-progress">
-          <div className="hero-progress-bar" style={{ animationDuration: '51s' }} />
+          <div className="hero-progress-bar" style={{ animationDuration: '40s' }} />
         </div>
       </div>
     </section>

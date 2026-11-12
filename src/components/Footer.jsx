@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail } from 'lucide-react';
 import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn, FaWhatsapp } from 'react-icons/fa';
 import './Footer.css';
-import logoImg from '../assets/images/shimanzu.png';
+import logoImg from '../assets/images/shimanzu-logo_page-0001.png';
 
 const Footer = () => (
   <footer className="footer">

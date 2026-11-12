@@ -10,7 +10,7 @@ import {
 import { useDataContext } from '../context/DataContext';
 import { compressImage } from '../utils/imageCompressor';
 import ProductCard from '../components/ProductCard';
-import logoImg from '../assets/images/shimanzu.png';
+import logoImg from '../assets/images/shimanzu-logo_page-0001.png';
 import './Admin.css';
 
 import prod1 from '../assets/images/1713003050.webp';

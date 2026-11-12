@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import logoImg from '../assets/images/shimanzu.png';
+import logoImg from '../assets/images/shimanzu-logo_page-0001.png';
 
 const LoadingScreen = () => {
   const [visible, setVisible] = useState(true);
