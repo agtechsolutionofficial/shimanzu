@@ -33,6 +33,15 @@ const getProductDivision = (product) => {
   return String(product?.division || '').toLowerCase().trim();
 };
 
+// Second (slider) image is only for Chemical Division products.
+// In the Add form the division is picked before the category, so allow it
+// when "Chemical Division" is chosen and no non-chemical category is set yet.
+const isChemicalProductForm = (form) => {
+  const category = String(form?.category || '').toLowerCase().trim();
+  if (category) return category === 'chemicals';
+  return form?.division === 'chemical';
+};
+
 const FORMULATION_OPTIONS = [
   'SC', 'EC', 'SL', 'WG', 'CS', 'FS', 'SE', 'PW', 'Suspension', 'Granules'
 ];
@@ -124,7 +133,8 @@ const Admin = () => {
     targets: '',
     dosage: '',
     description: '',
-    imgSrc: ''
+    imgSrc: '',
+    imgSrc2: ''
   };
 
   const [productForm, setProductForm] = useState(defaultProductState);
@@ -213,7 +223,8 @@ const Admin = () => {
       targets: prod.targets || '',
       dosage: prod.dosage || '',
       description: prod.description || '',
-      imgSrc: prod.imgSrc || ''
+      imgSrc: prod.imgSrc || '',
+      imgSrc2: prod.imgSrc2 || ''
     });
     setEditingItem(prod);
     setModalMode('edit-product');
@@ -253,7 +264,9 @@ const Admin = () => {
         name: productForm.name.trim(),
         chemical: productForm.chemical.trim() || 'Japanese Formulation Standard',
         categoryLabel: selectedCat?.name || productForm.category.toUpperCase(),
-        imgSrc: productForm.imgSrc ? productForm.imgSrc.trim() : ''
+        imgSrc: productForm.imgSrc ? productForm.imgSrc.trim() : '',
+        // Second image is kept only for Chemical Division products
+        imgSrc2: isChemicalProductForm(productForm) && productForm.imgSrc2 ? productForm.imgSrc2.trim() : ''
       };
 
       if (modalMode === 'edit-product' && editingItem) {
@@ -662,7 +675,8 @@ const Admin = () => {
       inStock: Boolean(productForm.inStock),
       packSizes: productForm.packSizes ? productForm.packSizes.split(',').map(s => s.trim()).filter(Boolean) : [],
       crops: productForm.crops ? productForm.crops.split(',').map(s => s.trim()).filter(Boolean) : [],
-      imgSrc: productForm.imgSrc ? productForm.imgSrc.trim() : ''
+      imgSrc: productForm.imgSrc ? productForm.imgSrc.trim() : '',
+      imgSrc2: isChemicalProductForm(productForm) && productForm.imgSrc2 ? productForm.imgSrc2.trim() : ''
     };
   }, [productForm, categories]);
 
@@ -717,10 +731,12 @@ const Admin = () => {
             <div className="admin-nav-item-left"><Layers size={19} className="admin-nav-icon accent-blue" /><span className="admin-nav-label">Chemical Division</span></div>
             <span className="admin-nav-badge">{products.filter(p => getProductDivision(p) === 'chemical').length}</span>
           </button>
+          {/* Food Division — temporarily hidden
           <button className="admin-nav-item" onClick={() => { setActiveTab('food-products'); setProductDivisionFilter('food'); setProductCategoryFilter('all'); setSearchQuery(''); setSidebarOpen(false); }}>
             <div className="admin-nav-item-left"><Layers size={19} className="admin-nav-icon accent-amber" /><span className="admin-nav-label">Food Division</span></div>
             <span className="admin-nav-badge">{products.filter(p => getProductDivision(p) === 'food').length}</span>
           </button>
+          */}
           <button className="admin-nav-item" onClick={() => { setActiveTab('other-products'); setProductDivisionFilter('other'); setProductCategoryFilter('all'); setSearchQuery(''); setSidebarOpen(false); }}>
             <div className="admin-nav-item-left"><Package size={19} className="admin-nav-icon accent-purple" /><span className="admin-nav-label">Other Products</span></div>
             <span className="admin-nav-badge">{products.filter(p => !['chemical', 'food'].includes(getProductDivision(p))).length}</span>
@@ -1149,9 +1165,11 @@ const Admin = () => {
                 <button className={`admin-filter-pill ${productDivisionFilter === 'chemical' ? 'active' : ''}`} onClick={() => setProductDivisionFilter('chemical')}>
                   Chemical ({products.filter(p => getProductDivision(p) === 'chemical').length})
                 </button>
+                {/* Food Division — temporarily hidden
                 <button className={`admin-filter-pill ${productDivisionFilter === 'food' ? 'active' : ''}`} onClick={() => setProductDivisionFilter('food')}>
                   Food ({products.filter(p => getProductDivision(p) === 'food').length})
                 </button>
+                */}
                 <button
                   className={`admin-filter-pill ${productCategoryFilter === 'all' ? 'active' : ''}`}
                   onClick={() => setProductCategoryFilter('all')}
@@ -1475,7 +1493,7 @@ const Admin = () => {
                       >
                         <option value="">Select Division</option>
                         <option value="chemical">Chemical Division</option>
-                        <option value="food">Food Division</option>
+                        {/* <option value="food">Food Division</option> */}
                         <option value="other">Other Product</option>
                       </select>
                     </div>
@@ -1698,6 +1716,50 @@ const Admin = () => {
                         onChange={e => setProductForm({ ...productForm, imgSrc: e.target.value })}
                       />
                     </div>
+
+                    {/* Second image — Chemical Division only (auto-slides with image 1 every 3s) */}
+                    {isChemicalProductForm(productForm) && (
+                      <div className="admin-form-group" style={{ marginTop: '20px' }}>
+                        <label className="admin-form-label">Second Image (Chemical Division — slides with first image every 3s)</label>
+                        <div className="admin-upload-dropzone">
+                          <Upload size={28} className="admin-upload-icon" />
+                          <div className="admin-upload-text">
+                            <strong>Upload Second Photo</strong>
+                            <span>Auto-compressed into ultra-fast WebP format</span>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="admin-file-hidden-input"
+                            onChange={e => handleImageUpload(e.target.files[0], (val) => setProductForm(prev => ({ ...prev, imgSrc2: val })))}
+                          />
+                        </div>
+                        <input
+                          type="text"
+                          className="admin-form-input"
+                          style={{ marginTop: '12px' }}
+                          placeholder="Or paste second image URL (https://...)"
+                          value={productForm.imgSrc2}
+                          onChange={e => setProductForm({ ...productForm, imgSrc2: e.target.value })}
+                        />
+                        {productForm.imgSrc2 && (
+                          <div className="admin-preview-thumbnail-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <img src={productForm.imgSrc2} alt="Second preview" />
+                              <span>Attached second photo</span>
+                            </div>
+                            <button
+                              type="button"
+                              className="admin-mini-btn delete"
+                              onClick={() => setProductForm({ ...productForm, imgSrc2: '' })}
+                              title="Remove second image"
+                            >
+                              <Trash2 size={12} /> Remove
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Form Submission */}
@@ -2462,6 +2524,44 @@ const Admin = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Second image — Chemical Division only (auto-slides with image 1 every 3s) */}
+                {isChemicalProductForm(productForm) && (
+                  <div className="admin-form-group full">
+                    <label className="admin-form-label">Second Image (Chemical Division — slides every 3s)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="admin-form-input"
+                      onChange={e => handleImageUpload(e.target.files[0], (val) => setProductForm(prev => ({ ...prev, imgSrc2: val })))}
+                    />
+                    <div style={{ marginTop: '12px' }}>
+                      <input
+                        type="text"
+                        className="admin-form-input"
+                        placeholder="Or paste second image URL (https://...)"
+                        value={productForm.imgSrc2}
+                        onChange={e => setProductForm({ ...productForm, imgSrc2: e.target.value })}
+                      />
+                    </div>
+                    {productForm.imgSrc2 && (
+                      <div className="admin-preview-thumbnail-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <img src={productForm.imgSrc2} alt="Second preview" />
+                          <span>Attached second photo</span>
+                        </div>
+                        <button
+                          type="button"
+                          className="admin-mini-btn delete"
+                          onClick={() => setProductForm({ ...productForm, imgSrc2: '' })}
+                          title="Remove second image"
+                        >
+                          <Trash2 size={12} /> Remove
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="admin-modal-actions">

@@ -79,6 +79,8 @@ export const normalizeProduct = (row) => {
   const dosage = String(row.dosage || row.recommendedDosage || '').trim();
   const description = String(row.description || row.productOverviewAndEfficacy || '').trim();
   const imgSrc = String(row.imgSrc || row.img_src || row.image || row.imageUrl || '').trim();
+  // Second image (Chemical Division only) — shown as an auto-slider in product view
+  const imgSrc2 = String(row.imgSrc2 || row.img_src_2 || '').trim();
   const rawDivision = String(row.division || row.productDivision || '').toLowerCase().trim();
   const division = rawDivision === 'food'
     ? 'food'
@@ -107,6 +109,7 @@ export const normalizeProduct = (row) => {
     dosage,
     description,
     imgSrc,
+    imgSrc2,
     division,
     createdAt: row.created_at || row.createdAt || null
   };

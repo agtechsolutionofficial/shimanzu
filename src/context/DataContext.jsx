@@ -360,15 +360,18 @@ export const DataProvider = ({ children }) => {
       if (Array.isArray(products) && products.length > 0) {
         // Strip large base64 strings so 73 products take ~25KB and always fit in 5MB limit
         const lightweight = products.map(p => {
-          const isHuge = p.imgSrc && typeof p.imgSrc === 'string' && p.imgSrc.startsWith('data:') && p.imgSrc.length > 30000;
-          return isHuge ? { ...p, imgSrc: '' } : p;
+          const isHugeData = (v) => typeof v === 'string' && v.startsWith('data:') && v.length > 30000;
+          let out = p;
+          if (isHugeData(p.imgSrc)) out = { ...out, imgSrc: '' };
+          if (isHugeData(p.imgSrc2)) out = { ...out, imgSrc2: '' };
+          return out;
         });
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(lightweight));
       }
     } catch (e) {
       try {
         localStorage.removeItem(CUSTOM_IMAGES_KEY);
-        const minimal = products.map(({ imgSrc, ...rest }) => rest);
+        const minimal = products.map(({ imgSrc, imgSrc2, ...rest }) => rest);
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(minimal));
       } catch (innerErr) {
         // Ignore fallback error
@@ -1000,9 +1003,21 @@ export const DataProvider = ({ children }) => {
       }
     }
 
+    // Second image (Chemical Division) — upload to Cloudinary if base64
+    let finalImg2 = newProd.imgSrc2 ? newProd.imgSrc2.trim() : '';
+    if (finalImg2 && (finalImg2.startsWith('data:') || finalImg2.startsWith('blob:'))) {
+      try {
+        const uploadRes2 = await mongoApi.uploadImageToCloudinary(finalImg2);
+        if (uploadRes2 && uploadRes2.url) finalImg2 = uploadRes2.url;
+      } catch (uploadErr) {
+        console.warn('Cloudinary upload warning (image 2):', uploadErr);
+      }
+    }
+
     const product = {
       ...newProd,
       id,
+      imgSrc2: finalImg2,
       name: newProd.name || 'Untitled Product',
       chemical: newProd.chemical || '',
       category: newProd.category || (categories[0]?.id || 'fungicides'),
@@ -1057,6 +1072,16 @@ export const DataProvider = ({ children }) => {
         }
       } catch (uploadErr) {
         console.warn('Cloudinary upload warning:', uploadErr);
+      }
+    }
+
+    // Second image (Chemical Division) — upload to Cloudinary if base64
+    if (fieldsToUpdate.imgSrc2 && (fieldsToUpdate.imgSrc2.startsWith('data:') || fieldsToUpdate.imgSrc2.startsWith('blob:'))) {
+      try {
+        const uploadRes2 = await mongoApi.uploadImageToCloudinary(fieldsToUpdate.imgSrc2);
+        if (uploadRes2 && uploadRes2.url) fieldsToUpdate.imgSrc2 = uploadRes2.url;
+      } catch (uploadErr) {
+        console.warn('Cloudinary upload warning (image 2):', uploadErr);
       }
     }
 
@@ -1219,10 +1244,17 @@ export const DataProvider = ({ children }) => {
     localStorage.removeItem('shimanzu_products_v1');
   };
 
+  // Food Division — temporarily hidden: food products are kept in the database
+  // but filtered out everywhere in the app (public site + admin).
+  // To bring them back, expose `products` instead of `visibleProducts` below.
+  const visibleProducts = products.filter(
+    p => !(p?.division === 'food' || p?.category === 'food')
+  );
+
   // Dynamically compute product counts per category
   const dynamicCategories = categories.map(cat => ({
     ...cat,
-    productCount: products.filter(p => p.category === cat.id).length
+    productCount: visibleProducts.filter(p => p.category === cat.id).length
   }));
 
   const value = {
@@ -1232,7 +1264,7 @@ export const DataProvider = ({ children }) => {
     isCropsLoading,
     cropsError,
     refreshCrops: loadDatabaseCrops,
-    products,
+    products: visibleProducts, // was: products (Food Division hidden)
     isSupabaseLoading,
     supabaseError,
     isDatabaseLoading: isSupabaseLoading,
