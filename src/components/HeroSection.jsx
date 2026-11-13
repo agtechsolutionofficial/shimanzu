@@ -12,12 +12,12 @@ import slide6 from '../assets/images/slide_6.mp4';
 
 const timeline = [
   { 
-    type: 'image', src: seedlingVideo, duration: 4000,
+    type: 'image', src: dioxideVideo, duration: 4000,
     title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow",
-    scale: 1.12
+    scale: 1.00
   },
   { 
-    type: 'image', src: dioxideVideo, duration: 4000,
+    type: 'image', src: seedlingVideo, duration: 4000,
     title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth",
     scale: 1.12
   },
