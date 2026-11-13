@@ -1,10 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2, MessageCircle, ZoomIn, ZoomOut, Package } from 'lucide-react';
 import './QuickViewModal.css';
+
+const SLIDE_INTERVAL_MS = 3000;
 
 const QuickViewModal = ({ product, onClose }) => {
   const [isZoomed, setIsZoomed] = useState(false);
   const [transformOrigin, setTransformOrigin] = useState('center center');
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  // Chemical Division products can have a second image that auto-slides
+  const slideImages = product
+    ? [product.imgSrc, product.division === 'chemical' ? product.imgSrc2 : '']
+        .map(src => String(src || '').trim())
+        .filter(Boolean)
+    : [];
+  const hasSlider = slideImages.length > 1;
+
+  // Reset to first image whenever a different product is opened
+  useEffect(() => {
+    setActiveSlide(0);
+  }, [product?.id]);
+
+  // Auto-slide every 3 seconds (paused while the user is zooming)
+  useEffect(() => {
+    if (!hasSlider || isZoomed) return undefined;
+    const timer = setInterval(() => {
+      setActiveSlide(prev => (prev + 1) % slideImages.length);
+    }, SLIDE_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [hasSlider, isZoomed, slideImages.length]);
 
   if (!product) return null;
 
@@ -26,7 +51,46 @@ const QuickViewModal = ({ product, onClose }) => {
           {/* Image Column */}
           <div className="modal-image-col">
             <div className="modal-img-frame">
-              {product.imgSrc ? (
+              {hasSlider ? (
+                <>
+                  <div
+                    className="modal-slider-track"
+                    style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+                  >
+                    {slideImages.map((src, idx) => (
+                      <div className="modal-slide" key={idx}>
+                        <img
+                          src={src}
+                          alt={`${product.name} ${idx + 1}`}
+                          className="modal-img"
+                          style={{
+                            transform: isZoomed && idx === activeSlide ? 'scale(2.5)' : 'scale(1)',
+                            transformOrigin: transformOrigin,
+                            cursor: isZoomed ? 'crosshair' : 'zoom-in'
+                          }}
+                          onMouseEnter={() => setIsZoomed(true)}
+                          onMouseLeave={() => {
+                            setIsZoomed(false);
+                            setTimeout(() => setTransformOrigin('center center'), 300);
+                          }}
+                          onMouseMove={handleMouseMove}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="modal-slider-dots">
+                    {slideImages.map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        className={`modal-slider-dot ${idx === activeSlide ? 'active' : ''}`}
+                        onClick={() => setActiveSlide(idx)}
+                        aria-label={`Show image ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : product.imgSrc ? (
                 <img
                   src={product.imgSrc}
                   alt={product.name}
@@ -51,7 +115,7 @@ const QuickViewModal = ({ product, onClose }) => {
               ) : null}
               <div 
                 className="modal-no-img-placeholder"
-                style={{ display: product.imgSrc ? 'none' : 'flex' }}
+                style={{ display: (product.imgSrc || hasSlider) ? 'none' : 'flex' }}
               >
                 <div className="modal-no-img-icon-box">
                   <Package size={44} strokeWidth={1.5} />

@@ -51,7 +51,9 @@ function AnimatedRoutes() {
           <Route path="/about" element={<About />} />
           <Route path="/products" element={<Products />} />
           <Route path="/chemical-division" element={<Products division="chemical" />} />
+          {/* Food Division — temporarily hidden
           <Route path="/food-division" element={<Products division="food" />} />
+          */}
           <Route path="/crops" element={<Crops />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/blog" element={<Blog />} />
