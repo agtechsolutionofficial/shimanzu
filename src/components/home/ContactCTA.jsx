@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Send } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import './ContactCTA.css';
-import contactImg from '../../assets/images/video_slides/slide_1.jpeg';
+import contactImg from '../../assets/images/video_slides/slide_4.jpeg';
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.6, delay: i * 0.1, ease: 'easeOut' } }) };
 const vp = { once: true, margin: '-50px' };

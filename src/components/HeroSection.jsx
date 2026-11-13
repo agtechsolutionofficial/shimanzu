@@ -3,20 +3,24 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Users, Globe, Leaf } from 'lucide-react';
 import './HeroSection.css';
 
-import seedlingVideo from '../assets/images/paddy.png';
+import seedlingVideo from '../assets/images/Shimanzu_Dairy_Image_1.png';
 import slide2 from '../assets/images/Seedling_growing_from_soil-clip-1_20260925110529.mp4';
 import slide3 from '../assets/images/Video-Project.mp4';
 import slide4 from '../assets/images/video_20261006_125028.mp4';
-import dioxideVideo from '../assets/images/DIOXIDE VIDEO.mp4';
+import dioxideVideo from '../assets/images/Shimanzu_Dairy_Image_2.png';
 import slide6 from '../assets/images/slide_6.mp4';
 
 const timeline = [
   { 
     type: 'image', src: seedlingVideo, duration: 4000,
     title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow",
-    scale: 1.32
+    scale: 1.12
   },
-  
+  { 
+    type: 'image', src: dioxideVideo, duration: 4000,
+    title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth",
+    scale: 1.12
+  },
   { 
     type: 'video', src: slide2, duration: 5000,
     title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth"
@@ -26,11 +30,7 @@ const timeline = [
     title1: "Advanced Agricultural", title2: "Solutions for a", titleAccent: "Better Tomorrow",
     scale: 1.30
   },
-  { 
-    type: 'video', src: dioxideVideo, duration: 6000,
-    title1: "Empowering Farmers:", title2: "Agrochemicals for", titleAccent: "Sustainable Growth",
-    scale: 1.30
-  },
+  
   { 
     type: 'video', src: slide4, duration: 8000,
     title1: "Maximizing Yields:", title2: "Japanese Technology for", titleAccent: "Healthy Crops"
@@ -217,7 +217,7 @@ const HeroSection = () => {
 
         {/* Progress bar */}
         <div className="hero-progress">
-          <div className="hero-progress-bar" style={{ animationDuration: '40s' }} />
+          <div className="hero-progress-bar" style={{ animationDuration: '38s' }} />
         </div>
       </div>
     </section>
